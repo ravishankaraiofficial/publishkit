@@ -1,0 +1,272 @@
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
+import { ref, uploadBytesResumable } from 'firebase/storage';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, storage } from '../lib/firebase';
+import { useAuth } from './useAuth';
+import { useToast } from '../components/ui/Toast';
+import { processAudioCall } from '../lib/api';
+import { type Result } from '../types';
+
+type OutputLanguage = "English" | "Hindi";
+
+function getStatusCycle(fileType: string): string[] {
+  if (fileType.startsWith('audio/')) {
+    return [
+      "Uploading audio…",
+      "Transcribing your voice…",
+      "Generating titles…",
+      "Writing description…",
+      "Almost ready…",
+    ];
+  }
+  if (fileType === 'application/pdf') {
+    return [
+      "Uploading PDF…",
+      "Reading and decoding the document…",
+      "Extracting key content…",
+      "Generating titles…",
+      "Writing description…",
+      "Almost ready…",
+    ];
+  }
+  if (fileType.startsWith('image/')) {
+    return [
+      "Uploading image…",
+      "Decoding the file…",
+      "Analysing visual content…",
+      "Generating titles…",
+      "Writing description…",
+      "Almost ready…",
+    ];
+  }
+  return [
+    "Uploading file…",
+    "Decoding the file…",
+    "Analysing content…",
+    "Generating titles…",
+    "Writing description…",
+    "Almost ready…",
+  ];
+}
+
+interface UploadContextType {
+  isUploading: boolean;
+  uploadProgress: number;
+  statusIndex: number;
+  statusCycle: string[];
+  outputLanguage: OutputLanguage;
+  setOutputLanguage: (lang: OutputLanguage) => void;
+  thumbnailPromptEnabled: boolean;
+  setThumbnailPromptEnabled: (enabled: boolean) => void;
+  resultId: string | null;
+  setResultId: (id: string | null) => void;
+  result: Result | null;
+  setResult: (res: Result | null) => void;
+  quotaExceeded: boolean;
+  setQuotaExceeded: (exceeded: boolean) => void;
+  handleFileSelect: (file: File) => Promise<void>;
+  reset: () => void;
+}
+
+const UploadContext = createContext<UploadContextType | null>(null);
+
+export function UploadProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [statusIndex, setStatusIndex] = useState(0);
+  const [statusCycle, setStatusCycle] = useState<string[]>(getStatusCycle('audio/mpeg'));
+  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("English");
+  const [thumbnailPromptEnabled, setThumbnailPromptEnabled] = useState(false);
+  
+  const [resultId, setResultId] = useState<string | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
+
+  const statusTimerRef = useRef<number | null>(null);
+  const prevUidRef = useRef<string | null>(null);
+
+  // When the user changes (e.g., anonymous → Google after sign-in), reset all
+  // upload state so the main page shows a fresh upload zone, not the old result.
+  useEffect(() => {
+    if (!user) return;
+    const prevUid = prevUidRef.current;
+    prevUidRef.current = user.uid;
+
+    if (prevUid && prevUid !== user.uid) {
+      // User identity changed — clear everything
+      setResult(null);
+      setResultId(null);
+      setUploadProgress(0);
+      setStatusIndex(0);
+      setQuotaExceeded(false);
+      setIsUploading(false);
+      return; // Don't restore old resultId for a new user
+    }
+
+    // Restore active resultId from localStorage when user is available
+    if (!resultId) {
+      const savedId = localStorage.getItem(`activeResultId_${user.uid}`);
+      if (savedId) setResultId(savedId);
+    }
+  }, [user?.uid]);
+
+  // Save active resultId to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      if (resultId) {
+        localStorage.setItem(`activeResultId_${user.uid}`, resultId);
+      } else {
+        localStorage.removeItem(`activeResultId_${user.uid}`);
+      }
+    }
+  }, [user, resultId]);
+
+  // Cycle through status messages every 3 seconds while processing
+  useEffect(() => {
+    if (!isUploading) {
+      if (statusTimerRef.current) {
+        window.clearInterval(statusTimerRef.current);
+        statusTimerRef.current = null;
+      }
+      return;
+    }
+
+    statusTimerRef.current = window.setInterval(() => {
+      setStatusIndex((i) => (i + 1) % statusCycle.length);
+    }, 3000);
+
+    return () => {
+      if (statusTimerRef.current) {
+        window.clearInterval(statusTimerRef.current);
+        statusTimerRef.current = null;
+      }
+    };
+  }, [isUploading, statusCycle]);
+
+  // Listen to Firestore for result updates
+  useEffect(() => {
+    if (!user || !resultId) return;
+
+    const unsubscribe = onSnapshot(doc(db, `users/${user.uid}/results/${resultId}`), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data() as Result;
+        setResult(data);
+
+        if (data.status === 'complete' || data.status === 'failed') {
+          setIsUploading(false);
+          if (data.status === 'complete' && user?.isAnonymous) {
+            // Mark free trial as consumed so next visit gates to login.
+            localStorage.setItem('freeTrialUsed', 'true');
+          }
+          if (data.status === 'failed') {
+            toast(data.errorMessage || 'Processing failed.', 'error');
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, resultId, toast]);
+
+  const handleFileSelect = async (file: File) => {
+    if (!user) return;
+
+    // Clear any stale quota/error state from a previous upload attempt
+    setQuotaExceeded(false);
+
+    // Set dynamic status messages based on actual file type
+    const cycle = getStatusCycle(file.type);
+    setStatusCycle(cycle);
+    setIsUploading(true);
+    setStatusIndex(0);
+    setUploadProgress(0);
+
+    const fileName = `${Date.now()}-${file.name}`;
+    // Store under correct subfolder so cleanup doesn't delete non-audio files prematurely
+    const isAudio = file.type.startsWith('audio/');
+    const folder = isAudio ? 'audio' : 'uploads';
+    const storagePath = `users/${user.uid}/${folder}/${fileName}`;
+    const storageRef = ref(storage, storagePath);
+
+    // Always pass explicit metadata so Firebase Storage knows the MIME type
+    const uploadTask = uploadBytesResumable(storageRef, file, { contentType: file.type || 'application/octet-stream' });
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload error", error);
+        toast('Upload failed. Please try again.', 'error');
+        setIsUploading(false);
+      },
+      async () => {
+        try {
+          const res = await processAudioCall({
+            storagePath,
+            audioFileName: file.name,
+            audioSizeBytes: file.size,
+            outputLanguage,
+            generateThumbnails: thumbnailPromptEnabled,
+            fileType: file.type,
+          });
+          setResultId(res.data.resultId);
+        } catch (error: any) {
+          console.error("Cloud function error", error);
+          if (error?.code === 'functions/resource-exhausted') {
+            if (user.isAnonymous) {
+              // Guest quota used — show sign-in prompt instead of error toast
+              localStorage.setItem('freeTrialUsed', 'true');
+              setQuotaExceeded(true);
+            } else {
+              // Signed-in user hit their daily upload limit — show a toast
+              toast('You\'ve reached your upload limit for today. Try again tomorrow.', 'error');
+            }
+          } else {
+            toast(error.message || 'Failed to start processing.', 'error');
+          }
+          setIsUploading(false);
+        }
+      }
+    );
+  };
+
+  const reset = () => {
+    setResult(null);
+    setResultId(null);
+    setUploadProgress(0);
+    setStatusIndex(0);
+    setQuotaExceeded(false);
+    if (user) {
+      localStorage.removeItem(`activeResultId_${user.uid}`);
+    }
+  };
+
+  return (
+    <UploadContext.Provider value={{
+      isUploading, uploadProgress, statusIndex, statusCycle,
+      outputLanguage, setOutputLanguage,
+      thumbnailPromptEnabled, setThumbnailPromptEnabled,
+      resultId, setResultId,
+      result, setResult,
+      quotaExceeded, setQuotaExceeded,
+      handleFileSelect, reset
+    }}>
+      {children}
+    </UploadContext.Provider>
+  );
+}
+
+export function useUpload() {
+  const context = useContext(UploadContext);
+  if (!context) {
+    throw new Error('useUpload must be used within an UploadProvider');
+  }
+  return context;
+}

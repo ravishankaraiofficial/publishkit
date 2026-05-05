@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #1A1A1A;
+  --color-border: #2A2A2A;
+  --color-primary: #E05A1E;
+  --color-primary-hover: #FF7A3D;
+  --font-inter: 'Inter', sans-serif;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-[#0D0D0D] text-white font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .section-label {
+    @apply text-xs font-semibold text-[#888888] uppercase tracking-wider mb-3;
+  }
+  .hero-glow {
+    text-shadow: 0 0 40px rgba(224, 90, 30, 0.4);
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes equalizer {
+  0%, 100% { height: 10px; }
+  50% { height: 40px; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 15s ease-in-out infinite;
+}
+.animate-float-delayed {
+  animation: float 18s ease-in-out infinite 2s;
+}
+.animate-float-slow {
+  animation: float 20s ease-in-out infinite 5s;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.equalizer-bar {
+  animation: equalizer 1.2s ease-in-out infinite;
+}
+.equalizer-bar:nth-child(2) { animation-delay: 0.2s; }
+.equalizer-bar:nth-child(3) { animation-delay: 0.4s; }
+.equalizer-bar:nth-child(4) { animation-delay: 0.1s; }
+.equalizer-bar:nth-child(5) { animation-delay: 0.3s; }
