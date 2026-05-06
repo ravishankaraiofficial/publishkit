@@ -5,6 +5,7 @@ import {
   orderBy,
   limit,
   getDocs,
+  onSnapshot,
   deleteDoc,
   doc,
   where,
@@ -69,27 +70,28 @@ export function PastResults() {
   // Single item trash confirm
   const [trashConfirmId, setTrashConfirmId] = useState<string | null>(null);
 
-  const fetchResults = async () => {
-    if (!user) return;
-    try {
-      const q = query(
-        collection(db, `users/${user.uid}/results`),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-      const snapshot = await getDocs(q);
-      const fetched = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Result));
-      setResults(fetched);
-    } catch (error) {
-      console.error('Failed to fetch results', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchResults();
-  }, [user]);
+    if (!user) return;
+    setLoading(true);
+    const q = query(
+      collection(db, `users/${user.uid}/results`),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetched = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Result));
+        setResults(fetched);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Failed to fetch results', error);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   // ── Delete range (Last Hour / All Time) ──────────────────────────────────
   const handleDeleteRange = async () => {
@@ -114,7 +116,6 @@ export function PastResults() {
 
       await Promise.all(toDelete.map(r => deleteResultItem(user.uid, r)));
       toast('History deleted', 'success');
-      setResults([]);
       setSelectedIds(new Set());
     } catch (err) {
       console.error('Delete failed', err);
@@ -122,7 +123,6 @@ export function PastResults() {
     } finally {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
-      await fetchResults();
     }
   };
 
@@ -134,10 +134,8 @@ export function PastResults() {
     setRemovingIds(prev => new Set(prev).add(trashConfirmId));
     setTrashConfirmId(null);
     await deleteResultItem(user.uid, target);
-    setTimeout(() => {
-      setResults(prev => prev.filter(r => r.id !== target.id));
-      setRemovingIds(prev => { const s = new Set(prev); s.delete(target.id!); return s; });
-    }, 400);
+    // onSnapshot removes the item from results automatically
+    setRemovingIds(prev => { const s = new Set(prev); s.delete(target.id!); return s; });
   };
 
   // ── Delete selected ──────────────────────────────────────────────────────
@@ -148,11 +146,9 @@ export function PastResults() {
     const ids = toDelete.map(r => r.id!);
     ids.forEach(id => setRemovingIds(prev => new Set(prev).add(id)));
     await Promise.all(toDelete.map(r => deleteResultItem(user.uid, r)));
-    setTimeout(() => {
-      setResults(prev => prev.filter(r => !ids.includes(r.id!)));
-      setRemovingIds(new Set());
-      setSelectedIds(new Set());
-    }, 400);
+    // onSnapshot removes deleted items from results automatically
+    setRemovingIds(new Set());
+    setSelectedIds(new Set());
     toast('History deleted', 'success');
   };
 
