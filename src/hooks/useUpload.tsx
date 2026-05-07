@@ -10,6 +10,13 @@ import { type Result } from '../types';
 
 type OutputLanguage = "English" | "Hindi";
 
+interface PendingUpload {
+  fileName: string;
+  fileType: string;
+  outputLanguage: OutputLanguage;
+  thumbnailPromptEnabled: boolean;
+}
+
 function getStatusCycle(fileType: string): string[] {
   if (fileType.startsWith('audio/')) {
     return [
@@ -85,6 +92,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const [resultId, setResultId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [quotaExceeded, setQuotaExceeded] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
 
   const statusTimerRef = useRef<number | null>(null);
   const prevUidRef = useRef<string | null>(null);
@@ -100,6 +108,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       // User identity changed — clear everything
       setResult(null);
       setResultId(null);
+      setPendingUpload(null);
       setUploadProgress(0);
       setStatusIndex(0);
       setQuotaExceeded(false);
@@ -112,18 +121,45 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       const savedId = localStorage.getItem(`activeResultId_${user.uid}`);
       if (savedId) setResultId(savedId);
     }
-  }, [user?.uid]);
+
+    // Restore pending upload metadata if no result is active
+    if (!resultId) {
+      const savedPending = localStorage.getItem(`pendingUpload_${user.uid}`);
+      if (savedPending) {
+        try {
+          const parsed = JSON.parse(savedPending) as PendingUpload;
+          setPendingUpload(parsed);
+          // If we have a pending upload but no resultId yet, we are in the
+          // "blind spot". Show processing UI.
+          setStatusCycle(getStatusCycle(parsed.fileType));
+          setIsUploading(true);
+        } catch (e) {
+          localStorage.removeItem(`pendingUpload_${user.uid}`);
+        }
+      }
+    }
+  }, [user?.uid, resultId]);
 
   // Save active resultId to localStorage whenever it changes
   useEffect(() => {
     if (user) {
       if (resultId) {
         localStorage.setItem(`activeResultId_${user.uid}`, resultId);
+        // Once we have a resultId, the "pending" metadata is no longer needed
+        localStorage.removeItem(`pendingUpload_${user.uid}`);
+        setPendingUpload(null);
       } else {
         localStorage.removeItem(`activeResultId_${user.uid}`);
       }
     }
   }, [user, resultId]);
+
+  // Save pending upload metadata whenever it changes
+  useEffect(() => {
+    if (user && pendingUpload) {
+      localStorage.setItem(`pendingUpload_${user.uid}`, JSON.stringify(pendingUpload));
+    }
+  }, [user, pendingUpload]);
 
   // Cycle through status messages every 3 seconds while processing
   useEffect(() => {
@@ -158,6 +194,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
         if (data.status === 'complete' || data.status === 'failed') {
           setIsUploading(false);
+          setPendingUpload(null);
+          if (user) localStorage.removeItem(`pendingUpload_${user.uid}`);
+
           if (data.status === 'complete' && user?.isAnonymous) {
             // Mark free trial as consumed so next visit gates to login.
             localStorage.setItem('freeTrialUsed', 'true');
@@ -184,6 +223,13 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setIsUploading(true);
     setStatusIndex(0);
     setUploadProgress(0);
+
+    setPendingUpload({
+      fileName: file.name,
+      fileType: file.type,
+      outputLanguage,
+      thumbnailPromptEnabled
+    });
 
     const fileName = `${Date.now()}-${file.name}`;
     // Store under correct subfolder so cleanup doesn't delete non-audio files prematurely
@@ -240,11 +286,13 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const reset = () => {
     setResult(null);
     setResultId(null);
+    setPendingUpload(null);
     setUploadProgress(0);
     setStatusIndex(0);
     setQuotaExceeded(false);
     if (user) {
       localStorage.removeItem(`activeResultId_${user.uid}`);
+      localStorage.removeItem(`pendingUpload_${user.uid}`);
     }
   };
 

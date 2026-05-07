@@ -142,6 +142,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // If a Google user came in via redirect, auth.currentUser will already
     // be set in the finally block and we skip anonymous sign-in.
     getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          // Google user successfully signed in via redirect — clear guest flag
+          localStorage.removeItem('freeTrialUsed');
+        }
+      })
       .catch((err: any) => {
         if (!isSilentAuthError(err)) {
           console.warn('getRedirectResult:', err?.code || err?.message);
@@ -185,6 +191,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         // Popup on desktop: postMessage-based, resolves in the same tab.
         await signInWithPopup(auth, provider);
+        // Successful popup sign-in — clear guest flag
+        localStorage.removeItem('freeTrialUsed');
       }
     } finally {
       googleSignInActive = false;
@@ -197,10 +205,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    // Mark free trial as used so that the anonymous guest session created
-    // after sign-out doesn't bounce the user back to the home page.
-    // Login and ProtectedRoute both gate on this flag.
-    localStorage.setItem('freeTrialUsed', 'true');
+    // Only mark as used if the CURRENT session was actually used.
+    // The UploadProvider handles setting this when a session completes.
     await signOut(auth);
   };
 

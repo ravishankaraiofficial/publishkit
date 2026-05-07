@@ -66,6 +66,14 @@ export const processAudio = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB' })
   .https.onCall(async (data, context) => {
     try {
+      // Security: App Check enforcement
+      if (!context.app) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'The function must be called from an App Check verified app.'
+        );
+      }
+
       await verifyWhitelist(context);
       const uid = context.auth!.uid;
 
