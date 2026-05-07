@@ -15,15 +15,20 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   const validateAndProcessFile = (file: File) => {
     setError(null);
+    if (errorTimeoutRef.current) window.clearTimeout(errorTimeoutRef.current);
+
     if (!file.type.match(/^(audio\/|image\/|application\/pdf)/i) && !file.name.match(/\.(mp3|wav|aac|pdf|png|jpg|jpeg)$/i)) {
       setError('Invalid file type. Please upload Audio, PDF, or Images.');
+      errorTimeoutRef.current = window.setTimeout(() => setError(null), 4000);
       return;
     }
     if (file.size > MAX_SIZE_BYTES) {
       setError(`File size exceeds ${MAX_SIZE_MB}MB limit.`);
+      errorTimeoutRef.current = window.setTimeout(() => setError(null), 4000);
       return;
     }
     onFileSelect(file);

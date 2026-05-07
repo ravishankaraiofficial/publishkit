@@ -134,6 +134,7 @@ export function PastResults() {
     setRemovingIds(prev => new Set(prev).add(trashConfirmId));
     setTrashConfirmId(null);
     await deleteResultItem(user.uid, target);
+    toast('Item deleted', 'success');
     // onSnapshot removes the item from results automatically
     setRemovingIds(prev => { const s = new Set(prev); s.delete(target.id!); return s; });
   };
@@ -303,12 +304,18 @@ export function PastResults() {
           <>
             {/* Delete Selected button — appears when items checked */}
             {selectedIds.size > 0 && (
-              <div className="mb-3">
+              <div className="mb-3 flex gap-3">
                 <button
                   onClick={() => setShowSelectionConfirm(true)}
                   className="px-4 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors"
                 >
                   Delete Selected ({selectedIds.size})
+                </button>
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  className="px-4 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
+                >
+                  Clear Selection
                 </button>
               </div>
             )}

@@ -143,10 +143,20 @@ export function Home() {
         )}
 
         {showProcessing && (
-          <ProcessingCard
-            statusText={statusCycle[statusIndex]}
-            uploadProgress={uploadProgress}
-          />
+          <div className="flex flex-col gap-4">
+            <ProcessingCard
+              statusText={statusCycle[statusIndex]}
+              uploadProgress={uploadProgress}
+            />
+            {result?.status === 'failed' && (
+              <button
+                onClick={reset}
+                className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 transition-all text-sm font-medium"
+              >
+                Failed. Try Another File?
+              </button>
+            )}
+          </div>
         )}
       </div>
 

@@ -254,12 +254,13 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       },
       async () => {
         try {
+          const isAudio = file.type.startsWith('audio/');
           const res = await processAudioCall({
             storagePath,
             audioFileName: file.name,
             audioSizeBytes: file.size,
             outputLanguage,
-            generateThumbnails: thumbnailPromptEnabled,
+            generateThumbnails: isAudio ? thumbnailPromptEnabled : false,
             fileType: file.type,
           });
           setResultId(res.data.resultId);

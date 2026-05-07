@@ -28,6 +28,6 @@ export interface Result {
   summary?: string;
   errorMessage?: string;
   outputLanguage?: string;
-  partialErrors?: string[];
+  partialErrors?: Record<string, string> | null;
   cached?: boolean;
 }
