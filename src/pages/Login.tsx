@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth, isSilentAuthError } from '../hooks/useAuth';
 import { useState } from 'react';
 import { useToast } from '../components/ui/Toast';
@@ -8,6 +8,8 @@ export function Login() {
   const { user, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
+  const explicitSignIn = location.state?.explicitSignIn;
 
   // Real Google user → go straight to the app.
   if (user && !user.isAnonymous) {
@@ -15,7 +17,8 @@ export function Login() {
   }
 
   // Anonymous user who hasn't used their free trial → send them to the app.
-  if (user?.isAnonymous && localStorage.getItem('freeTrialUsed') !== 'true') {
+  // Bypass this if they explicitly clicked "Sign In" from the Navbar.
+  if (user?.isAnonymous && localStorage.getItem('freeTrialUsed') !== 'true' && !explicitSignIn) {
     return <Navigate to="/" replace />;
   }
 

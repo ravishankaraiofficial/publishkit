@@ -7,6 +7,7 @@ import { useAuth } from './useAuth';
 import { useToast } from '../components/ui/Toast';
 import { processAudioCall } from '../lib/api';
 import { type Result } from '../types';
+import fpPromise from '@fingerprintjs/fingerprintjs';
 
 type OutputLanguage = "English" | "Hindi";
 
@@ -254,6 +255,15 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       },
       async () => {
         try {
+          let visitorId = 'anonymous-fp';
+          try {
+            const fp = await fpPromise.load();
+            const fpResult = await fp.get();
+            visitorId = fpResult.visitorId;
+          } catch (fpError) {
+            console.warn("FingerprintJS blocked or failed to load, falling back to anonymous-fp", fpError);
+          }
+          
           const isAudio = file.type.startsWith('audio/');
           const res = await processAudioCall({
             storagePath,
@@ -262,6 +272,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             outputLanguage,
             generateThumbnails: isAudio ? thumbnailPromptEnabled : false,
             fileType: file.type,
+            fingerprint: visitorId,
           });
           setResultId(res.data.resultId);
         } catch (error: any) {

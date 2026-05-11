@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../hooks/useAuth';
 
 export function CopyButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
+  const { user, signInWithGoogle } = useAuth();
 
   const handleCopy = async () => {
+    if (user?.isAnonymous) {
+      await signInWithGoogle();
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);

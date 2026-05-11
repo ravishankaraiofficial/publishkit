@@ -20,7 +20,7 @@ export function Navbar() {
 
   const handleAuthAction = async () => {
     if (isGuest) {
-      navigate('/login');
+      navigate('/login', { state: { explicitSignIn: true } });
     } else {
       await logout();
       toast('Signed out successfully', 'success');

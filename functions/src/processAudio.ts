@@ -74,7 +74,7 @@ export const processAudio = functions
         );
       }
 
-      await verifyWhitelist(context);
+      await verifyWhitelist(context, data.fingerprint);
       const uid = context.auth!.uid;
 
       const storagePath = sanitizeString(data.storagePath);

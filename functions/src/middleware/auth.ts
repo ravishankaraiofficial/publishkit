@@ -2,7 +2,9 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { db } from '../lib/firestore';
 
-export async function verifyWhitelist(context: functions.https.CallableContext) {
+import * as crypto from 'crypto';
+
+export async function verifyWhitelist(context: functions.https.CallableContext, fingerprint?: string) {
   const email = context.auth?.token?.email;
 
   // Any real Google-authenticated user (has an email) gets unlimited access.
@@ -11,21 +13,39 @@ export async function verifyWhitelist(context: functions.https.CallableContext) 
     return true;
   }
 
+  // VPN Shield: Detect and block VPN/Proxy IPs for anonymous users only.
+  const headers = context.rawRequest.headers;
+  const isVpnOrProxy = 
+    !!headers['via'] || 
+    !!headers['proxy-connection'] ||
+    (typeof headers['x-forwarded-for'] === 'string' && headers['x-forwarded-for'].includes(','));
+  
+  if (isVpnOrProxy) {
+    throw new functions.https.HttpsError('permission-denied', 'VPNs and Proxies are not allowed for guest users.');
+  }
+
   // Anonymous user — enforce per-UID quota: exactly 1 free session per guest.
-  // We use the Firebase anonymous UID (stable for the session) as the key.
-  const guestId = context.auth?.uid || context.rawRequest.ip || 'unknown-guest';
+  const rawIp = context.rawRequest.ip || 'unknown-ip';
+  const rawFp = fingerprint || 'unknown-fp';
+  const hash = crypto.createHash('sha256').update(`${rawIp}-${rawFp}`).digest('hex');
+  const guestId = context.auth?.uid || hash;
+  
   const guestRef = db.collection('guestUsage').doc(guestId.replace(/\//g, '_'));
 
-  const guestDoc = await guestRef.get();
-  if (guestDoc.exists) {
-    const guestUses = guestDoc.data()?.uses || 0;
+  await db.runTransaction(async (transaction) => {
+    const guestDoc = await transaction.get(guestRef);
+    const guestUses = guestDoc.exists ? (guestDoc.data()?.uses || 0) : 0;
+
     if (guestUses >= 1) {
       throw new functions.https.HttpsError('resource-exhausted', 'Guest quota exceeded. Please sign up for full access.');
     }
-    await guestRef.update({ uses: admin.firestore.FieldValue.increment(1) });
-  } else {
-    await guestRef.set({ uses: 1 });
-  }
+
+    if (!guestDoc.exists) {
+      transaction.set(guestRef, { uses: 1, firstUsedAt: admin.firestore.FieldValue.serverTimestamp() });
+    } else {
+      transaction.update(guestRef, { uses: admin.firestore.FieldValue.increment(1) });
+    }
+  });
 
   return true;
 }

@@ -8,4 +8,5 @@ export const processAudioCall = httpsCallable<{
   outputLanguage?: "English" | "Hindi";
   generateThumbnails?: boolean;
   fileType?: string;
+  fingerprint?: string;
 }, { resultId: string; cached?: boolean }>(functions, 'processAudio');

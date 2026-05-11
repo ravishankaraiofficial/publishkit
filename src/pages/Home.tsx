@@ -71,8 +71,8 @@ export function Home() {
           })}
         </div>
 
-        {/* Thumbnail Toggle — compact on mobile */}
-        <label className="flex items-center gap-3 cursor-pointer group bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-2.5 w-full max-w-sm">
+        {/* Thumbnail Toggle — compact on mobile, full width like free-session box on desktop */}
+        <label className="flex items-center gap-3 cursor-pointer group bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-2.5 w-full max-w-sm sm:max-w-[600px] sm:justify-center sm:py-3 transition-all hover:border-[#E05A1E]/40">
           <div className="relative flex-shrink-0">
             <input
               type="checkbox"
@@ -90,10 +90,13 @@ export function Home() {
               thumbnailPromptEnabled ? "transform translate-x-[18px]" : ""
             )}></div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-white leading-tight">Thumbnail Prompts</span>
-            <span className="text-[10px] text-[#555555] leading-tight">Off by default · uses extra AI</span>
-            <span className="text-[10px] text-[#444444] leading-tight mt-0.5">Audio files only</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <span className="text-xs font-semibold text-white leading-tight sm:text-sm">Thumbnail Prompts</span>
+            <span className="text-[10px] text-[#555555] leading-tight sm:text-sm sm:text-[#888888]">
+              <span className="hidden sm:inline">— </span>Off by default · uses extra AI
+              <span className="hidden sm:inline"> · Audio files only</span>
+            </span>
+            <span className="text-[10px] text-[#444444] leading-tight mt-0.5 sm:hidden">Audio files only</span>
           </div>
         </label>
       </div>

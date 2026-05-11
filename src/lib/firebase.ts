@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 // Note: In development, you'll need a debug token.
 // See: https://firebase.google.com/docs/app-check/web/debug-provider
 initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LcR_7AqAAAAAN3i9_hBf4f-4dD2X9_X9X9X9X9X'), // Replace with actual site key
+  provider: new ReCaptchaEnterpriseProvider('6LcapOQsAAAAAIruihJKCmhDKLWmKhp2I9VqgYKh'),
   isTokenAutoRefreshEnabled: true
 });
 
