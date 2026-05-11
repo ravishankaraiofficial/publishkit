@@ -110,6 +110,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
         // Only fetch Firestore profile for real (non-anonymous) users.
         if (!currentUser.isAnonymous) {
+          // Google user successfully signed in — clear guest flag if it was set
+          localStorage.removeItem('freeTrialUsed');
           await fetchProfileAndWhitelist(currentUser);
         }
         setLoading(false);

@@ -14,6 +14,8 @@ type OutputLanguage = "English" | "Hindi";
 interface PendingUpload {
   fileName: string;
   fileType: string;
+  fileSize: number;
+  storagePath: string;
   outputLanguage: OutputLanguage;
   thumbnailPromptEnabled: boolean;
 }
@@ -97,6 +99,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
   const statusTimerRef = useRef<number | null>(null);
   const prevUidRef = useRef<string | null>(null);
+  const recoveryAttemptedRef = useRef(false);
 
   // When the user changes (e.g., anonymous → Google after sign-in), reset all
   // upload state so the main page shows a fresh upload zone, not the old result.
@@ -114,6 +117,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       setStatusIndex(0);
       setQuotaExceeded(false);
       setIsUploading(false);
+      recoveryAttemptedRef.current = false;
       return; // Don't restore old resultId for a new user
     }
 
@@ -124,7 +128,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     }
 
     // Restore pending upload metadata if no result is active
-    if (!resultId) {
+    if (!resultId && !recoveryAttemptedRef.current) {
       const savedPending = localStorage.getItem(`pendingUpload_${user.uid}`);
       if (savedPending) {
         try {
@@ -134,6 +138,30 @@ export function UploadProvider({ children }: { children: ReactNode }) {
           // "blind spot". Show processing UI.
           setStatusCycle(getStatusCycle(parsed.fileType));
           setIsUploading(true);
+          recoveryAttemptedRef.current = true;
+
+          // Re-trigger the callable — backend caching makes this safe and idempotent.
+          // This recovers from a refresh that happened after upload but before resultId was returned.
+          processAudioCall({
+            storagePath: parsed.storagePath,
+            audioFileName: parsed.fileName,
+            audioSizeBytes: parsed.fileSize,
+            outputLanguage: parsed.outputLanguage,
+            generateThumbnails: parsed.fileType.startsWith('audio/') ? parsed.thumbnailPromptEnabled : false,
+            fileType: parsed.fileType,
+          }).then(res => {
+            setResultId(res.data.resultId);
+          }).catch((err) => {
+            console.error("Recovery processAudioCall failed:", err);
+            // If it was a quota error, handle it
+            if (err?.code === 'functions/resource-exhausted') {
+              if (user.isAnonymous) {
+                localStorage.setItem('freeTrialUsed', 'true');
+                setQuotaExceeded(true);
+              }
+              setIsUploading(false);
+            }
+          });
         } catch (e) {
           localStorage.removeItem(`pendingUpload_${user.uid}`);
         }
@@ -217,6 +245,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
     // Clear any stale quota/error state from a previous upload attempt
     setQuotaExceeded(false);
+    recoveryAttemptedRef.current = false;
 
     // Set dynamic status messages based on actual file type
     const cycle = getStatusCycle(file.type);
@@ -225,18 +254,20 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setStatusIndex(0);
     setUploadProgress(0);
 
+    const fileName = `${Date.now()}-${file.name}`;
+    const isAudio = file.type.startsWith('audio/');
+    const folder = isAudio ? 'audio' : 'uploads';
+    const storagePath = `users/${user.uid}/${folder}/${fileName}`;
+
     setPendingUpload({
       fileName: file.name,
       fileType: file.type,
+      fileSize: file.size,
+      storagePath,
       outputLanguage,
       thumbnailPromptEnabled
     });
 
-    const fileName = `${Date.now()}-${file.name}`;
-    // Store under correct subfolder so cleanup doesn't delete non-audio files prematurely
-    const isAudio = file.type.startsWith('audio/');
-    const folder = isAudio ? 'audio' : 'uploads';
-    const storagePath = `users/${user.uid}/${folder}/${fileName}`;
     const storageRef = ref(storage, storagePath);
 
     // Always pass explicit metadata so Firebase Storage knows the MIME type
@@ -252,6 +283,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
         console.error("Upload error", error);
         toast('Upload failed. Please try again.', 'error');
         setIsUploading(false);
+        setPendingUpload(null);
+        localStorage.removeItem(`pendingUpload_${user.uid}`);
       },
       async () => {
         try {
@@ -290,6 +323,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             toast(error.message || 'Failed to start processing.', 'error');
           }
           setIsUploading(false);
+          setPendingUpload(null);
+          localStorage.removeItem(`pendingUpload_${user.uid}`);
         }
       }
     );
@@ -302,6 +337,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setUploadProgress(0);
     setStatusIndex(0);
     setQuotaExceeded(false);
+    recoveryAttemptedRef.current = false;
     if (user) {
       localStorage.removeItem(`activeResultId_${user.uid}`);
       localStorage.removeItem(`pendingUpload_${user.uid}`);

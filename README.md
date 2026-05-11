@@ -66,11 +66,14 @@ PublishKit removes that friction entirely. It's designed for creators who record
 |---|---|
 | API keys | Gemini key lives in Firebase Secret Manager — never in code or `.env` |
 | Auth | Firebase Google OAuth — no passwords stored |
+| App Check | **reCAPTCHA Enterprise** (`ReCaptchaEnterpriseProvider`) — all unauthenticated backend calls are rejected |
 | Data isolation | Firestore rules enforce `uid === auth.uid` on every read/write |
-| Guest abuse | 1 free session per anonymous UID enforced server-side |
+| Guest abuse | 1 free session per anonymous UID (server-side) + device fingerprinting via FingerprintJS (hardware-level) |
+| VPN/Proxy | Backend middleware detects and blocks known VPN/proxy IPs |
 | Rate limiting | 10 uploads/day per signed-in user enforced in Cloud Functions |
 | File access | Firebase Storage rules reject wrong MIME types and files > 200 MB |
 | Headers | CSP, X-Frame-Options, X-XSS-Protection, Referrer-Policy set on hosting |
+| Cost protection | Hard quota cap of 8,000 Gemini requests/day — mathematically limits spend to ~₹6,000/month |
 
 ---
 
@@ -88,12 +91,10 @@ PublishKit removes that friction entirely. It's designed for creators who record
 
 ## Future Improvements
 
-- [ ] YouTube Data API integration — publish directly from the app
-- [ ] Batch upload — process multiple files at once
-- [ ] Result editing — edit titles/description inline before copying
+> These are intentionally deferred. The app is production-ready without them.
+
 - [ ] Email notifications when long files finish processing
-- [ ] Upgrade to Gemini 2.0 streaming for real-time output
-- [ ] PWA support for offline access and install prompt
+- [ ] YouTube Data API integration — publish directly from the app (requires Google OAuth approval)
 
 ---
 
@@ -158,34 +159,36 @@ publishkit/
 ├── src/
 │   ├── components/
 │   │   ├── layout/        # Navbar, PageContainer, ProtectedRoute, AppLoader
-│   │   ├── results/       # ResultTabs, CopyButton
-│   │   ├── ui/            # Button, Input, Card, Toast, Spinner
+│   │   ├── results/       # ResultTabs (partial error display), CopyButton
+│   │   ├── ui/            # Button, Input, Card, Toast, Spinner, ColorPicker
 │   │   └── upload/        # DropZone
 │   ├── hooks/
-│   │   ├── useAuth.tsx    # Firebase auth (Google + anonymous + race condition handling)
-│   │   └── useUpload.tsx  # Upload state, Firestore listener, result management
+│   │   ├── useAuth.tsx    # Firebase auth (Google + anonymous + race condition handling + freeTrialUsed clearing)
+│   │   └── useUpload.tsx  # Upload state, Firestore listener, blind-spot recovery logic
 │   ├── lib/
-│   │   ├── firebase.ts    # Firebase app initialisation
+│   │   ├── firebase.ts    # Firebase init with ReCaptchaEnterpriseProvider (AppCheck)
 │   │   ├── api.ts         # Cloud Function callable
+│   │   ├── colors.ts      # Shared color processing utilities
 │   │   └── utils.ts       # cn() helper
 │   ├── pages/
-│   │   ├── Home.tsx       # Upload zone + results
-│   │   ├── Login.tsx      # Google sign-in
-│   │   ├── Settings.tsx   # Creator profile
-│   │   ├── PastResults.tsx# History page
+│   │   ├── Home.tsx       # Upload zone + results (Thumbnail toggle responsive desktop layout)
+│   │   ├── Login.tsx      # Google sign-in (respects explicitSignIn router state)
+│   │   ├── Settings.tsx   # Creator profile (uses shared ColorPicker)
+│   │   ├── PastResults.tsx# History page (real-time via onSnapshot)
 │   │   ├── SetupProfile.tsx
 │   │   └── AccessPending.tsx
-│   └── types/             # Shared TypeScript types
+│   └── types/             # Shared TypeScript types (partialErrors: Record<string,string>|null)
 ├── functions/
 │   └── src/
 │       ├── index.ts           # Function exports
 │       ├── processAudio.ts    # Main callable + Firestore worker trigger
-│       ├── generate.ts        # Gemini title/timestamp/description generation
-│       ├── transcribe.ts      # Gemini audio transcription
+│       ├── generate.ts        # Gemini 2.5 Flash generation (titles/timestamps/description/thumbnails)
+│       ├── transcribe.ts      # Gemini native audio transcription
 │       ├── cleanup.ts         # Scheduled 3-hour file deletion
 │       └── middleware/
-│           ├── auth.ts        # Guest quota + Google user bypass
-│           └── rateLimit.ts   # 10/day per user limit
+│           ├── auth.ts        # VPN/proxy detection + per-device fingerprint enforcement
+│           └── rateLimit.ts   # 10 uploads/day per signed-in user
+├── GEMINI.md                  # AI assistant context file (read this first for full project state)
 ├── firestore.rules            # Firestore security rules
 ├── storage.rules              # Firebase Storage security rules
 ├── firebase.json              # Hosting + Functions config + security headers
@@ -197,17 +200,17 @@ publishkit/
 
 ## Cost
 
-Designed to run on free tiers:
-
-| Service | Free Tier |
+| Service | Plan |
 |---|---|
-| Firebase Hosting | 10 GB/month |
-| Cloud Firestore | 50k reads, 20k writes/day |
-| Firebase Storage | 5 GB storage, 1 GB/day download |
-| Cloud Functions | 2M invocations/month |
-| Gemini 2.5 Flash | Free tier available via Google AI Studio |
+| Firebase Hosting | Free tier |
+| Cloud Firestore | Free tier (50k reads, 20k writes/day) |
+| Firebase Storage | Free tier (5 GB storage) |
+| Cloud Functions | Free tier (2M invocations/month) |
+| Gemini 2.5 Flash | Pay-as-you-go (retained for enterprise data privacy) |
 
-Recommended: set a **$1/month budget alert** in Google Cloud Console.
+**Hard financial cap:** Google Cloud API quota is set to **8,000 requests/day** for `gemini-2.5-flash`.
+This mathematically guarantees a maximum spend of **~₹6,000/month** even under sustained maximum load.
+A ₹1,000 budget alert email is also configured in Google Cloud Billing.
 
 ---
 
