@@ -19,6 +19,14 @@ service cloud.firestore {
         && request.auth.uid == uid;
     }
 
+    // Feedback board — anyone can read, only signed-in users can write/vote
+    match /feedback/{document} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null;
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;

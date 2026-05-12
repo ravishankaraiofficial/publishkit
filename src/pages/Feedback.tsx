@@ -44,13 +44,21 @@ export function Feedback() {
 
   useEffect(() => {
     const q = query(collection(db, 'feedback'), orderBy('votes', 'desc'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as FeedbackItem));
-      setItems(fetched);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetched = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as FeedbackItem));
+        setItems(fetched);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Feedback load error:', error);
+        setLoading(false);
+        toast('Failed to load feedback', 'error');
+      }
+    );
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
