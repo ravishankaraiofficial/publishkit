@@ -10,6 +10,7 @@ import { AccessPending } from './pages/AccessPending';
 import { SetupProfile } from './pages/SetupProfile';
 import { Settings } from './pages/Settings';
 import { PastResults } from './pages/PastResults';
+import { Feedback } from './pages/Feedback';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ function AuthGatedRoutes() {
           <Route path="/setup" element={<SetupProfile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/results" element={<PastResults />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Route>
       </Routes>
     </BrowserRouter>

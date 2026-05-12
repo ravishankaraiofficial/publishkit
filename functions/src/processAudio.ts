@@ -36,7 +36,8 @@ async function findCachedResult(
   uid: string,
   audioFileName: string,
   audioSizeBytes: number,
-  outputLanguage: OutputLanguage
+  outputLanguage: OutputLanguage,
+  generateThumbnails: boolean
 ): Promise<string | null> {
   const cutoffMs = Date.now() - CACHE_WINDOW_MS;
 
@@ -52,6 +53,7 @@ async function findCachedResult(
     if (data.audioFileName !== audioFileName) continue;
     if (data.audioSizeBytes !== audioSizeBytes) continue;
     if (data.outputLanguage && data.outputLanguage !== outputLanguage) continue;
+    if (data.generateThumbnails !== generateThumbnails) continue;
 
     const created = data.createdAt?.toMillis ? data.createdAt.toMillis() : 0;
     if (created >= cutoffMs) {
@@ -82,13 +84,14 @@ export const processAudio = functions
       const audioSizeBytes = typeof data.audioSizeBytes === 'number' ? data.audioSizeBytes : 0;
       const fileType: string = typeof data.fileType === 'string' ? data.fileType : 'audio/mpeg';
       const outputLanguage = normalizeLanguage(data.outputLanguage);
+      const generateThumbnails = data.generateThumbnails === true;
 
       if (!storagePath || !audioFileName) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required arguments');
       }
 
-      // Cache check (same filename + filesize within last 7 days)
-      const cachedId = await findCachedResult(uid, audioFileName, audioSizeBytes, outputLanguage);
+      // Cache check (same filename + filesize + thumbnails flag within last 7 days)
+      const cachedId = await findCachedResult(uid, audioFileName, audioSizeBytes, outputLanguage, generateThumbnails);
       if (cachedId) {
         return { resultId: cachedId, cached: true };
       }
@@ -107,7 +110,7 @@ export const processAudio = functions
         audioSizeBytes,
         fileType,
         outputLanguage,
-        generateThumbnails: data.generateThumbnails === true,
+        generateThumbnails,
         status: 'processing',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         expiresAt,

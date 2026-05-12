@@ -1,12 +1,13 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Home, Clock, Settings, LogOut, LogIn, Zap } from 'lucide-react';
+import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
 
 const navItems = [
   { to: '/', icon: Home, label: 'New' },
   { to: '/results', icon: Clock, label: 'History' },
+  { to: '/feedback', icon: MessageSquare, label: 'Feedback' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -28,12 +29,19 @@ export function Navbar() {
     }
   };
 
+  const navLinkClass = (to: string) => cn(
+    "transition-all duration-150 active:scale-95",
+    location.pathname === to
+      ? "text-white"
+      : "text-[#888888] hover:text-white"
+  );
+
   return (
     <>
       {/* ── Desktop top bar ── */}
       <nav className="hidden sm:flex border-b border-[#2A2A2A] bg-[#0D0D0D]/90 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 w-full flex justify-between h-16 items-center">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group transition-all active:scale-95">
             <Zap className="w-5 h-5 text-[#E05A1E]" />
             <span className="text-[#E05A1E] font-bold text-xl tracking-tight group-hover:text-[#FF7A3D] transition-colors">
               PublishKit
@@ -45,19 +53,15 @@ export function Navbar() {
               <Link
                 key={to}
                 to={to}
-                className={cn(
-                  "transition-colors",
-                  location.pathname === to
-                    ? "text-white"
-                    : "text-[#888888] hover:text-white"
-                )}
+                className={navLinkClass(to)}
               >
                 {label}
               </Link>
             ))}
+
             <button
               onClick={handleAuthAction}
-              className="text-[#888888] hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-[#888888] hover:text-white transition-all flex items-center gap-1.5 active:scale-95"
             >
               {isGuest ? (
                 <>
@@ -75,13 +79,13 @@ export function Navbar() {
 
       {/* ── Mobile top bar ── */}
       <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-[#0D0D0D]/95 backdrop-blur-md border-b border-[#2A2A2A] sticky top-0 z-50">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 active:scale-95 transition-all">
           <Zap className="w-4 h-4 text-[#E05A1E]" />
           <span className="text-[#E05A1E] font-bold text-lg tracking-tight">PublishKit</span>
         </Link>
         <button
           onClick={handleAuthAction}
-          className="flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-colors px-3 py-1.5 rounded-full border border-[#2A2A2A]"
+          className="flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-all px-3 py-1.5 rounded-full border border-[#2A2A2A] active:scale-95"
         >
           {isGuest ? (
             <>
@@ -105,7 +109,7 @@ export function Navbar() {
                 key={to}
                 to={to}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-5 py-2 rounded-xl transition-all",
+                  "flex flex-col items-center gap-1 px-5 py-2 rounded-xl transition-all active:scale-90",
                   active
                     ? "text-[#E05A1E]"
                     : "text-[#555555] hover:text-[#888888]"

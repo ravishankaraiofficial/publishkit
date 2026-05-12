@@ -5,6 +5,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { DropZone } from '../components/upload/DropZone';
 import { ResultTabs } from '../components/results/ResultTabs';
 import { cn } from '../lib/utils';
+import { MessageSquare } from 'lucide-react';
 
 export function Home() {
   const { user } = useAuth();
@@ -30,7 +31,7 @@ export function Home() {
   const showResults = !!(result && result.status === 'complete');
   const showProcessing =
     (isUploading && !showResults) ||
-    !!(result && result.status === 'processing');
+    !!(result && (result.status === 'processing' || result.status === 'failed'));
   const showUpload = !isUploading && !showResults && !showProcessing;
 
   return (
@@ -173,8 +174,47 @@ export function Home() {
 
           <ResultTabs result={result} />
 
+          {/* Feedback Prompt for Signed-in Users */}
+          {!isGuest && (
+            <div className="mt-12 p-8 rounded-3xl bg-gradient-to-b from-[#1A1A1A] to-[#0D0D0D] border border-[#E05A1E]/20 text-center relative overflow-hidden group">
+              {/* Subtle background glow */}
+              <div className="absolute inset-0 bg-[#E05A1E]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative z-10">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#E05A1E]/10 text-[#E05A1E] mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                
+                <h3 className="text-xl font-bold text-white mb-2">Saved you some time? 🧡</h3>
+                <p className="text-[#888888] text-sm mb-8 max-w-md mx-auto leading-relaxed">
+                  If PublishKit helped you today, would you mind sharing a quick tweet or review? 
+                  It helps us keep the tool free for everyone!
+                </p>
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Link 
+                    to="/feedback"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-white text-black font-bold hover:bg-[#E05A1E] hover:text-white transition-all duration-300 active:scale-95 shadow-xl hover:shadow-[#E05A1E]/20"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Share Feedback
+                  </Link>
+                  
+                  <button 
+                    onClick={reset}
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-2xl border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#E05A1E]/40 transition-all duration-300 active:scale-95 font-medium"
+                  >
+                    Generate Another
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="text-center mt-8">
-            {isGuest ? (
+            {isGuest && (
               /* Guest: trial just consumed — prompt to sign in */
               <div className="bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-6 max-w-sm mx-auto fade-in">
                 <p className="text-white font-semibold mb-1">That was your free session! 🎉</p>
@@ -204,13 +244,6 @@ export function Home() {
                   Sign in with Google
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={reset}
-                className="inline-flex items-center justify-center px-6 py-2.5 rounded-lg border border-[#E05A1E]/60 text-[#E05A1E] hover:bg-[#E05A1E]/10 hover:border-[#E05A1E] transition-all text-sm font-medium"
-              >
-                Generate Another
-              </button>
             )}
           </div>
         </div>

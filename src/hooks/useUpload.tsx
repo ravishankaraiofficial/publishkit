@@ -159,8 +159,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
                 localStorage.setItem('freeTrialUsed', 'true');
                 setQuotaExceeded(true);
               }
-              setIsUploading(false);
             }
+            setIsUploading(false);
           });
         } catch (e) {
           localStorage.removeItem(`pendingUpload_${user.uid}`);
