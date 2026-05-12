@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { type Result } from '../../types';
 import { cn } from '../../lib/utils';
 import { CopyButton } from './CopyButton';
@@ -17,6 +18,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
   const isDoc = isDocumentResult(result);
 
   const [activeTab, setActiveTab] = useState<string>(isDoc ? 'summary' : 'titles');
+  const [chatGPTCopied, setChatGPTCopied] = useState(false);
   const { user, signInWithGoogle } = useAuth();
 
   if (isDoc) {
@@ -216,14 +218,25 @@ export function ResultTabs({ result }: ResultTabsProps) {
           window.open(url, '_blank');
         };
 
-        const copyAndNotifyImagen = async () => {
+        const openImagen = async () => {
           if (user?.isAnonymous) {
             await signInWithGoogle();
             return;
           }
           if (!result.thumbnailPromptImagen) return;
-          navigator.clipboard.writeText(result.thumbnailPromptImagen);
-          alert('Prompt copied! Use this prompt in Google Imagen 3 to generate your thumbnail.');
+          await navigator.clipboard.writeText(result.thumbnailPromptImagen);
+          window.open('https://aitestkitchen.withgoogle.com/tools/image-fx', '_blank');
+        };
+
+        const copyAndNotifyChatGPT = async () => {
+          if (user?.isAnonymous) {
+            await signInWithGoogle();
+            return;
+          }
+          if (!result.thumbnailPromptChatGPT) return;
+          await navigator.clipboard.writeText(result.thumbnailPromptChatGPT);
+          setChatGPTCopied(true);
+          setTimeout(() => setChatGPTCopied(false), 2000);
         };
 
         return (
@@ -246,7 +259,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
                     {result.thumbnailPromptImagen}
                   </p>
                   <button 
-                    onClick={copyAndNotifyImagen}
+                    onClick={openImagen}
                     className="w-full py-3 rounded-xl bg-transparent border border-[#E05A1E]/40 text-[#E05A1E] hover:bg-[#E05A1E]/10 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,17 +272,27 @@ export function ResultTabs({ result }: ResultTabsProps) {
                 <div className="space-y-4 pt-4 border-t border-[#2A2A2A]">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-semibold text-white">ChatGPT / DALL-E 3 Prompt</h4>
-                    <span className="text-[10px] bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">Best for Bold Graphics</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={copyAndNotifyChatGPT}
+                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all border-[#2A2A2A] bg-[#0D0D0D] text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
+                        style={chatGPTCopied ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' } : {}}
+                      >
+                        {chatGPTCopied ? <><Check className="w-3.5 h-3.5" />Copied ✓</> : <><Copy className="w-3.5 h-3.5" />Copy</>}
+                      </button>
+                      <span className="text-[10px] bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">Best for Bold Graphics</span>
+                    </div>
                   </div>
                   <p className="text-[#CFCFCF] bg-[#0D0D0D] p-4 rounded-xl border border-[#2A2A2A] text-sm leading-relaxed shadow-inner">
                     {result.thumbnailPromptChatGPT}
                   </p>
                   <button 
                     onClick={openChatGPT}
-                    className="w-full py-3 rounded-xl bg-[#E05A1E] text-white hover:bg-[#FF7A3D] transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#E05A1E]/10"
+                    className="w-full py-3 rounded-xl bg-transparent border border-[#E05A1E]/40 text-[#E05A1E] hover:bg-[#E05A1E]/10 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.28 12.12c0-1.8-.73-3.48-1.92-4.71-1.19-1.23-2.82-1.99-4.63-1.99-1.39 0-3.47.45-5.18 1.48-1.71-1.03-3.79-1.48-5.18-1.48-1.81 0-3.44.76-4.63 1.99-1.19 1.23-1.92 2.91-1.92 4.71 0 1.25.36 2.41 1 3.39L1.41 21.3a.75.75 0 0 0 .9.9l5.79-1.44c.98.64 2.14 1 3.39 1 1.81 0 3.44-.76 4.63-1.99 1.19-1.23 1.92-2.91 1.92-4.71 0-.3-.02-.59-.06-.88.66-.59 1.22-1.31 1.63-2.12.41-.81.67-1.71.67-2.65V12.12zM12 19c-1.38 0-2.61-.43-3.64-1.15a.75.75 0 0 0-.67-.09l-4.11 1.02 1.02-4.11a.75.75 0 0 0-.09-.67C3.79 13.16 3.36 11.93 3.36 10.55c0-1.28.53-2.48 1.49-3.36C5.81 6.3 7.01 5.77 8.29 5.77c.88 0 2.22.24 3.71.95V10.5c0 .35.05.7.15 1.03.1.33.25.64.45.92.2.28.45.52.74.72s.6.35.94.45c.34.1.69.15 1.04.15h.68l.21 2.54c-.16.2-.33.39-.53.56-1.19 1.23-2.82 1.99-4.63 1.99-1.39 0-3.47-.45-5.18-1.48a.75.75 0 0 0-.84.04c-.33.24-.71.39-1.12.45-.41.06-.83.02-1.23-.11-.4-.13-.76-.35-1.07-.63-.31-.28-.54-.62-.68-1s-.2-.79-.17-1.19c.03-.4.16-.78.38-1.12s.51-.62.86-.81c.35-.19.74-.29 1.14-.29.41 0 .8.1 1.14.29l1.45.87V7.05c1.49-.71 2.83-.95 3.71-.95 1.28 0 2.48.53 3.36 1.49.96.88 1.49 2.08 1.49 3.36 0 .67-.2 1.3-.57 1.83l-1.04-.62c.2-.28.31-.62.31-.97 0-.46-.18-.88-.47-1.2-.29-.32-.69-.53-1.12-.53-1.1 0-2 1.12-2 2.5V19z" />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
                     Generate Thumbnail from ChatGPT
                   </button>

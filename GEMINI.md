@@ -6,7 +6,7 @@
 - **GitHub:** https://github.com/ravishankaraiofficial/publishkit
 - **Firebase Project:** `gen-lang-client-0079285803`
 - **Root Directory:** `D:\Project\Project 01\Google Antigravity Files`
-- **Last Updated:** 2026-05-11
+- **Last Updated:** 2026-05-12
 
 ---
 
@@ -27,14 +27,18 @@
 **The app is LIVE and LAUNCH-READY. All known bugs are fixed. No known blockers.**
 
 ### Latest Deployed Commit
-`b7444e0` — "feat: add reply/answer functionality to feedback board"
+`TBD` — "fix: thumbnail prompt UX + mobile auth redirect error"
 
 ### Recent Changes (2026-05-12)
 - ✅ Feedback Board page fully implemented with voting system
-- ✅ Reply/answer functionality (like YouTube comments) 
+- ✅ Reply/answer functionality (like YouTube comments)
 - ✅ Firestore Security Rules for feedback & replies collections
 - ✅ Error handling and TypeScript fixes
 - ✅ Navbar updated with Feedback navigation button
+- ✅ Added Copy button for ChatGPT prompt in Thumbnail Prompts tab (inline in header, same style as Imagen)
+- ✅ Fixed "Generate Thumbnail from Imagen" button — now copies prompt + opens Google ImageFX in new tab
+- ✅ Made "Generate Thumbnail from ChatGPT" button identical to Imagen button (same outlined style + clipboard icon)
+- ✅ Fixed mobile auth error: switched from `signInWithRedirect` to `signInWithPopup` on mobile to prevent sessionStorage loss when user switches browser mode mid-redirect
 
 ---
 
@@ -50,7 +54,7 @@
 | `src/pages/Login.tsx` | Reads `location.state?.explicitSignIn` to bypass automatic guest redirect when user intentionally clicks Sign In |
 | `src/pages/PastResults.tsx` | History page. Uses `onSnapshot` (real-time, NOT `getDocs`) |
 | `src/components/layout/Navbar.tsx` | Passes `{ state: { explicitSignIn: true } }` when navigating to `/login` from Sign In button; includes Feedback link |
-| `src/components/results/ResultTabs.tsx` | Shows per-tab partial error messages if one of the parallel AI calls fails |
+| `src/components/results/ResultTabs.tsx` | Shows per-tab partial error messages if one of the parallel AI calls fails. Thumbnail Prompts tab has: inline Copy button in ChatGPT header row, "Generate Thumbnail from Imagen" opens Google ImageFX (https://aitestkitchen.withgoogle.com/tools/image-fx) after copying prompt, "Generate Thumbnail from ChatGPT" opens chatgpt.com with prompt pre-filled. Both generate buttons share identical outlined style + clipboard icon. |
 | `src/components/ui/ColorPicker.tsx` | Shared reusable color picker component (used by Settings + SetupProfile) |
 | `src/lib/colors.ts` | Shared color processing utilities (extracted from Settings + SetupProfile to eliminate duplication) |
 | `src/types/index.ts` | `partialErrors?: Record<string, string> \| null` — matches backend output exactly |
@@ -77,8 +81,9 @@
 
 ### Authentication Flow
 - Desktop: `signInWithPopup`
-- Mobile: `signInWithRedirect` (to avoid cross-origin storage blocks)
-- `freeTrialUsed` localStorage flag is cleared in 3 places: `onAuthStateChanged` (for any real user), `getRedirectResult` (mobile redirect case), and `signInWithPopup` success (desktop case).
+- Mobile: `signInWithPopup` first (avoids sessionStorage loss issue). Falls back to `signInWithRedirect` ONLY if popup is explicitly blocked (`auth/popup-blocked` or `auth/web-storage-unsupported`).
+- **Why changed from redirect:** `signInWithRedirect` on mobile stored auth state in `sessionStorage`. If user switched browser mode (Mobile→Desktop) mid-redirect, sessionStorage was cleared → Firebase `/__/auth/handler` error page. Popup has no such dependency.
+- `freeTrialUsed` localStorage flag is cleared in 3 places: `onAuthStateChanged` (for any real user), `getRedirectResult` (redirect fallback case), and `signInWithPopup` success.
 - The Sign In button in Navbar uses `navigate('/login', { state: { explicitSignIn: true } })` to prevent the Login page from bouncing users back to Home before their trial is used.
 
 ### Financial Protection

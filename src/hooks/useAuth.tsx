@@ -20,6 +20,8 @@ const SILENT_AUTH_CODES = new Set([
   'auth/user-cancelled',
   'auth/no-auth-event',
   'auth/web-storage-unsupported',
+  'auth/internal-error',        // fired when /__/auth/handler loses sessionStorage
+  'auth/missing-initial-state', // same root cause — mode switch mid-redirect
 ]);
 
 export function isSilentAuthError(err: any): boolean {
@@ -186,10 +188,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       provider.setCustomParameters({ prompt: 'select_account' });
 
       if (isMobileDevice()) {
-        // Redirect on mobile: page navigates away immediately so there is
-        // no "stuck" button. authDomain = publishkit.web.app means the
-        // redirect handler is same-origin — no cross-origin storage block.
-        await signInWithRedirect(auth, provider);
+        // On mobile, prefer signInWithPopup — it avoids the sessionStorage
+        // loss that occurs when the user switches browser mode (mobile→desktop)
+        // mid-redirect, which causes the /__/auth/handler error page.
+        // Only fall back to redirect if the browser explicitly blocks popups.
+        try {
+          await signInWithPopup(auth, provider);
+          localStorage.removeItem('freeTrialUsed');
+        } catch (popupErr: any) {
+          if (
+            popupErr?.code === 'auth/popup-blocked' ||
+            popupErr?.code === 'auth/web-storage-unsupported'
+          ) {
+            // Popup truly blocked — fall back to redirect as last resort.
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw popupErr;
+          }
+        }
       } else {
         // Popup on desktop: postMessage-based, resolves in the same tab.
         await signInWithPopup(auth, provider);
