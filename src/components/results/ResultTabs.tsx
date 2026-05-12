@@ -74,8 +74,8 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
   const renderContent = () => {
     // Check for partial errors for the current tab
-    const hasError = result.partialErrors && result.partialErrors[activeTab];
-    const errorMessage = hasError ? result.partialErrors[activeTab] : null;
+    const hasError = result.partialErrors?.[activeTab];
+    const errorMessage = hasError || null;
 
     switch (activeTab) {
       case 'titles': {

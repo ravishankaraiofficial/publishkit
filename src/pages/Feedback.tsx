@@ -1,24 +1,22 @@
 import { useState, useEffect } from 'react';
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  orderBy, 
-  serverTimestamp, 
-  doc, 
-  updateDoc, 
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  doc,
+  updateDoc,
   increment,
   arrayUnion,
-  arrayRemove,
-  getDoc,
-  setDoc
+  arrayRemove
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { ArrowBigUp, MessageSquare, Plus, Check } from 'lucide-react';
+import { ArrowBigUp, MessageSquare, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from '../components/ui/Button';
 
