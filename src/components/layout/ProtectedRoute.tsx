@@ -16,9 +16,11 @@ export function ProtectedRoute() {
   }
 
   // Anonymous (guest) users get exactly one free session.
-  // After they've used it the localStorage flag is set and we gate them.
+  // Their quota is handled gracefully on the Home page via quotaExceeded state.
+  // We allow them to navigate to /feedback, /results, etc.
   if (user.isAnonymous) {
-    if (localStorage.getItem('freeTrialUsed') === 'true') {
+    // If they try to access settings or setup, bounce them to login
+    if (location.pathname === '/settings' || location.pathname === '/setup') {
       return <Navigate to="/login" replace />;
     }
     return <Outlet />;

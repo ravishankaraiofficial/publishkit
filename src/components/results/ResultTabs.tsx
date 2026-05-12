@@ -19,6 +19,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
   const [activeTab, setActiveTab] = useState<string>(isDoc ? 'summary' : 'titles');
   const [chatGPTCopied, setChatGPTCopied] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { user, signInWithGoogle } = useAuth();
 
   if (isDoc) {
@@ -81,30 +82,50 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
     switch (activeTab) {
       case 'titles': {
-        const titlesText = (result.titles || [])
-          .map((t, i) => `${i + 1}. ${t.title}\n${t.reason}`)
-          .join('\n\n');
+        const copyTitle = async (text: string, idx: number) => {
+          await navigator.clipboard.writeText(text);
+          setCopiedIndex(idx);
+          setTimeout(() => setCopiedIndex(null), 2000);
+        };
+
         return (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14">
+          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
             {errorMessage ? (
               <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4 mb-4">
                 <p className="text-[#EF4444] text-sm font-medium">Generation Error</p>
                 <p className="text-[#EF4444]/80 text-xs mt-1">{errorMessage}</p>
               </div>
             ) : (
-              <>
-                <CopyButton text={titlesText} />
-                <div className="space-y-6">
-                  {(result.titles || []).map((t, i) => (
-                    <div key={i} className="border-b border-[#2A2A2A] pb-4 last:border-0 last:pb-0">
-                      <h4 className="text-base font-medium text-white mb-1">
-                        {i + 1}. {t.title}
-                      </h4>
-                      <p className="text-sm text-[#888888] italic">{t.reason}</p>
+              <div className="space-y-4">
+                {(result.titles || []).map((t, i) => (
+                  <div key={i} className="group relative bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#E05A1E]/40 transition-all">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-white leading-snug">
+                          {i + 1}. {t.title}
+                        </h4>
+                        <p className="text-xs text-[#888888] italic mt-1.5 leading-relaxed">{t.reason}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyTitle(t.title, i)}
+                        className="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all"
+                        style={
+                          copiedIndex === i
+                            ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' }
+                            : { borderColor: '#2A2A2A', background: '#0D0D0D', color: '#888888' }
+                        }
+                      >
+                        {copiedIndex === i ? (
+                          <><Check className="w-3.5 h-3.5" />Copied</>  
+                        ) : (
+                          <><Copy className="w-3.5 h-3.5" />Copy</>
+                        )}
+                      </button>
                     </div>
-                  ))}
-                </div>
-              </>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         );

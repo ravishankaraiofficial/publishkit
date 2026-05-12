@@ -27,7 +27,7 @@
 **The app is LIVE and LAUNCH-READY. All known bugs are fixed. No known blockers.**
 
 ### Latest Deployed Commit
-`TBD` — "fix: thumbnail prompt UX + mobile auth redirect error"
+`TBD` — "fix: title copy buttons, guest result persistence, and router gating"
 
 ### Recent Changes (2026-05-12)
 - ✅ Feedback Board page fully implemented with voting system
@@ -39,6 +39,9 @@
 - ✅ Fixed "Generate Thumbnail from Imagen" button — now copies prompt + opens Google ImageFX in new tab
 - ✅ Made "Generate Thumbnail from ChatGPT" button identical to Imagen button (same outlined style + clipboard icon)
 - ✅ Fixed mobile auth error: switched from `signInWithRedirect` to `signInWithPopup` on mobile to prevent sessionStorage loss when user switches browser mode mid-redirect
+- ✅ Changed titles tab: replaced bulk copy button with individual inline copy buttons for each title
+- ✅ Fixed guest result persistence: backed up guest result to `localStorage` and restored it upon Google Sign-In to prevent results from disappearing during forced auth
+- ✅ Fixed guest router gate: removed strict routing block to allow guests with exhausted free trials to still view the Feedback and History tabs
 
 ---
 

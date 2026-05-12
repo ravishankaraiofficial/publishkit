@@ -94,7 +94,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   
   const [resultId, setResultId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
-  const [quotaExceeded, setQuotaExceeded] = useState(false);
+  const [quotaExceeded, setQuotaExceeded] = useState(() => localStorage.getItem('freeTrialUsed') === 'true');
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
 
   const statusTimerRef = useRef<number | null>(null);
@@ -109,6 +109,19 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     prevUidRef.current = user.uid;
 
     if (prevUid && prevUid !== user.uid) {
+      // User identity changed. Check if they just upgraded from guest with a completed result.
+      const backup = localStorage.getItem('guestResultBackup');
+      if (backup && !user.isAnonymous) {
+        try {
+          const parsed = JSON.parse(backup) as Result;
+          setResult(parsed);
+          setResultId('restored-guest-result');
+        } catch(e) {}
+        localStorage.removeItem('guestResultBackup');
+        recoveryAttemptedRef.current = false;
+        return;
+      }
+
       // User identity changed — clear everything
       setResult(null);
       setResultId(null);
@@ -124,7 +137,20 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     // Restore active resultId from localStorage when user is available
     if (!resultId) {
       const savedId = localStorage.getItem(`activeResultId_${user.uid}`);
-      if (savedId) setResultId(savedId);
+      if (savedId) {
+        setResultId(savedId);
+      } else if (!user.isAnonymous) {
+        // No active result. Did they just sign in via redirect after generating as guest?
+        const backup = localStorage.getItem('guestResultBackup');
+        if (backup) {
+          try {
+            const parsed = JSON.parse(backup) as Result;
+            setResult(parsed);
+            setResultId('restored-guest-result');
+          } catch(e) {}
+          localStorage.removeItem('guestResultBackup');
+        }
+      }
     }
 
     // Restore pending upload metadata if no result is active
@@ -214,7 +240,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
   // Listen to Firestore for result updates
   useEffect(() => {
-    if (!user || !resultId) return;
+    if (!user || !resultId || resultId === 'restored-guest-result') return;
 
     const unsubscribe = onSnapshot(doc(db, `users/${user.uid}/results/${resultId}`), (snapshot) => {
       if (snapshot.exists()) {
@@ -229,6 +255,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
           if (data.status === 'complete' && user?.isAnonymous) {
             // Mark free trial as consumed so next visit gates to login.
             localStorage.setItem('freeTrialUsed', 'true');
+            // Backup the result in case they sign in to copy it
+            localStorage.setItem('guestResultBackup', JSON.stringify(data));
           }
           if (data.status === 'failed') {
             toast(data.errorMessage || 'Processing failed.', 'error');
@@ -338,6 +366,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setStatusIndex(0);
     setQuotaExceeded(false);
     recoveryAttemptedRef.current = false;
+    localStorage.removeItem('guestResultBackup');
     if (user) {
       localStorage.removeItem(`activeResultId_${user.uid}`);
       localStorage.removeItem(`pendingUpload_${user.uid}`);
