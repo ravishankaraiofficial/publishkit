@@ -23,11 +23,18 @@
 
 ---
 
-## Current Production Status (as of 2026-05-11)
+## Current Production Status (as of 2026-05-12)
 **The app is LIVE and LAUNCH-READY. All known bugs are fixed. No known blockers.**
 
-### Deployed Commit
-`720fda1` — "Production hardening: UI fixes, Auth routing, and AppCheck integration"
+### Latest Deployed Commit
+`b7444e0` — "feat: add reply/answer functionality to feedback board"
+
+### Recent Changes (2026-05-12)
+- ✅ Feedback Board page fully implemented with voting system
+- ✅ Reply/answer functionality (like YouTube comments) 
+- ✅ Firestore Security Rules for feedback & replies collections
+- ✅ Error handling and TypeScript fixes
+- ✅ Navbar updated with Feedback navigation button
 
 ---
 
@@ -42,11 +49,12 @@
 | `src/pages/Home.tsx` | Main page. Thumbnail toggle is `sm:max-w-[600px]` on desktop to match the free-session banner width |
 | `src/pages/Login.tsx` | Reads `location.state?.explicitSignIn` to bypass automatic guest redirect when user intentionally clicks Sign In |
 | `src/pages/PastResults.tsx` | History page. Uses `onSnapshot` (real-time, NOT `getDocs`) |
-| `src/components/layout/Navbar.tsx` | Passes `{ state: { explicitSignIn: true } }` when navigating to `/login` from Sign In button |
+| `src/components/layout/Navbar.tsx` | Passes `{ state: { explicitSignIn: true } }` when navigating to `/login` from Sign In button; includes Feedback link |
 | `src/components/results/ResultTabs.tsx` | Shows per-tab partial error messages if one of the parallel AI calls fails |
 | `src/components/ui/ColorPicker.tsx` | Shared reusable color picker component (used by Settings + SetupProfile) |
 | `src/lib/colors.ts` | Shared color processing utilities (extracted from Settings + SetupProfile to eliminate duplication) |
 | `src/types/index.ts` | `partialErrors?: Record<string, string> \| null` — matches backend output exactly |
+| `src/pages/Feedback.tsx` | Feedback Board with voting, feature requests, and reply system (like YouTube comments) |
 
 ### Backend (`functions/src/`)
 | File | Purpose |
@@ -81,6 +89,16 @@
 
 ### Upload Recovery ("Blind Spot" Fix)
 When a user uploads a file, `storagePath` and `fileSize` are now persisted to localStorage inside `PendingUpload` BEFORE the backend call returns a `resultId`. If the user refreshes in this 1-2 second window, `useUpload.tsx` automatically re-triggers `processAudioCall` on mount, which is idempotent due to the 7-day cache on the backend.
+
+### Feedback Board System
+**Collections:**
+- `feedback/{feedbackId}` — Main feedback items with fields: title, description, votes, votedBy[], uid, userName, status, createdAt
+- `feedback/{feedbackId}/replies/{replyId}` — Replies/answers with fields: text, uid, userName, createdAt
+
+**Features:**
+- Public read access (anyone can see feedback + replies)
+- Signed-in users only: create feedback, vote, post replies
+- Only content creator can delete their own feedback/replies (Firestore rule enforced)
 
 ---
 
