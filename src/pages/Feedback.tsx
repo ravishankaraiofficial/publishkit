@@ -52,9 +52,9 @@ export function Feedback() {
         setLoading(false);
       },
       (error) => {
-        console.error('Feedback load error:', error);
+        console.error('Feedback load error:', error.message, error.code);
         setLoading(false);
-        toast('Failed to load feedback', 'error');
+        setItems([]);
       }
     );
     return () => unsubscribe();
