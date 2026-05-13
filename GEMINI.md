@@ -6,7 +6,7 @@
 - **GitHub:** https://github.com/ravishankaraiofficial/publishkit
 - **Firebase Project:** `gen-lang-client-0079285803`
 - **Root Directory:** `D:\Project\Project 01\Google Antigravity Files`
-- **Last Updated:** 2026-05-12
+- **Last Updated:** 2026-05-13
 
 ---
 
@@ -23,11 +23,16 @@
 
 ---
 
-## Current Production Status (as of 2026-05-12)
+## Current Production Status (as of 2026-05-13)
 **The app is LIVE and LAUNCH-READY. All known bugs are fixed. No known blockers.**
 
 ### Latest Deployed Commit
-`TBD` — "fix: title copy buttons, guest result persistence, and router gating"
+`TBD` — "fix: New tab reset and sign-out cache clear"
+
+### Recent Changes (2026-05-13)
+- ✅ Fixed "New" tab and PublishKit logo: clicking them now always calls `reset()` in `useUpload`, clearing the active result and returning to a fresh upload screen on both mobile and desktop
+- ✅ Fixed sign-out result persistence bug: `logout()` now explicitly removes `activeResultId_` and `pendingUpload_` from localStorage before signing out, so signing back in always shows a clean upload page instead of the last result
+- ✅ `reset()` in `useUpload.tsx` now also sets `isUploading` to `false` to prevent stuck processing state after manual reset
 
 ### Recent Changes (2026-05-12)
 - ✅ Feedback Board page fully implemented with voting system
@@ -56,7 +61,7 @@
 | `src/pages/Home.tsx` | Main page. Thumbnail toggle is `sm:max-w-[600px]` on desktop to match the free-session banner width |
 | `src/pages/Login.tsx` | Reads `location.state?.explicitSignIn` to bypass automatic guest redirect when user intentionally clicks Sign In |
 | `src/pages/PastResults.tsx` | History page. Uses `onSnapshot` (real-time, NOT `getDocs`) |
-| `src/components/layout/Navbar.tsx` | Passes `{ state: { explicitSignIn: true } }` when navigating to `/login` from Sign In button; includes Feedback link |
+| `src/components/layout/Navbar.tsx` | Passes `{ state: { explicitSignIn: true } }` when navigating to `/login` from Sign In button; includes Feedback link. "New" tab and logo both call `reset()` from `useUpload` on click to guarantee a fresh upload state. |
 | `src/components/results/ResultTabs.tsx` | Shows per-tab partial error messages if one of the parallel AI calls fails. Thumbnail Prompts tab has: inline Copy button in ChatGPT header row, "Generate Thumbnail from Imagen" opens Google ImageFX (https://aitestkitchen.withgoogle.com/tools/image-fx) after copying prompt, "Generate Thumbnail from ChatGPT" opens chatgpt.com with prompt pre-filled. Both generate buttons share identical outlined style + clipboard icon. |
 | `src/components/ui/ColorPicker.tsx` | Shared reusable color picker component (used by Settings + SetupProfile) |
 | `src/lib/colors.ts` | Shared color processing utilities (extracted from Settings + SetupProfile to eliminate duplication) |

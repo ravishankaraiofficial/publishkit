@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useUpload } from '../../hooks/useUpload';
 import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
@@ -13,6 +14,7 @@ const navItems = [
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const { reset } = useUpload();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -41,7 +43,7 @@ export function Navbar() {
       {/* ── Desktop top bar ── */}
       <nav className="hidden sm:flex border-b border-[#2A2A2A] bg-[#0D0D0D]/90 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 w-full flex justify-between h-16 items-center">
-          <Link to="/" className="flex items-center gap-2 group transition-all active:scale-95">
+          <Link to="/" onClick={reset} className="flex items-center gap-2 group transition-all active:scale-95">
             <Zap className="w-5 h-5 text-[#E05A1E]" />
             <span className="text-[#E05A1E] font-bold text-xl tracking-tight group-hover:text-[#FF7A3D] transition-colors">
               PublishKit
@@ -53,6 +55,7 @@ export function Navbar() {
               <Link
                 key={to}
                 to={to}
+                onClick={to === '/' ? reset : undefined}
                 className={navLinkClass(to)}
               >
                 {label}
@@ -79,7 +82,7 @@ export function Navbar() {
 
       {/* ── Mobile top bar ── */}
       <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-[#0D0D0D]/95 backdrop-blur-md border-b border-[#2A2A2A] sticky top-0 z-50">
-        <Link to="/" className="flex items-center gap-2 active:scale-95 transition-all">
+        <Link to="/" onClick={reset} className="flex items-center gap-2 active:scale-95 transition-all">
           <Zap className="w-4 h-4 text-[#E05A1E]" />
           <span className="text-[#E05A1E] font-bold text-lg tracking-tight">PublishKit</span>
         </Link>
@@ -108,6 +111,7 @@ export function Navbar() {
               <Link
                 key={to}
                 to={to}
+                onClick={to === '/' ? reset : undefined}
                 className={cn(
                   "flex flex-col items-center gap-1 px-5 py-2 rounded-xl transition-all active:scale-90",
                   active

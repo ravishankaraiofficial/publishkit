@@ -359,6 +359,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   };
 
   const reset = () => {
+    setIsUploading(false);
     setResult(null);
     setResultId(null);
     setPendingUpload(null);

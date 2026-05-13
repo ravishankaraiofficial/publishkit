@@ -223,8 +223,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    // Only mark as used if the CURRENT session was actually used.
-    // The UploadProvider handles setting this when a session completes.
+    if (auth.currentUser) {
+      localStorage.removeItem(`activeResultId_${auth.currentUser.uid}`);
+      localStorage.removeItem(`pendingUpload_${auth.currentUser.uid}`);
+    }
     await signOut(auth);
   };
 
