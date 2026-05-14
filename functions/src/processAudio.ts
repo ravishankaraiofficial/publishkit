@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { db, storage } from './lib/firestore';
 import { verifyWhitelist } from './middleware/auth';
-import { checkRateLimit, incrementRateLimit } from './middleware/rateLimit';
+import { enforceRateLimit } from './middleware/rateLimit';
 import { transcribeAudio } from './transcribe';
 import { generateOutputs, analyzeDocument } from './generate';
 import { geminiApiKey } from './lib/gemini';
@@ -96,8 +96,9 @@ export const processAudio = functions
         return { resultId: cachedId, cached: true };
       }
 
-      const usageRef = await checkRateLimit(uid);
-      await incrementRateLimit(usageRef);
+      // Enforce atomic rate limits (UID + IP based)
+      const rawIp = context.rawRequest.ip || 'unknown';
+      await enforceRateLimit(uid, rawIp);
 
       const resultRef = db.collection(`users/${uid}/results`).doc();
       const resultId = resultRef.id;
