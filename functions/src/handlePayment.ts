@@ -138,19 +138,19 @@ export const razorpayWebhook = functions
           ? new Date(subscription.charge_at * 1000)
           : new Date(Date.now() + 32 * 24 * 60 * 60 * 1000);
 
-        await db.doc(`users/${uid}`).update({
+        await db.doc(`users/${uid}`).set({
           plan,
           planExpiry: nextBilling.toISOString(),
           razorpaySubscriptionId: subscription.id,
-        });
+}, { merge: true });
       }
 
-      if (event === 'subscription.cancelled' || event === 'subscription.expired') {
-        await db.doc(`users/${uid}`).update({
-          plan: 'free',
-          planExpiry: admin.firestore.FieldValue.delete(),
-          razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
-        });
+      if (event === 'subscription.cancelled' || event === 'subscription.completed') {
+        await db.doc(`users/${uid}`).set({
+        plan: 'free',
+        planExpiry: admin.firestore.FieldValue.delete(),
+        razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+}, { merge: true });
       }
 
       res.status(200).send('OK');

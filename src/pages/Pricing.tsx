@@ -71,7 +71,10 @@ const Pricing: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || user.isAnonymous) {
+      setLoading(false);
+      return;
+    }
 
     const fetchUsage = async () => {
       try {
@@ -90,7 +93,8 @@ const Pricing: React.FC = () => {
   }, [user]);
 
   const handleUpgrade = async (planKey: 'pro' | 'ultra') => {
-    if (!user) {
+    if (!user || user.isAnonymous) {
+      toast('Please sign in with Google to upgrade.', 'info');
       navigate('/login');
       return;
     }

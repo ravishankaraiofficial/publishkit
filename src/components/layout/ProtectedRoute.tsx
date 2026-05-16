@@ -20,8 +20,8 @@ export function ProtectedRoute() {
   // We allow them to navigate to /feedback, /results, etc.
   if (user.isAnonymous) {
     // If they try to access settings or setup, bounce them to login
-    if (location.pathname === '/settings' || location.pathname === '/setup') {
-      return <Navigate to="/login" replace />;
+    if (location.pathname === '/settings' || location.pathname === '/setup' || location.pathname === '/pricing') {
+      return <Navigate to="/login" state={{ explicitSignIn: true }} replace />;
     }
     return <Outlet />;
   }
