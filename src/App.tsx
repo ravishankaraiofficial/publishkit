@@ -11,6 +11,9 @@ import { SetupProfile } from './pages/SetupProfile';
 import { Settings } from './pages/Settings';
 import { PastResults } from './pages/PastResults';
 import { Feedback } from './pages/Feedback';
+import Pricing from './pages/Pricing';
+import ScriptWriter from './pages/ScriptWriter';
+import RepurposingPlanner from './pages/RepurposingPlanner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -36,6 +39,9 @@ function AuthGatedRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/results" element={<PastResults />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/script-writer" element={<ScriptWriter />} />
+          <Route path="/repurposing" element={<RepurposingPlanner />} />
         </Route>
       </Routes>
     </BrowserRouter>

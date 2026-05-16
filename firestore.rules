@@ -21,7 +21,18 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow write: if request.auth != null
-        && request.auth.uid == uid;
+        && request.auth.uid == uid
+        && !request.resource.data.keys().hasAny(['plan', 'planExpiry', 'razorpaySubscriptionId']);
+    }
+
+    // Usage readable for UI display (write locked, Admin SDK only)
+    match /users/{uid}/usage/{month} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Ultra trials for Script Writer and Repurposing Planner
+    match /users/{uid}/ultraTrials/{feature} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
     // Feedback board — anyone can read, only real signed-in users can create/vote

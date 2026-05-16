@@ -1,25 +1,27 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useUpload } from '../../hooks/useUpload';
-import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare } from 'lucide-react';
+import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
 
 const navItems = [
   { to: '/', icon: Home, label: 'New' },
   { to: '/results', icon: Clock, label: 'History' },
+  { to: '/pricing', icon: Sparkles, label: 'Pricing' },
   { to: '/feedback', icon: MessageSquare, label: 'Feedback' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 export function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, profile } = useAuth();
   const { reset } = useUpload();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const isGuest = !user || user.isAnonymous;
+  const currentPlan = profile?.plan || 'free';
 
   const handleAuthAction = async () => {
     if (isGuest) {
@@ -61,6 +63,19 @@ export function Navbar() {
                 {label}
               </Link>
             ))}
+
+            {!isGuest && currentPlan && (
+              <div className={cn(
+                "px-3 py-1 rounded-full text-xs font-semibold transition-all",
+                currentPlan === 'ultra'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white'
+                  : currentPlan === 'pro'
+                  ? 'bg-blue-600/20 text-blue-300'
+                  : 'bg-gray-800 text-gray-300'
+              )}>
+                {currentPlan === 'ultra' ? '✦ Ultra' : currentPlan === 'pro' ? 'Pro' : 'Free'}
+              </div>
+            )}
 
             <button
               onClick={handleAuthAction}

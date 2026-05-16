@@ -96,9 +96,13 @@ export const processAudio = functions
         return { resultId: cachedId, cached: true };
       }
 
+      // Read user's plan for rate limit enforcement
+      const userDoc = await db.doc(`users/${uid}`).get();
+      const plan = (userDoc.data()?.plan as string) || 'free';
+
       // Enforce atomic rate limits (UID + IP based)
       const rawIp = context.rawRequest.ip || 'unknown';
-      await enforceRateLimit(uid, rawIp);
+      await enforceRateLimit(uid, rawIp, plan);
 
       const resultRef = db.collection(`users/${uid}/results`).doc();
       const resultId = resultRef.id;

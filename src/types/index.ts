@@ -1,3 +1,5 @@
+export type PlanTier = 'free' | 'pro' | 'ultra';
+
 export interface CreatorProfile {
   name: string;
   handle?: string;
@@ -6,6 +8,9 @@ export interface CreatorProfile {
   brandColor2: string;
   language: "English" | "Hindi";
   niche: string;
+  plan?: PlanTier;
+  planExpiry?: string;
+  razorpaySubscriptionId?: string;
 }
 
 export interface Result {
