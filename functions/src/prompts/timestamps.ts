@@ -1,13 +1,15 @@
-type OutputLanguage = "English" | "Hindi";
+import { introductionWord, strongLanguageDirective } from '../lib/languages';
 
 export function getTimestampsPrompt(
   transcript: string,
-  outputLanguage: OutputLanguage = "English"
+  outputLanguage: string = 'English'
 ): string {
-  const hindiInstruction =
-    outputLanguage === "Hindi"
-      ? `\nIMPORTANT: All chapter titles and timestamp labels must be in Hindi using Devanagari script. Keep the timestamp values themselves in numeric format (e.g., "0:00", "2:35").\n`
-      : "";
+  // Re-shape the strong directive for timestamps (no "respond in language" — these are chapter labels).
+  const directive = strongLanguageDirective(outputLanguage).replace(
+    'translate and respond EXCLUSIVELY',
+    'write all chapter titles and timestamp labels'
+  );
+  const intro = introductionWord(outputLanguage);
 
   return `
 Read the following transcript, identify natural topic transitions, and output YouTube chapter timestamps.
@@ -18,12 +20,12 @@ STRUCTURE RULES:
 3. If the content is short (less than 7 timestamps), provide a simple flat list of timestamps without chapter headings.
 
 TIMESTAMP RULES:
-1. The first timestamp MUST be exactly "0:00 ${outputLanguage === "Hindi" ? "परिचय" : "Introduction"}".
+1. The first timestamp MUST be exactly "0:00 ${intro}".
 2. Use seconds based on cumulative word position (assume 150 words per minute).
 3. Maximum 12 timestamps total.
 4. Output plain text only. No markdown, no bolding, no code blocks.
 
-${hindiInstruction}
+${directive}
 
 Source Content:
 ${transcript.substring(0, 50000)}

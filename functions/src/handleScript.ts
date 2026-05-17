@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';
 import { enforceScriptTrial } from './middleware/rateLimit';
+import { coerceLanguage, languageHint } from './lib/languages';
 
 interface ScriptOutput {
   hook: string;
@@ -32,7 +33,7 @@ export const generateScript = functions
       const topic = typeof data.topic === 'string' ? data.topic.trim() : '';
       const tone = ['Casual', 'Educational', 'Storytelling'].includes(data.tone) ? data.tone : 'Casual';
       const duration = ['5', '10', '15'].includes(data.duration) ? data.duration : '10';
-      const language = ['English', 'Hindi'].includes(data.language) ? data.language : 'English';
+      const language = coerceLanguage(data.language);
 
       if (!topic || topic.length === 0 || topic.length > 500) {
         throw new functions.https.HttpsError('invalid-argument', 'Topic must be between 1 and 500 characters');
@@ -71,7 +72,7 @@ Requirements:
 - Create 3-4 main sections with relevant titles and detailed content
 - Content should be engaging and follow the ${tone} tone
 - CTA should encourage viewers to like, subscribe, or take action
-- Language: ${language}${language === 'Hindi' ? ' (use Devanagari script)' : ''}
+- Language: ${language}${languageHint(language)}
 - Return ONLY valid JSON, no markdown formatting or extra text`;
 
       const result = await model.generateContent(prompt);

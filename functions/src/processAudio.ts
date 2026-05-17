@@ -9,15 +9,19 @@ import { enforceRateLimit } from './middleware/rateLimit';
 import { transcribeAudio } from './transcribe';
 import { generateOutputs, analyzeDocument } from './generate';
 import { geminiApiKey } from './lib/gemini';
+import { coerceLanguage } from './lib/languages';
 
 const CACHE_WINDOW_DAYS = 7;
 const CACHE_WINDOW_MS = CACHE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 
-type OutputLanguage = "English" | "Hindi";
+// Output language is validated/coerced via the shared VALID_LANGUAGES set
+// in lib/languages.ts. Use a plain string here so the rest of the call chain
+// (generate.ts, prompts/*) accepts the wider set of 13 languages.
+type OutputLanguage = string;
 
 function normalizeLanguage(input: any): OutputLanguage {
-  return input === "Hindi" ? "Hindi" : "English";
+  return coerceLanguage(input);
 }
 
 function sanitizeString(input: any): string {

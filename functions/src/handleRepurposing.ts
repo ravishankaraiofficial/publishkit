@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';
 import { enforceRepurposingTrial } from './middleware/rateLimit';
+import { coerceLanguage, languageHint } from './lib/languages';
 
 interface RepurposingOutput {
   x?: string[];
@@ -31,8 +32,7 @@ export const generateRepurposing = functions
       const title = typeof data.title === 'string' ? data.title.trim() : '';
       const description = typeof data.description === 'string' ? data.description.trim() : '';
       const platforms = Array.isArray(data.platforms) ? data.platforms : [];
-      const language: 'English' | 'Hindi' =
-        data.language === 'Hindi' ? 'Hindi' : 'English';
+      const language = coerceLanguage(data.language);
       // Optional: when provided, the resulting MultiPost output is persisted
       // onto users/{uid}/results/{resultId}.multiPostOutput so it shows in
       // History and auto-deletes with the rest of the result doc.
@@ -73,7 +73,7 @@ export const generateRepurposing = functions
       const promises = selectedPlatforms.map(async (platform: string) => {
         let prompt = '';
 
-        const languageLine = `- Language: ${language}${language === 'Hindi' ? ' (use Devanagari script — हिंदी)' : ''}`;
+        const languageLine = `- Language: ${language}${languageHint(language)}`;
 
         if (platform === 'x') {
           prompt = `Create a Twitter/X thread (5-7 tweets) based on this content:

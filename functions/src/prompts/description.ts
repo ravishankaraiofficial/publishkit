@@ -1,20 +1,16 @@
-type OutputLanguage = "English" | "Hindi";
+import { strongLanguageDirective } from '../lib/languages';
 
 export function getDescriptionPrompt(
   transcript: string,
   profile: any,
-  outputLanguage: OutputLanguage = "English"
+  outputLanguage: string = 'English'
 ): string {
-  const hindiInstruction =
-    outputLanguage === "Hindi"
-      ? `\nCRITICAL INSTRUCTION: You MUST translate and respond EXCLUSIVELY in Hindi using the Devanagari script. Do NOT respond in English. Keep timestamps in numeric format only.\n`
-      : "";
-
-  const effectiveLanguage = outputLanguage || profile.language;
+  const directive = strongLanguageDirective(outputLanguage);
+  const effectiveLanguage = outputLanguage || profile.language || 'English';
 
   return `
 You are an expert YouTube strategist. Given the following video transcript, write a highly engaging YouTube video description.
-The description MUST be in this language: ${effectiveLanguage}.${hindiInstruction}
+The description MUST be in this language: ${effectiveLanguage}.${directive}
 
 It must include:
 1. A strong 2-sentence hook at the top.

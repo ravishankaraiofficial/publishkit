@@ -13,6 +13,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { cn } from '../lib/utils';
 import { colorNameToHex } from '../lib/colors';
 import { ColorPicker } from '../components/ui/ColorPicker';
+import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_VALUES, formatLanguageOption } from '../lib/languages';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -20,7 +21,7 @@ const profileSchema = z.object({
   appearance: z.string().min(10, 'Appearance must be at least 10 characters'),
   brandColor1Raw: z.string().min(1, 'Brand color 1 is required'),
   brandColor2Raw: z.string().min(1, 'Brand color 2 is required'),
-  language: z.enum(['English', 'Hindi']),
+  language: z.enum(OUTPUT_LANGUAGE_VALUES),
   niche: z.string().min(1, 'Niche is required'),
 });
 
@@ -195,7 +196,7 @@ export function Settings() {
                 </div>
               </div>
 
-              {/* Default Language — visual toggle */}
+              {/* Default Language — 13-option dropdown */}
               <Controller
                 name="language"
                 control={control}
@@ -205,25 +206,23 @@ export function Settings() {
                       Default Output Language
                     </label>
                     <p className="text-xs text-[#555555] mb-3">
-                      Choose which language your titles, descriptions and timestamps are generated in by default.
+                      Choose which language your titles, descriptions, timestamps, scripts, and MultiPost output are generated in by default.
                     </p>
-                    <div className="flex gap-3">
-                      {(['English', 'Hindi'] as const).map((lang) => (
-                        <button
-                          key={lang}
-                          type="button"
-                          onClick={() => field.onChange(lang)}
-                          className={cn(
-                            'flex-1 py-3 rounded-xl text-sm font-semibold border transition-all',
-                            field.value === lang
-                              ? 'bg-[#E05A1E] border-[#E05A1E] text-white shadow-[0_0_16px_rgba(224,90,30,0.35)]'
-                              : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/50 hover:text-white'
-                          )}
-                        >
-                          {lang}
-                        </button>
+                    <select
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className={cn(
+                        'w-full py-3 px-4 rounded-xl text-sm font-medium border transition-all',
+                        'bg-[#0D0D0D] border-[#2A2A2A] text-white',
+                        'focus:outline-none focus:border-[#E05A1E]/60 cursor-pointer'
+                      )}
+                    >
+                      {OUTPUT_LANGUAGES.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {formatLanguageOption(opt)}
+                        </option>
                       ))}
-                    </div>
+                    </select>
                     {errors.language && (
                       <p className="mt-1.5 text-sm text-[#EF4444]">{errors.language.message}</p>
                     )}

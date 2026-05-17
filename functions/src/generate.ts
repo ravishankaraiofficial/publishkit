@@ -4,8 +4,11 @@ import { getTitlesPrompt } from './prompts/titles';
 import { getTimestampsPrompt } from './prompts/timestamps';
 import { getDescriptionPrompt } from './prompts/description';
 import { getThumbnailsPrompt } from './prompts/thumbnails';
+import { strongLanguageDirective } from './lib/languages';
 
-type OutputLanguage = "English" | "Hindi";
+// Language is validated upstream (processAudio coerces via VALID_LANGUAGES).
+// This file accepts any string and lets the language helpers fall back safely.
+type OutputLanguage = string;
 
 const PER_CALL_TIMEOUT_MS = 25_000;
 const DOC_CALL_TIMEOUT_MS = 60_000;
@@ -66,7 +69,7 @@ export async function analyzeDocument(
 
   const prompt =
     `Analyze this file. Provide a 150-200 word summary and a 300-400 word detailed description. ` +
-    `Output language: ${outputLanguage}. ` +
+    `Output language: ${outputLanguage}.${strongLanguageDirective(outputLanguage)} ` +
     `For a PDF: summary covers main topic, key points, conclusion; description expands each key section. ` +
     `For an image: summary describes what is shown, text visible, and purpose; description covers colors, layout, text, people, objects, context. ` +
     `Return ONLY valid JSON with exactly these two keys: { "summary": string, "description": string }`;

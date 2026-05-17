@@ -1,4 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
+import type { OutputLanguage } from '../lib/languages';
 
 export type PlanTier = 'free' | 'pro' | 'ultra';
 
@@ -8,7 +9,7 @@ export interface CreatorProfile {
   appearance: string;
   brandColor1: string;
   brandColor2: string;
-  language: "English" | "Hindi";
+  language: OutputLanguage;
   niche: string;
   plan?: PlanTier;
   planExpiry?: string;

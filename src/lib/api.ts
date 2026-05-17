@@ -1,11 +1,12 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './firebase';
+import type { OutputLanguage } from './languages';
 
 export const processAudioCall = httpsCallable<{
   storagePath: string;
   audioFileName: string;
   audioSizeBytes: number;
-  outputLanguage?: "English" | "Hindi";
+  outputLanguage?: OutputLanguage;
   generateThumbnails?: boolean;
   fileType?: string;
   fingerprint?: string;

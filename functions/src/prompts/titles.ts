@@ -1,22 +1,18 @@
-type OutputLanguage = "English" | "Hindi";
+import { strongLanguageDirective } from '../lib/languages';
 
 export function getTitlesPrompt(
   transcript: string,
   profile: any,
-  outputLanguage: OutputLanguage = "English"
+  outputLanguage: string = 'English'
 ): string {
-  const hindiInstruction =
-    outputLanguage === "Hindi"
-      ? `\nCRITICAL INSTRUCTION: You MUST translate and respond EXCLUSIVELY in Hindi using the Devanagari script. Do NOT respond in English. Keep timestamps in numeric format only.\n`
-      : "";
-
-  const effectiveLanguage = outputLanguage || profile.language;
+  const directive = strongLanguageDirective(outputLanguage);
+  const effectiveLanguage = outputLanguage || profile.language || 'English';
 
   return `
 You are an expert YouTube strategist. Given the following video transcript, generate exactly 5 YouTube title options ranked best to worst for CTR.
 For each title, provide a one-line reason explaining why it works.
 Optimize for: hook strength, curiosity gap, keyword inclusion, and length under 60 characters.
-The title language MUST be: ${effectiveLanguage}.${hindiInstruction}
+The title language MUST be: ${effectiveLanguage}.${directive}
 
 Output strict JSON with this schema:
 {

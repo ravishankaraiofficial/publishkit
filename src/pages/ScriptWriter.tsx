@@ -5,6 +5,9 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
+import { useToast } from '../components/ui/Toast';
+import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import type { OutputLanguage } from '../lib/languages';
 
 interface ScriptOutput {
   hook: string;
@@ -19,10 +22,11 @@ const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan'
 const ScriptWriter: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState<'Casual' | 'Educational' | 'Storytelling'>('Casual');
   const [duration, setDuration] = useState<'5' | '10' | '15'>('10');
-  const [language, setLanguage] = useState<'English' | 'Hindi'>(profile?.language || 'English');
+  const [language, setLanguage] = useState<OutputLanguage>(profile?.language || 'English');
   const [output, setOutput] = useState<ScriptOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -220,12 +224,22 @@ ${output.cta}
               <label className="block text-white font-semibold mb-2">Language</label>
               <select
                 value={language}
-                onChange={(e) => setLanguage(e.target.value as any)}
+                onChange={(e) => {
+                  const next = e.target.value as OutputLanguage;
+                  const prev = language;
+                  setLanguage(next);
+                  if (next !== 'English' && next !== prev) {
+                    toast(`Output will be in ${toastNativeName(next)}`, 'info');
+                  }
+                }}
                 disabled={loading}
                 className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
+                {OUTPUT_LANGUAGES.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {formatLanguageOption(opt)}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

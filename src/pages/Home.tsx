@@ -7,6 +7,8 @@ import { ResultTabs } from '../components/results/ResultTabs';
 import { cn } from '../lib/utils';
 import { MessageSquare } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
+import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import type { OutputLanguage } from '../lib/languages';
 
 export function Home() {
   const { user } = useAuth();
@@ -54,33 +56,31 @@ export function Home() {
 
       {/* Language and Options Toggles */}
       <div className="flex flex-col items-center gap-3 mb-6 sm:mb-10">
-        {/* Language buttons */}
-        <div className="flex justify-center gap-2">
-          {(["English", "Hindi"] as const).map((lang) => {
-            const active = outputLanguage === lang;
-            return (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => {
-                  setOutputLanguage(lang);
-                  if (lang === 'Hindi' && outputLanguage !== 'Hindi') {
-                    toast('Hindi mode on — सब हिंदी में आएगा', 'info');
-                  }
-                }}
-                disabled={isUploading || showResults}
-                className={cn(
-                  "px-5 py-2 rounded-full text-sm font-medium transition-all",
-                  active
-                    ? "bg-[#E05A1E] text-white shadow-[0_0_18px_rgba(224,90,30,0.35)]"
-                    : "bg-transparent border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#E05A1E]/60",
-                  (isUploading || showResults) && "opacity-60 cursor-not-allowed"
-                )}
-              >
-                {lang}
-              </button>
-            );
-          })}
+        {/* Output language dropdown — 13 options */}
+        <div className="flex flex-col items-center gap-1">
+          <label className="text-xs text-[#888888]">Output Language</label>
+          <select
+            value={outputLanguage}
+            onChange={(e) => {
+              const next = e.target.value as OutputLanguage;
+              const prev = outputLanguage;
+              setOutputLanguage(next);
+              if (next !== 'English' && next !== prev) {
+                toast(`Output will be in ${toastNativeName(next)}`, 'info');
+              }
+            }}
+            disabled={isUploading || showResults}
+            className={cn(
+              "bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-5 py-2 text-sm font-medium text-white focus:outline-none focus:border-[#E05A1E]/60 transition-all min-w-[180px] text-center cursor-pointer",
+              (isUploading || showResults) && "opacity-60 cursor-not-allowed"
+            )}
+          >
+            {OUTPUT_LANGUAGES.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {formatLanguageOption(opt)}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Thumbnail Toggle — compact on mobile, full width like free-session box on desktop */}

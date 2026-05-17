@@ -8,6 +8,7 @@ import { useAuth } from './useAuth';
 import { useToast } from '../components/ui/Toast';
 import { processAudioCall } from '../lib/api';
 import { type Result } from '../types';
+import type { OutputLanguage } from '../lib/languages';
 import fpPromise from '@fingerprintjs/fingerprintjs';
 
 interface MultiPostPlatforms {
@@ -15,8 +16,6 @@ interface MultiPostPlatforms {
   instagram: boolean;
   linkedin: boolean;
 }
-
-type OutputLanguage = "English" | "Hindi";
 
 interface PendingUpload {
   fileName: string;
