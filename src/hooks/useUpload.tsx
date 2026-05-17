@@ -296,7 +296,14 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             const platforms = (['x', 'instagram', 'linkedin'] as const).filter(
               (p) => multiPostPlatforms[p]
             );
-            const firstTitle = data.titles?.[0]?.title || data.audioFileName || '';
+            // Audio results have titles[0].title. PDF / image results have summary
+            // instead — use the first 200 chars of summary so MultiPost has
+            // meaningful context to generate from. Filename is last-resort.
+            const firstTitle =
+              data.titles?.[0]?.title ||
+              data.summary?.slice(0, 200) ||
+              data.audioFileName ||
+              '';
             if (platforms.length > 0 && firstTitle) {
               multiPostTriggeredRef.current = resultId;
               const generate = httpsCallable<
