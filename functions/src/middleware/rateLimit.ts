@@ -94,15 +94,26 @@ const FEATURE_MONTHLY_LIMITS: Record<string, number> = {
  * Caller is "charged" before the Gemini call; on Gemini failure the usage still
  * counts (matches the metadata-upload pattern in enforceRateLimit above).
  *
+ * `count` lets MultiPost charge per platform — e.g. 3 platforms selected = 3.
+ * The full count is checked atomically against the limit so partial reservations
+ * never happen: either every platform fits in the remaining quota or the call
+ * is rejected before any Gemini work runs.
+ *
  * Legacy fields scriptTrialLastUsedAt / repurposingTrialLastUsedAt are no longer
  * read or written here. They remain as harmless orphan data on older user docs.
  */
-async function enforceTrialOrUsage(uid: string, plan: string, feature: TrialFeature): Promise<void> {
+async function enforceTrialOrUsage(
+  uid: string,
+  plan: string,
+  feature: TrialFeature,
+  count: number = 1
+): Promise<void> {
   const userRef = db.doc(`users/${uid}`);
   const usageField = feature === 'script' ? 'scriptUsageThisMonth' : 'repurposingUsageThisMonth';
   const monthField = feature === 'script' ? 'scriptUsageMonth' : 'repurposingUsageMonth';
   const currentMonth = new Date().toISOString().slice(0, 7);
   const limit = FEATURE_MONTHLY_LIMITS[plan] ?? FEATURE_MONTHLY_LIMITS.free;
+  const charge = Math.max(1, Math.floor(count));
 
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
@@ -110,14 +121,18 @@ async function enforceTrialOrUsage(uid: string, plan: string, feature: TrialFeat
 
     const storedMonth = data[monthField];
     const current = storedMonth === currentMonth ? (data[usageField] ?? 0) : 0;
-    if (current >= limit) {
-      throw new functions.https.HttpsError(
-        'resource-exhausted',
-        `Monthly limit of ${limit} reached. Resets on the 1st of next month.`
-      );
+    const remaining = Math.max(0, limit - current);
+
+    if (current + charge > limit) {
+      const message =
+        charge === 1
+          ? `Monthly limit of ${limit} reached. Resets on the 1st of next month.`
+          : `This would use ${charge} of your monthly quota but only ${remaining} left. ` +
+            `Pick fewer platforms or upgrade your plan.`;
+      throw new functions.https.HttpsError('resource-exhausted', message);
     }
     const payload = {
-      [usageField]: current + 1,
+      [usageField]: current + charge,
       [monthField]: currentMonth,
     };
     if (snap.exists) {
@@ -129,9 +144,13 @@ async function enforceTrialOrUsage(uid: string, plan: string, feature: TrialFeat
 }
 
 export async function enforceScriptTrial(uid: string, plan: string): Promise<void> {
-  return enforceTrialOrUsage(uid, plan, 'script');
+  return enforceTrialOrUsage(uid, plan, 'script', 1);
 }
 
-export async function enforceRepurposingTrial(uid: string, plan: string): Promise<void> {
-  return enforceTrialOrUsage(uid, plan, 'repurposing');
+export async function enforceRepurposingTrial(
+  uid: string,
+  plan: string,
+  count: number = 1
+): Promise<void> {
+  return enforceTrialOrUsage(uid, plan, 'repurposing', count);
 }

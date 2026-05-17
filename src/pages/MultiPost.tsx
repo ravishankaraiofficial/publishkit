@@ -24,6 +24,7 @@ const MultiPost: React.FC = () => {
   const [description, setDescription] = useState('');
   const [pastResults, setPastResults] = useState<Array<{ id: string; title: string }>>([]);
   const [selectedResult, setSelectedResult] = useState('');
+  const [language, setLanguage] = useState<'English' | 'Hindi'>(profile?.language || 'English');
   const [platforms, setPlatforms] = useState({
     x: true,
     instagram: true,
@@ -111,7 +112,7 @@ const MultiPost: React.FC = () => {
       }
 
       const generateRepurposing = httpsCallable<
-        { title: string; description: string; platforms: string[] },
+        { title: string; description: string; platforms: string[]; language: 'English' | 'Hindi' },
         MultiPostOutput
       >(functions, 'generateRepurposing');
 
@@ -119,6 +120,7 @@ const MultiPost: React.FC = () => {
         title: contentTitle.trim(),
         description: contentDescription.trim(),
         platforms: selectedPlatforms,
+        language,
       });
 
       setOutput(result.data);
@@ -257,6 +259,33 @@ const MultiPost: React.FC = () => {
               disabled={loading || !!selectedResult}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-white font-semibold mb-2">Output Language</label>
+            <p className="text-xs text-gray-500 mb-3">
+              All posts will be written in this language. Hindi uses Devanagari script (हिंदी).
+            </p>
+            <div className="flex gap-2">
+              {(['English', 'Hindi'] as const).map((lang) => {
+                const active = language === lang;
+                return (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setLanguage(lang)}
+                    disabled={loading}
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                      active
+                        ? 'bg-orange-600 text-white shadow-[0_0_18px_rgba(224,90,30,0.35)]'
+                        : 'bg-transparent border border-gray-700 text-gray-400 hover:text-white hover:border-orange-600/60'
+                    } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  >
+                    {lang}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="mb-6">

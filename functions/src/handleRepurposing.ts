@@ -31,6 +31,8 @@ export const generateRepurposing = functions
       const title = typeof data.title === 'string' ? data.title.trim() : '';
       const description = typeof data.description === 'string' ? data.description.trim() : '';
       const platforms = Array.isArray(data.platforms) ? data.platforms : [];
+      const language: 'English' | 'Hindi' =
+        data.language === 'Hindi' ? 'Hindi' : 'English';
       // Optional: when provided, the resulting MultiPost output is persisted
       // onto users/{uid}/results/{resultId}.multiPostOutput so it shows in
       // History and auto-deletes with the rest of the result doc.
@@ -55,9 +57,10 @@ export const generateRepurposing = functions
       }
 
       // Plan-aware trial / usage enforcement (atomic; throws resource-exhausted when blocked)
+      // Charges once per selected platform — 3 platforms = 3 generations.
       const userSnap = await db.doc(`users/${context.auth.uid}`).get();
       const plan = (userSnap.data()?.plan as string) || 'free';
-      await enforceRepurposingTrial(context.auth.uid, plan);
+      await enforceRepurposingTrial(context.auth.uid, plan, selectedPlatforms.length);
 
       // Initialize Gemini
       const apiKey = geminiApiKey.value();
@@ -70,6 +73,8 @@ export const generateRepurposing = functions
       const promises = selectedPlatforms.map(async (platform: string) => {
         let prompt = '';
 
+        const languageLine = `- Language: ${language}${language === 'Hindi' ? ' (use Devanagari script — हिंदी)' : ''}`;
+
         if (platform === 'x') {
           prompt = `Create a Twitter/X thread (5-7 tweets) based on this content:
 Title: ${title}
@@ -80,6 +85,7 @@ Requirements:
 - Engaging, shareable content
 - Natural thread flow
 - Professional tone
+${languageLine}
 
 Return ONLY a JSON array of tweet strings, no markdown:
 ["tweet 1", "tweet 2", ...]`;
@@ -93,6 +99,7 @@ Requirements:
 - Include relevant emojis
 - Add 20 relevant hashtags at the end
 - 1-3 paragraphs
+${languageLine}
 
 Return ONLY a JSON string, no markdown:
 "caption text here"`;
@@ -107,6 +114,7 @@ Requirements:
 - Start with a hook
 - Include insights and takeaways
 - End with a call-to-action
+${languageLine}
 
 Return ONLY a JSON string, no markdown:
 "post text here"`;

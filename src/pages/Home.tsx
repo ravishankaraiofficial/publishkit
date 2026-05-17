@@ -6,10 +6,12 @@ import { DropZone } from '../components/upload/DropZone';
 import { ResultTabs } from '../components/results/ResultTabs';
 import { cn } from '../lib/utils';
 import { MessageSquare } from 'lucide-react';
+import { useToast } from '../components/ui/Toast';
 
 export function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const {
     isUploading,
@@ -60,7 +62,12 @@ export function Home() {
               <button
                 key={lang}
                 type="button"
-                onClick={() => setOutputLanguage(lang)}
+                onClick={() => {
+                  setOutputLanguage(lang);
+                  if (lang === 'Hindi' && outputLanguage !== 'Hindi') {
+                    toast('Hindi mode on — सब हिंदी में आएगा', 'info');
+                  }
+                }}
                 disabled={isUploading || showResults}
                 className={cn(
                   "px-5 py-2 rounded-full text-sm font-medium transition-all",

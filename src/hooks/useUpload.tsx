@@ -307,7 +307,13 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             if (platforms.length > 0 && firstTitle) {
               multiPostTriggeredRef.current = resultId;
               const generate = httpsCallable<
-                { title: string; description: string; platforms: string[]; resultId: string },
+                {
+                  title: string;
+                  description: string;
+                  platforms: string[];
+                  resultId: string;
+                  language: OutputLanguage;
+                },
                 { x?: string[]; instagram?: string; linkedin?: string }
               >(functions, 'generateRepurposing');
               generate({
@@ -315,6 +321,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
                 description: data.description || '',
                 platforms: platforms as unknown as string[],
                 resultId,
+                language: outputLanguage,
               }).catch((err: any) => {
                 console.error('MultiPost auto-generation failed:', err);
                 if (err?.code === 'functions/resource-exhausted') {
@@ -330,7 +337,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [user, resultId, toast, multiPostEnabled, multiPostPlatforms]);
+  }, [user, resultId, toast, multiPostEnabled, multiPostPlatforms, outputLanguage]);
 
   const handleFileSelect = async (file: File) => {
     if (!user) return;
