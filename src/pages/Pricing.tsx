@@ -195,10 +195,10 @@ const Pricing: React.FC = () => {
             return (
               <div
                 key={planKey}
-                className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
+                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
                   isUltra
-                    ? 'md:scale-105 bg-gradient-to-b from-orange-950 to-neutral-900 border-2 border-orange-600 shadow-2xl shadow-orange-600/20'
-                    : 'bg-neutral-900 border border-gray-800 hover:border-gray-700'
+                    ? 'md:scale-105 bg-gradient-to-b from-orange-950 to-neutral-900 border-2 border-orange-600 shadow-2xl shadow-orange-600/20 hover:shadow-orange-600/50 hover:border-orange-500'
+                    : 'bg-neutral-900 border border-gray-800 hover:border-orange-600/60 hover:shadow-2xl hover:shadow-orange-600/30'
                 } ${isCurrent && !isUltra ? 'border-orange-600/50' : ''}`}
               >
                 {/* Current plan badge */}
@@ -226,22 +226,41 @@ const Pricing: React.FC = () => {
                     <p className="text-sm text-gray-400 mt-3 mb-4">{plan.limit} uploads per month</p>
                   </div>
 
-                  {/* CTA Button */}
-                  <button
-                    onClick={() => handleUpgrade(planKey as 'pro' | 'ultra')}
-                    disabled={isCurrent || upgrading === planKey}
-                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 mb-8 ${
-                      isCurrent
-                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                        : upgrading === planKey
-                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-75'
-                        : isUltra
-                        ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600 shadow-lg shadow-orange-600/30'
-                        : 'bg-gray-800 text-white hover:bg-gray-700'
-                    }`}
-                  >
-                    {isCurrent ? '✓ Current Plan' : upgrading === planKey ? 'Opening...' : 'Upgrade'}
-                  </button>
+                  {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free */}
+                  {planKey === 'free' ? (
+                    <div className="mb-8 space-y-2">
+                      {[
+                        "Get unique Titles tuned to YouTube's algorithm",
+                        "Get Description tuned to YouTube's algorithm",
+                        'Get Timestamps with headings',
+                        'Get Hashtags that help rank your video and get more views',
+                      ].map((line) => (
+                        <p
+                          key={line}
+                          className="flex items-start gap-2 text-sm text-gray-200 leading-snug"
+                        >
+                          <span className="text-orange-500 flex-shrink-0 font-bold">→</span>
+                          <span>{line}</span>
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleUpgrade(planKey as 'pro' | 'ultra')}
+                      disabled={isCurrent || upgrading === planKey}
+                      className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 mb-8 ${
+                        isCurrent
+                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                          : upgrading === planKey
+                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-75'
+                          : isUltra
+                          ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600 shadow-lg shadow-orange-600/30'
+                          : 'bg-gray-800 text-white hover:bg-gray-700'
+                      }`}
+                    >
+                      {isCurrent ? '✓ Current Plan' : upgrading === planKey ? 'Opening...' : 'Upgrade'}
+                    </button>
+                  )}
 
                   {/* Features list */}
                   <div className="space-y-0">{renderFeatures(planKey)}</div>
