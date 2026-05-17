@@ -1,160 +1,143 @@
-# Razorpay Deployment & Diagnostic Script
-# Sets up secrets, builds, deploys, and diagnoses 401 errors
+# Razorpay Deployment & Diagnostic Script (PowerShell — Windows-safe)
+# Sets up secrets, builds, deploys, and prints a smoke-test runbook.
+#
+# Usage:  .\deploy-razorpay.ps1
+#
+# This script is idempotent: it never overwrites a secret silently. If a
+# secret is already set it asks before changing it.
 
-$ErrorActionPreference = "Stop"
+# DO NOT set $ErrorActionPreference = "Stop" globally — Firebase CLI prints
+# progress messages to stderr (e.g. "- Preparing the list of your Firebase
+# projects") which PowerShell 5.1 turns into terminating NativeCommandErrors
+# under strict mode. We use explicit $LASTEXITCODE checks instead.
+$ErrorActionPreference = "Continue"
 
-Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Razorpay Integration Deployment" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
 
 # ============ STEP 1: Check Firebase CLI ============
 Write-Host "Step 1: Checking Firebase CLI..." -ForegroundColor Yellow
-$firebaseVersion = firebase --version 2>$null
-if (-not $firebaseVersion) {
-    Write-Host "ERROR: Firebase CLI not found. Install it first." -ForegroundColor Red
+$firebaseVersion = (firebase --version 2>&1 | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $firebaseVersion) {
+    Write-Host "ERROR: Firebase CLI not found. Install with: npm i -g firebase-tools" -ForegroundColor Red
     exit 1
 }
-Write-Host "✓ Firebase CLI found: $firebaseVersion" -ForegroundColor Green
+Write-Host "[OK] Firebase CLI found: $firebaseVersion" -ForegroundColor Green
 
-# Check project
-$currentProject = firebase projects:list 2>$null | Select-String "ACTIVE"
-if (-not $currentProject) {
-    Write-Host "`nNo active Firebase project detected." -ForegroundColor Yellow
-    $projectId = Read-Host "Enter your Firebase Project ID"
-    firebase projects:list
-    Write-Host "Set project with: firebase use $projectId" -ForegroundColor Cyan
+# Active project — skip the dashboard-list lookup (it writes progress to stderr
+# which trips PowerShell under strict mode). Just verify .firebaserc exists.
+if (Test-Path ".firebaserc") {
+    $rcContent = Get-Content ".firebaserc" -Raw
+    if ($rcContent -match '"default"\s*:\s*"([^"]+)"') {
+        Write-Host "[OK] Active project (from .firebaserc): $($Matches[1])" -ForegroundColor Green
+    } else {
+        Write-Host "[!] .firebaserc found but no default project" -ForegroundColor Yellow
+    }
 } else {
-    Write-Host "✓ Active project: $(($currentProject -split '\s+')[0])" -ForegroundColor Green
+    Write-Host "[!] No .firebaserc — run: firebase use <project-id>" -ForegroundColor Yellow
 }
 
 # ============ STEP 2: Build Functions ============
-Write-Host "`nStep 2: Building Cloud Functions..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Step 2: Building Cloud Functions..." -ForegroundColor Yellow
 Push-Location functions
 try {
-    npm install 2>&1 | Select-String "added|up to date" -ErrorAction SilentlyContinue
     npm run build
-    Write-Host "✓ Functions built successfully" -ForegroundColor Green
-} catch {
-    Write-Host "ERROR: Build failed. Check functions/src/ for TypeScript errors." -ForegroundColor Red
-    exit 1
-} finally {
-    Pop-Location
+    if ($LASTEXITCODE -ne 0) {
+        throw "Functions build failed"
+    }
+    Write-Host "[OK] Functions built successfully" -ForegroundColor Green
 }
+catch {
+    Write-Host "ERROR: Build failed. Check functions/src/ for TypeScript errors." -ForegroundColor Red
+    Pop-Location
+    exit 1
+}
+Pop-Location
 
-# ============ STEP 3: Inspect Secrets ============
-Write-Host "`nStep 3: Inspecting Razorpay Secrets..." -ForegroundColor Yellow
+# ============ STEP 3: Set / Update Secrets ============
+Write-Host ""
+Write-Host "Step 3: Setting Razorpay secrets..." -ForegroundColor Yellow
+Write-Host "(Existing secrets are listed; you'll be asked before any change.)" -ForegroundColor DarkGray
+Write-Host ""
 
-function Inspect-Secret {
-    param([string]$SecretName)
+# List existing secrets once
+$existingList = firebase functions:secrets:list 2>&1 | Out-String
 
-    Write-Host "`n  $SecretName" -ForegroundColor Cyan -NoNewline
+function Set-RazorpaySecret {
+    param(
+        [string]$Name,
+        [string]$Hint
+    )
 
-    # Try to read the secret (Firebase CLI doesn't expose values, but we can check version)
-    $secretCheck = firebase functions:secrets:list 2>&1 | Select-String $SecretName
-
-    if ($secretCheck) {
-        Write-Host " ✓ Set" -ForegroundColor Green
-
-        # Warn if likely issues
-        if ($SecretName -eq "RAZORPAY_KEY_ID") {
-            Write-Host "    (Should start with: rzp_test_ or rzp_live_)" -ForegroundColor DarkGray
-        } elseif ($SecretName -eq "RAZORPAY_KEY_SECRET") {
-            Write-Host "    (Should be ~24 characters)" -ForegroundColor DarkGray
+    $alreadySet = $existingList -match $Name
+    if ($alreadySet) {
+        Write-Host "  $Name : already set" -ForegroundColor Green
+        $update = Read-Host "    Update? (y/N)"
+        if ($update -ne "y" -and $update -ne "Y") {
+            return
         }
     } else {
-        Write-Host " ✗ NOT SET" -ForegroundColor Red
-        return $false
+        Write-Host "  $Name : not set" -ForegroundColor Yellow
     }
-    return $true
-}
 
-$keyIdSet = Inspect-Secret "RAZORPAY_KEY_ID"
-$keySecretSet = Inspect-Secret "RAZORPAY_KEY_SECRET"
-$webhookSecretSet = Inspect-Secret "RAZORPAY_WEBHOOK_SECRET"
+    Write-Host "    Hint: $Hint" -ForegroundColor DarkGray
+    $secureValue = Read-Host "    Paste value (input hidden)" -AsSecureString
+    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureValue)
+    $plain = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+    [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
 
-# ============ STEP 4: Offer to Reset Secrets ============
-Write-Host "`nStep 4: Reset Missing or Incorrect Secrets?" -ForegroundColor Yellow
+    if ([string]::IsNullOrWhiteSpace($plain)) {
+        Write-Host "    Skipped (empty value)" -ForegroundColor DarkGray
+        return
+    }
 
-if (-not $keyIdSet) {
-    Write-Host "`nRAZORPAY_KEY_ID is not set." -ForegroundColor Yellow
-    $keyId = Read-Host "Paste your Razorpay Test Key ID (rzp_test_...)"
-    $keyId = $keyId.Trim()
-    firebase functions:secrets:set RAZORPAY_KEY_ID <<< $keyId
-    Write-Host "✓ Set RAZORPAY_KEY_ID" -ForegroundColor Green
-}
+    # PowerShell-safe: pipe the value to firebase via STDIN using --data-file=-
+    $plain.Trim() | firebase functions:secrets:set $Name --data-file=-
 
-if (-not $keySecretSet) {
-    Write-Host "`nRAZORPAY_KEY_SECRET is not set." -ForegroundColor Yellow
-    $keySecret = Read-Host "Paste your Razorpay Key Secret"
-    $keySecret = $keySecret.Trim()
-    firebase functions:secrets:set RAZORPAY_KEY_SECRET <<< $keySecret
-    Write-Host "✓ Set RAZORPAY_KEY_SECRET" -ForegroundColor Green
-}
-
-if (-not $webhookSecretSet) {
-    Write-Host "`nRAZORPAY_WEBHOOK_SECRET is not set." -ForegroundColor Yellow
-    $webhookSecret = Read-Host "Paste your Razorpay Webhook Secret (or press Enter for temp)"
-    if ($webhookSecret) {
-        $webhookSecret = $webhookSecret.Trim()
-        firebase functions:secrets:set RAZORPAY_WEBHOOK_SECRET <<< $webhookSecret
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "    [OK] $Name set" -ForegroundColor Green
     } else {
-        firebase functions:secrets:set RAZORPAY_WEBHOOK_SECRET <<< "temp-webhook-secret-for-testing"
-    }
-    Write-Host "✓ Set RAZORPAY_WEBHOOK_SECRET" -ForegroundColor Green
-}
-
-# Ask to update if already set
-Write-Host "`nUpdate existing secrets? (y/n): " -ForegroundColor Yellow -NoNewline
-$updateChoice = Read-Host
-if ($updateChoice -eq "y" -or $updateChoice -eq "Y") {
-    $newKeyId = Read-Host "New Key ID (leave blank to skip)"
-    if ($newKeyId) {
-        firebase functions:secrets:set RAZORPAY_KEY_ID <<< $newKeyId.Trim()
-        Write-Host "✓ Updated RAZORPAY_KEY_ID" -ForegroundColor Green
-    }
-
-    $newKeySecret = Read-Host "New Key Secret (leave blank to skip)"
-    if ($newKeySecret) {
-        firebase functions:secrets:set RAZORPAY_KEY_SECRET <<< $newKeySecret.Trim()
-        Write-Host "✓ Updated RAZORPAY_KEY_SECRET" -ForegroundColor Green
-    }
-
-    $newWebhookSecret = Read-Host "New Webhook Secret (leave blank to skip)"
-    if ($newWebhookSecret) {
-        firebase functions:secrets:set RAZORPAY_WEBHOOK_SECRET <<< $newWebhookSecret.Trim()
-        Write-Host "✓ Updated RAZORPAY_WEBHOOK_SECRET" -ForegroundColor Green
+        Write-Host "    [FAIL] $Name not set (exit code $LASTEXITCODE)" -ForegroundColor Red
     }
 }
 
-# ============ STEP 5: Deploy ============
-Write-Host "`nStep 5: Deploying Cloud Functions..." -ForegroundColor Yellow
-firebase deploy --only functions:createSubscription,functions:razorpayWebhook,functions:generateScript,functions:generateRepurposing
+Set-RazorpaySecret -Name "RAZORPAY_KEY_ID"         -Hint "Live key starts with rzp_live_  (test with rzp_test_)"
+Set-RazorpaySecret -Name "RAZORPAY_KEY_SECRET"     -Hint "Live key secret, ~24 chars"
+Set-RazorpaySecret -Name "RAZORPAY_WEBHOOK_SECRET" -Hint "Secret shown when you registered the webhook URL on the live dashboard"
 
-Write-Host "✓ Deployment complete" -ForegroundColor Green
+# ============ STEP 4: Deploy ============
+Write-Host ""
+Write-Host "Step 4: Deploying Razorpay Cloud Functions..." -ForegroundColor Yellow
+firebase deploy --only functions:createSubscription,functions:razorpayWebhook
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Functions deploy failed." -ForegroundColor Red
+    exit 1
+}
+Write-Host "[OK] Deploy complete" -ForegroundColor Green
 
-# ============ STEP 6: Next Steps ============
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  NEXT STEPS" -ForegroundColor Cyan
+# ============ STEP 5: Smoke-Test Runbook ============
+Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-
-Write-Host @"
-1. Open a NEW PowerShell window in this folder:
-
-   cd "D:\Project\Project 01\Google Antigravity Files"
-   firebase functions:log --only createSubscription
-
-2. Go to https://publishkit.web.app/pricing in your browser
-
-3. Click "Upgrade to Pro" or "Upgrade to Ultra"
-
-4. Watch the PowerShell window for logs. Copy these lines back here:
-
-   [createSubscription] Plan ID:
-   [createSubscription] Key ID loaded:
-   [createSubscription] Key Secret loaded:
-   [createSubscription] ERROR caught: (if any)
-
-From those lines I can tell you the exact fix for the 401 error.
-"@ -ForegroundColor Cyan
-
-Write-Host "`n"
+Write-Host "  Live Smoke Test" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "1. In a NEW PowerShell window run:" -ForegroundColor Cyan
+Write-Host "     firebase functions:log --only createSubscription,razorpayWebhook" -ForegroundColor White
+Write-Host ""
+Write-Host "2. Open https://publishkit.web.app/pricing as a signed-in non-Pro user." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "3. Click 'Upgrade' on the Pro card. The Razorpay modal should say" -ForegroundColor Cyan
+Write-Host "   'PublishKit Pro' and Rs.299/month. Complete with a real card you own." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "4. Within ~10 seconds the log window should show:" -ForegroundColor Cyan
+Write-Host "     [createSubscription] Success! Subscription ID: sub_..." -ForegroundColor White
+Write-Host "     subscription.activated event received (from razorpayWebhook)" -ForegroundColor White
+Write-Host ""
+Write-Host "5. Reload /pricing -> Pro card shows 'Current Plan'. Navbar pill -> 'Pro'." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "6. Refund the test payment from the Razorpay dashboard if desired." -ForegroundColor Cyan
+Write-Host ""

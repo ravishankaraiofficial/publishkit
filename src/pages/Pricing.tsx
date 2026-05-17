@@ -110,7 +110,7 @@ const Pricing: React.FC = () => {
         key: keyId,
         subscription_id: subscriptionId,
         name: 'PublishKit',
-        description: `${planKey === 'ultra' ? 'Max' : 'Pro'} Plan`,
+        description: planKey === 'ultra' ? 'PublishKit Max' : 'PublishKit Pro',
         handler: () => {
           toast('Payment successful! Your plan will activate shortly.', 'success');
           setTimeout(() => window.location.reload(), 3000);

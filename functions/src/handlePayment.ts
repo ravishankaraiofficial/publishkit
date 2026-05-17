@@ -10,9 +10,11 @@ const razorpayWebhookSecret = defineSecret('RAZORPAY_WEBHOOK_SECRET');
 
 const db = admin.firestore();
 
+// Live-mode plan IDs (Razorpay dashboard → Subscriptions → Plans).
+// 'ultra' is the internal plan key — surfaces as "PublishKit Max" to customers.
 const PLAN_IDS: Record<string, string> = {
-  pro: 'plan_Sq0QRIV54nNTBX',
-  ultra: 'plan_Sq0Qt7wEgb2XaA',
+  pro: 'plan_Spz2M0sp8rv1SA',
+  ultra: 'plan_SqU3YCU38LA6aw',
 };
 
 export const createSubscription = functions
