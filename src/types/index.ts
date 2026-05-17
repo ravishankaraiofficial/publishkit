@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type PlanTier = 'free' | 'pro' | 'ultra';
 
 export interface CreatorProfile {
@@ -11,6 +13,13 @@ export interface CreatorProfile {
   plan?: PlanTier;
   planExpiry?: string;
   razorpaySubscriptionId?: string;
+  // Server-managed trial / usage fields (Admin SDK only — see firestore.rules)
+  scriptTrialLastUsedAt?: Timestamp | null;
+  repurposingTrialLastUsedAt?: Timestamp | null;
+  scriptUsageThisMonth?: number;
+  repurposingUsageThisMonth?: number;
+  scriptUsageMonth?: string;
+  repurposingUsageMonth?: string;
 }
 
 export interface Result {

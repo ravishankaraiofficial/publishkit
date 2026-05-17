@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
+import { db } from './lib/firestore';
+import { enforceScriptTrial } from './middleware/rateLimit';
 
 interface ScriptOutput {
   hook: string;
@@ -35,6 +37,11 @@ export const generateScript = functions
       if (!topic || topic.length === 0 || topic.length > 500) {
         throw new functions.https.HttpsError('invalid-argument', 'Topic must be between 1 and 500 characters');
       }
+
+      // Plan-aware trial / usage enforcement (atomic; throws resource-exhausted when blocked)
+      const userSnap = await db.doc(`users/${context.auth.uid}`).get();
+      const plan = (userSnap.data()?.plan as string) || 'free';
+      await enforceScriptTrial(context.auth.uid, plan);
 
       // Initialize Gemini
       const apiKey = geminiApiKey.value();

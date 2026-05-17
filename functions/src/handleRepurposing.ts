@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
+import { db } from './lib/firestore';
+import { enforceRepurposingTrial } from './middleware/rateLimit';
 
 interface RepurposingOutput {
   x?: string[];
@@ -44,6 +46,11 @@ export const generateRepurposing = functions
       if (selectedPlatforms.length === 0) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid platforms selected');
       }
+
+      // Plan-aware trial / usage enforcement (atomic; throws resource-exhausted when blocked)
+      const userSnap = await db.doc(`users/${context.auth.uid}`).get();
+      const plan = (userSnap.data()?.plan as string) || 'free';
+      await enforceRepurposingTrial(context.auth.uid, plan);
 
       // Initialize Gemini
       const apiKey = geminiApiKey.value();

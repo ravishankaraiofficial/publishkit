@@ -20,9 +20,25 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow write: if request.auth != null
+      // Server-managed fields — Admin SDK (Cloud Functions) only.
+      // Use diff().affectedKeys() so users can still update OTHER profile fields
+      // (name, niche, colors, …) after a Cloud Function has written any of these.
+      allow create: if request.auth != null
         && request.auth.uid == uid
-        && !request.resource.data.keys().hasAny(['plan', 'planExpiry', 'razorpaySubscriptionId']);
+        && !request.resource.data.keys().hasAny([
+          'plan', 'planExpiry', 'razorpaySubscriptionId',
+          'scriptTrialLastUsedAt', 'repurposingTrialLastUsedAt',
+          'scriptUsageThisMonth', 'repurposingUsageThisMonth',
+          'scriptUsageMonth', 'repurposingUsageMonth'
+        ]);
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'plan', 'planExpiry', 'razorpaySubscriptionId',
+          'scriptTrialLastUsedAt', 'repurposingTrialLastUsedAt',
+          'scriptUsageThisMonth', 'repurposingUsageThisMonth',
+          'scriptUsageMonth', 'repurposingUsageMonth'
+        ]);
     }
 
     // Usage readable for UI display (write locked, Admin SDK only)

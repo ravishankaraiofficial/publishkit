@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Zap, Copy, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +14,7 @@ interface RepurposingOutput {
 }
 
 const RepurposingPlanner: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -29,12 +29,24 @@ const RepurposingPlanner: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'x' | 'instagram' | 'linkedin'>('x');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [trialUsed, setTrialUsed] = useState(false);
-  const [showTrialBanner, setShowTrialBanner] = useState(false);
   const [error, setError] = useState('');
 
-  const currentPlan = profile?.plan || 'free';
-  const isUltra = currentPlan === 'ultra';
+  const plan = profile?.plan ?? 'free';
+  const isFree = plan === 'free';
+  const isPro = plan === 'pro';
+  const isUltra = plan === 'ultra';
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const ultraUsage =
+    profile?.repurposingUsageMonth === currentMonth ? (profile?.repurposingUsageThisMonth ?? 0) : 0;
+
+  const trialUsed = (() => {
+    if (isUltra) return ultraUsage >= 1000;
+    const last = profile?.repurposingTrialLastUsedAt?.toDate?.();
+    if (!last) return false;
+    const windowDays = isPro ? 7 : 30;
+    return Date.now() - last.getTime() < windowDays * 24 * 60 * 60 * 1000;
+  })();
 
   // Fetch past results for dropdown
   useEffect(() => {
@@ -45,47 +57,18 @@ const RepurposingPlanner: React.FC = () => {
         const resultsRef = collection(db, `users/${user.uid}/results`);
         const q = query(resultsRef, where('status', '==', 'complete'));
         const snap = await getDocs(q);
-        const results = snap.docs.map((doc) => ({
-          id: doc.id,
-          title: doc.data().audioFileName || 'Untitled',
+        const results = snap.docs.map((d) => ({
+          id: d.id,
+          title: d.data().audioFileName || 'Untitled',
         }));
-        setPastResults(results.slice(0, 10)); // Last 10 results
-      } catch (error) {
-        console.error('Error fetching past results:', error);
+        setPastResults(results.slice(0, 10));
+      } catch (err) {
+        console.error('Error fetching past results:', err);
       }
     };
 
     fetchPastResults();
   }, [user]);
-
-  // Check trial status on mount
-  useEffect(() => {
-    if (!user || isUltra) return;
-
-    const checkTrialStatus = async () => {
-      try {
-        const trialRef = doc(db, `users/${user.uid}/ultraTrials/repurposingPlanner`);
-        const trialDoc = await getDoc(trialRef);
-
-        if (trialDoc.exists()) {
-          const lastTrialAt = trialDoc.data()?.lastTrialAt?.toDate?.() || new Date(trialDoc.data()?.lastTrialAt);
-          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-          if (lastTrialAt > sevenDaysAgo) {
-            setTrialUsed(true);
-          } else {
-            setShowTrialBanner(true);
-          }
-        } else {
-          setShowTrialBanner(true);
-        }
-      } catch (error) {
-        console.error('Error checking trial status:', error);
-      }
-    };
-
-    checkTrialStatus();
-  }, [user, isUltra]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -93,14 +76,9 @@ const RepurposingPlanner: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const copyTweet = (tweet: string) => {
-    handleCopy(tweet);
-  };
-
   const copyFullThread = () => {
     if (!output?.x) return;
-    const thread = output.x.join('\n\n');
-    handleCopy(thread);
+    handleCopy(output.x.join('\n\n'));
   };
 
   const handleGenerate = async () => {
@@ -123,7 +101,6 @@ const RepurposingPlanner: React.FC = () => {
     setOutput(null);
 
     try {
-      // If using past result, fetch its data
       let contentTitle = title;
       let contentDescription = description;
 
@@ -137,11 +114,7 @@ const RepurposingPlanner: React.FC = () => {
       }
 
       const generateRepurposing = httpsCallable<
-        {
-          title: string;
-          description: string;
-          platforms: string[];
-        },
+        { title: string; description: string; platforms: string[] },
         RepurposingOutput
       >(functions, 'generateRepurposing');
 
@@ -152,42 +125,61 @@ const RepurposingPlanner: React.FC = () => {
       });
 
       setOutput(result.data);
-
-      // Record trial usage if on Free/Pro
-      if (!isUltra && showTrialBanner) {
-        const trialRef = doc(db, `users/${user.uid}/ultraTrials/repurposingPlanner`);
-        await setDoc(trialRef, {
-          lastTrialAt: serverTimestamp(),
-        });
-        setShowTrialBanner(false);
-        setTrialUsed(true);
-      }
+      await refreshProfile();
     } catch (err: any) {
       console.error('Error generating repurposing:', err);
       setError(err?.message || 'Failed to generate content. Please try again.');
+      if (err?.code === 'functions/resource-exhausted' || err?.code === 'resource-exhausted') {
+        await refreshProfile();
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Locked state for non-Ultra users who used trial
-  if (!isUltra && trialUsed) {
+  // Locked screen — trial / monthly quota exhausted
+  if (trialUsed) {
+    const headline = isUltra ? 'Monthly limit reached' : 'Trial used';
+    const body = isUltra
+      ? "You've used your 1000 repurposing runs for this month. Resets on the 1st."
+      : isPro
+      ? "You've used your Repurposing Planner trial this week. Upgrade to Ultra for 1000/month."
+      : "You've used your Repurposing Planner trial this month. Upgrade to Pro or Ultra for more.";
+    const ctaLabel = isUltra ? 'See plans' : isPro ? 'Upgrade to Ultra →' : 'Upgrade to Pro or Ultra →';
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 flex items-center justify-center">
         <div className="max-w-md bg-neutral-900 rounded-2xl border border-gray-800 p-8 text-center">
           <AlertCircle className="w-16 h-16 text-orange-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Free Trial Used</h2>
-          <p className="text-gray-400 mb-6">You've used your free Repurposing Planner trial this week. Upgrade to Ultra for unlimited access.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">{headline}</h2>
+          <p className="text-gray-400 mb-6">{body}</p>
           <button
             onClick={() => navigate('/pricing')}
             className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all"
           >
-            Upgrade to Ultra →
+            {ctaLabel}
           </button>
         </div>
       </div>
     );
   }
+
+  const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
+    if (isFree) {
+      return (
+        <span className="text-xs text-[#888888] italic">Copy not available on Free plan</span>
+      );
+    }
+    return (
+      <button
+        onClick={() => handleCopy(text)}
+        className={`flex items-center gap-2 ${sizeClass} rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-all`}
+      >
+        <Copy className="w-4 h-4" />
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 md:p-12">
@@ -198,22 +190,31 @@ const RepurposingPlanner: React.FC = () => {
           <p className="text-gray-400">Turn your content into tailored posts for X, Instagram, and LinkedIn</p>
         </div>
 
-        {/* Trial Banner for Free/Pro users */}
-        {!isUltra && showTrialBanner && (
+        {/* Plan banner */}
+        {isFree && (
           <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 border border-orange-600/40 rounded-2xl p-4 mb-8">
             <div className="flex items-start gap-3">
               <Zap className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-white font-semibold">Free Preview</p>
-                <p className="text-gray-300 text-sm">Output is visible but copy buttons are disabled. Upgrade to Ultra for full access.</p>
+                <p className="text-white font-semibold">Free plan</p>
+                <p className="text-gray-300 text-sm">
+                  1 trial per month. Output is visible but copy buttons are not available on Free.
+                  Upgrade for monthly access and full copy support.
+                </p>
               </div>
             </div>
+          </div>
+        )}
+        {isUltra && (
+          <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+            <p className="text-sm text-gray-300">
+              <span className="text-white font-semibold">{ultraUsage}</span> / 1000 used this month
+            </p>
           </div>
         )}
 
         {/* Input Section */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
-          {/* Title Input or Past Results Selector */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-2">Content Source</label>
             <div className="flex gap-4 mb-4">
@@ -226,7 +227,7 @@ const RepurposingPlanner: React.FC = () => {
                     setSelectedResult('');
                   }}
                   placeholder="Enter video title or YouTube title"
-                  disabled={loading || (trialUsed && !isUltra)}
+                  disabled={loading}
                   className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
@@ -237,7 +238,7 @@ const RepurposingPlanner: React.FC = () => {
                     setSelectedResult(e.target.value);
                     setTitle('');
                   }}
-                  disabled={loading || (trialUsed && !isUltra)}
+                  disabled={loading}
                   className="bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Or pick a past result...</option>
@@ -251,7 +252,6 @@ const RepurposingPlanner: React.FC = () => {
             </div>
           </div>
 
-          {/* Description */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-2">Description (Optional)</label>
             <textarea
@@ -259,12 +259,11 @@ const RepurposingPlanner: React.FC = () => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add any additional context or key points..."
               rows={2}
-              disabled={loading || !!selectedResult || (trialUsed && !isUltra)}
+              disabled={loading || !!selectedResult}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
-          {/* Platform Selection */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-3">Select Platforms</label>
             <div className="flex flex-wrap gap-3">
@@ -282,7 +281,7 @@ const RepurposingPlanner: React.FC = () => {
                         [platform]: e.target.checked,
                       })
                     }
-                    disabled={loading || (trialUsed && !isUltra)}
+                    disabled={loading}
                     className="w-4 h-4 accent-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <span className="text-white font-medium capitalize">{platform}</span>
@@ -293,10 +292,9 @@ const RepurposingPlanner: React.FC = () => {
 
           {error && <p className="text-red-500 text-sm mb-6">{error}</p>}
 
-          {/* Generate Button */}
           <button
             onClick={handleGenerate}
-            disabled={loading || (trialUsed && !isUltra)}
+            disabled={loading}
             className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? 'Generating Content...' : 'Generate Content'}
@@ -306,7 +304,6 @@ const RepurposingPlanner: React.FC = () => {
         {/* Output Section */}
         {output && (
           <div className="space-y-6">
-            {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-800">
               {(['x', 'instagram', 'linkedin'] as const).map((tab) => (
                 <button
@@ -333,37 +330,24 @@ const RepurposingPlanner: React.FC = () => {
                   <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <span className="text-sm text-gray-400">Tweet {idx + 1}</span>
-                      <button
-                        onClick={() => copyTweet(tweet)}
-                        disabled={!isUltra && showTrialBanner}
-                        title={!isUltra && showTrialBanner ? 'Upgrade to Ultra to copy' : undefined}
-                        className={`flex items-center gap-2 px-3 py-1 rounded text-sm transition-all ${
-                          !isUltra && showTrialBanner
-                            ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gray-800 text-white hover:bg-gray-700'
-                        }`}
-                      >
-                        <Copy className="w-4 h-4" />
-                        {copied ? 'Copied!' : 'Copy'}
-                      </button>
+                      {renderCopyAction(tweet, 'px-3 py-1 text-sm')}
                     </div>
                     <p className="text-gray-100 leading-relaxed">{tweet}</p>
                   </div>
                 ))}
 
-                {/* Copy Full Thread */}
-                <button
-                  onClick={copyFullThread}
-                  disabled={!isUltra && showTrialBanner}
-                  title={!isUltra && showTrialBanner ? 'Upgrade to Ultra to copy' : undefined}
-                  className={`w-full py-3 rounded-lg font-semibold transition-all ${
-                    !isUltra && showTrialBanner
-                      ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
-                >
-                  📋 Copy Full Thread
-                </button>
+                {isFree ? (
+                  <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
+                    Copy not available on Free plan — upgrade to Pro or Ultra
+                  </div>
+                ) : (
+                  <button
+                    onClick={copyFullThread}
+                    className="w-full py-3 rounded-lg font-semibold transition-all bg-gray-800 text-white hover:bg-gray-700"
+                  >
+                    📋 Copy Full Thread
+                  </button>
+                )}
               </div>
             )}
 
@@ -372,19 +356,7 @@ const RepurposingPlanner: React.FC = () => {
               <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <h3 className="text-lg font-bold text-white">Instagram Caption</h3>
-                  <button
-                    onClick={() => handleCopy(output.instagram!)}
-                    disabled={!isUltra && showTrialBanner}
-                    title={!isUltra && showTrialBanner ? 'Upgrade to Ultra to copy' : undefined}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                      !isUltra && showTrialBanner
-                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
-                        : 'bg-gray-800 text-white hover:bg-gray-700'
-                    }`}
-                  >
-                    <Copy className="w-4 h-4" />
-                    {copied ? 'Copied!' : 'Copy'}
-                  </button>
+                  {renderCopyAction(output.instagram)}
                 </div>
                 <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.instagram}</p>
               </div>
@@ -395,19 +367,7 @@ const RepurposingPlanner: React.FC = () => {
               <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <h3 className="text-lg font-bold text-white">LinkedIn Post</h3>
-                  <button
-                    onClick={() => handleCopy(output.linkedin!)}
-                    disabled={!isUltra && showTrialBanner}
-                    title={!isUltra && showTrialBanner ? 'Upgrade to Ultra to copy' : undefined}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                      !isUltra && showTrialBanner
-                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
-                        : 'bg-gray-800 text-white hover:bg-gray-700'
-                    }`}
-                  >
-                    <Copy className="w-4 h-4" />
-                    {copied ? 'Copied!' : 'Copy'}
-                  </button>
+                  {renderCopyAction(output.linkedin)}
                 </div>
                 <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.linkedin}</p>
               </div>
