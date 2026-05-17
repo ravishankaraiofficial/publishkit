@@ -20,7 +20,9 @@ export function ResultTabs({ result }: ResultTabsProps) {
   const [activeTab, setActiveTab] = useState<string>(isDoc ? 'summary' : 'titles');
   const [chatGPTCopied, setChatGPTCopied] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { user, signInWithGoogle } = useAuth();
+  const [mpCopiedKey, setMpCopiedKey] = useState<string | null>(null);
+  const { user, profile, signInWithGoogle } = useAuth();
+  const isFreePlan = (profile?.plan ?? 'free') === 'free';
 
   if (isDoc) {
     return (
@@ -73,6 +75,9 @@ export function ResultTabs({ result }: ResultTabsProps) {
   const visibleTabs: { id: string; label: string }[] = [...tabs];
   if (result.thumbnailPromptImagen || (result.partialErrors && result.partialErrors.thumbnails)) {
     visibleTabs.push({ id: 'thumbnails', label: 'Thumbnail Prompts' });
+  }
+  if (result.multiPostOutput) {
+    visibleTabs.push({ id: 'multipost', label: 'MultiPost' });
   }
 
   const renderContent = () => {
@@ -319,6 +324,92 @@ export function ResultTabs({ result }: ResultTabsProps) {
                   </button>
                 </div>
               </>
+            )}
+          </div>
+        );
+      }
+
+      case 'multipost': {
+        const mp = result.multiPostOutput || {};
+        const copyMp = async (text: string, key: string) => {
+          await navigator.clipboard.writeText(text);
+          setMpCopiedKey(key);
+          setTimeout(() => setMpCopiedKey(null), 2000);
+        };
+        const copyChip = (text: string, key: string) => {
+          if (isFreePlan) {
+            return (
+              <span className="text-xs text-[#888888] italic flex-shrink-0">
+                Copy not available on Free Plan
+              </span>
+            );
+          }
+          return (
+            <button
+              type="button"
+              onClick={() => copyMp(text, key)}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all"
+              style={
+                mpCopiedKey === key
+                  ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' }
+                  : { borderColor: '#2A2A2A', background: '#0D0D0D', color: '#888888' }
+              }
+            >
+              {mpCopiedKey === key ? (
+                <><Check className="w-3.5 h-3.5" />Copied</>
+              ) : (
+                <><Copy className="w-3.5 h-3.5" />Copy</>
+              )}
+            </button>
+          );
+        };
+
+        return (
+          <div className="space-y-6">
+            {mp.x && mp.x.length > 0 && (
+              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-white">X / Twitter Thread</h4>
+                  {copyChip(mp.x.join('\n\n'), 'x-thread')}
+                </div>
+                <div className="space-y-3">
+                  {mp.x.map((tweet, i) => (
+                    <div key={i} className="bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl p-4">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <span className="text-xs text-[#888888]">Tweet {i + 1}</span>
+                        {copyChip(tweet, `x-${i}`)}
+                      </div>
+                      <p className="text-[#CFCFCF] text-sm leading-relaxed">{tweet}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {mp.instagram && (
+              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-white">Instagram Caption</h4>
+                  {copyChip(mp.instagram, 'instagram')}
+                </div>
+                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.instagram}</p>
+              </div>
+            )}
+
+            {mp.linkedin && (
+              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-white">LinkedIn Post</h4>
+                  {copyChip(mp.linkedin, 'linkedin')}
+                </div>
+                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.linkedin}</p>
+              </div>
+            )}
+
+            {!mp.x?.length && !mp.instagram && !mp.linkedin && (
+              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 text-center text-sm text-[#888888]">
+                MultiPost is generating in the background…
+              </div>
             )}
           </div>
         );

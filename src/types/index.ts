@@ -44,4 +44,12 @@ export interface Result {
   outputLanguage?: string;
   partialErrors?: Record<string, string> | null;
   cached?: boolean;
+  // MultiPost output, persisted on the result doc by the generateRepurposing
+  // Cloud Function when a resultId is passed. Auto-deletes with the rest of
+  // the result document via the deleteOldAudio scheduled job (3 hours).
+  multiPostOutput?: {
+    x?: string[];
+    instagram?: string;
+    linkedin?: string;
+  };
 }

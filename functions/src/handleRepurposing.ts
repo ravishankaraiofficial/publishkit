@@ -31,6 +31,13 @@ export const generateRepurposing = functions
       const title = typeof data.title === 'string' ? data.title.trim() : '';
       const description = typeof data.description === 'string' ? data.description.trim() : '';
       const platforms = Array.isArray(data.platforms) ? data.platforms : [];
+      // Optional: when provided, the resulting MultiPost output is persisted
+      // onto users/{uid}/results/{resultId}.multiPostOutput so it shows in
+      // History and auto-deletes with the rest of the result doc.
+      const resultId =
+        typeof data.resultId === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(data.resultId)
+          ? data.resultId
+          : null;
 
       if (!title || title.length === 0) {
         throw new functions.https.HttpsError('invalid-argument', 'Title is required');
@@ -145,6 +152,21 @@ Return ONLY a JSON string, no markdown:
       // Ensure at least one platform succeeded
       if (Object.keys(output).length === 0) {
         throw new functions.https.HttpsError('internal', 'Failed to generate content for any platform');
+      }
+
+      // If a resultId was supplied, persist the output onto that result doc.
+      // Path is constructed from the caller's auth uid (NOT a client-supplied uid),
+      // so the write is implicitly scoped to the caller's own results subtree.
+      if (resultId) {
+        try {
+          await db.doc(`users/${context.auth.uid}/results/${resultId}`).update({
+            multiPostOutput: output,
+          });
+        } catch (persistErr: any) {
+          // Persist failure is non-fatal — the caller still receives the output
+          // in the return payload and can fall back to in-memory display.
+          console.error('Failed to persist multiPostOutput to result doc:', persistErr?.message);
+        }
       }
 
       return output;

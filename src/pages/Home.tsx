@@ -20,6 +20,10 @@ export function Home() {
     setOutputLanguage,
     thumbnailPromptEnabled,
     setThumbnailPromptEnabled,
+    multiPostEnabled,
+    setMultiPostEnabled,
+    multiPostPlatforms,
+    setMultiPostPlatforms,
     result,
     quotaExceeded,
     handleFileSelect,
@@ -143,6 +147,83 @@ export function Home() {
         {!quotaExceeded && showUpload && (
           <div className="fade-in">
             <DropZone onFileSelect={handleFileSelect} />
+
+            {/* MultiPost — optional add-on that triggers automatically after
+                the audio result lands. Signed-in users only; guests don't
+                have a plan quota for MultiPost. */}
+            {!isGuest && (
+              <div className="mt-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-3 sm:py-4 transition-all hover:border-[#E05A1E]/40">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={multiPostEnabled}
+                      onChange={(e) => {
+                        const on = e.target.checked;
+                        setMultiPostEnabled(on);
+                        if (on) {
+                          setMultiPostPlatforms({ x: true, instagram: true, linkedin: true });
+                        }
+                      }}
+                      disabled={isUploading || showResults}
+                    />
+                    <div className={cn(
+                      "block w-10 h-[22px] rounded-full transition-colors",
+                      multiPostEnabled ? "bg-[#E05A1E]" : "bg-[#2A2A2A]"
+                    )}></div>
+                    <div className={cn(
+                      "dot absolute left-[3px] top-[3px] bg-white w-4 h-4 rounded-full transition-transform",
+                      multiPostEnabled ? "transform translate-x-[18px]" : ""
+                    )}></div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 flex-1">
+                    <span className="text-xs font-semibold text-white leading-tight sm:text-sm">MultiPost</span>
+                    <span className="text-[10px] text-[#555555] leading-tight sm:text-sm sm:text-[#888888]">
+                      <span className="hidden sm:inline">— </span>
+                      {multiPostEnabled
+                        ? 'On · social posts generate after audio'
+                        : 'Off by default · also create posts for X, Instagram, LinkedIn'}
+                    </span>
+                  </div>
+                </label>
+
+                {/* Platform checkboxes — visible always so users see what they get,
+                    but only actionable when the toggle is on. */}
+                <div className="mt-3 flex flex-wrap gap-2 pl-[52px]">
+                  {(['x', 'instagram', 'linkedin'] as const).map((platform) => {
+                    const checked = multiPostEnabled && multiPostPlatforms[platform];
+                    const label = platform === 'x' ? 'X' : platform === 'instagram' ? 'Instagram' : 'LinkedIn';
+                    return (
+                      <label
+                        key={platform}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer",
+                          checked
+                            ? "border-[#E05A1E]/60 bg-[#E05A1E]/10 text-white"
+                            : "border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#E05A1E]/40",
+                          (!multiPostEnabled || isUploading || showResults) && "opacity-60 cursor-not-allowed"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-3.5 h-3.5 accent-[#E05A1E]"
+                          checked={checked}
+                          disabled={!multiPostEnabled || isUploading || showResults}
+                          onChange={(e) =>
+                            setMultiPostPlatforms({
+                              ...multiPostPlatforms,
+                              [platform]: e.target.checked,
+                            })
+                          }
+                        />
+                        {label}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -2,12 +2,19 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { ref, uploadBytesResumable } from 'firebase/storage';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db, storage } from '../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, storage, functions } from '../lib/firebase';
 import { useAuth } from './useAuth';
 import { useToast } from '../components/ui/Toast';
 import { processAudioCall } from '../lib/api';
 import { type Result } from '../types';
 import fpPromise from '@fingerprintjs/fingerprintjs';
+
+interface MultiPostPlatforms {
+  x: boolean;
+  instagram: boolean;
+  linkedin: boolean;
+}
 
 type OutputLanguage = "English" | "Hindi";
 
@@ -69,6 +76,10 @@ interface UploadContextType {
   setOutputLanguage: (lang: OutputLanguage) => void;
   thumbnailPromptEnabled: boolean;
   setThumbnailPromptEnabled: (enabled: boolean) => void;
+  multiPostEnabled: boolean;
+  setMultiPostEnabled: (enabled: boolean) => void;
+  multiPostPlatforms: MultiPostPlatforms;
+  setMultiPostPlatforms: (platforms: MultiPostPlatforms) => void;
   resultId: string | null;
   setResultId: (id: string | null) => void;
   result: Result | null;
@@ -91,6 +102,15 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const [statusCycle, setStatusCycle] = useState<string[]>(getStatusCycle('audio/mpeg'));
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("English");
   const [thumbnailPromptEnabled, setThumbnailPromptEnabled] = useState(false);
+  const [multiPostEnabled, setMultiPostEnabled] = useState(false);
+  const [multiPostPlatforms, setMultiPostPlatforms] = useState<MultiPostPlatforms>({
+    x: true,
+    instagram: true,
+    linkedin: true,
+  });
+  // Track whether MultiPost has been triggered for the current result so we
+  // don't re-run it on every onSnapshot tick after the result completes.
+  const multiPostTriggeredRef = useRef<string | null>(null);
   
   const [resultId, setResultId] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -261,12 +281,49 @@ export function UploadProvider({ children }: { children: ReactNode }) {
           if (data.status === 'failed') {
             toast(data.errorMessage || 'Processing failed.', 'error');
           }
+
+          // Auto-trigger MultiPost when the result lands, if the user opted in
+          // BEFORE uploading. Guests cannot use MultiPost (quota fields live
+          // on the user doc). Skip if already triggered for this resultId or
+          // if the result doc already has multiPostOutput.
+          if (
+            data.status === 'complete' &&
+            !user?.isAnonymous &&
+            multiPostEnabled &&
+            !data.multiPostOutput &&
+            multiPostTriggeredRef.current !== resultId
+          ) {
+            const platforms = (['x', 'instagram', 'linkedin'] as const).filter(
+              (p) => multiPostPlatforms[p]
+            );
+            const firstTitle = data.titles?.[0]?.title || data.audioFileName || '';
+            if (platforms.length > 0 && firstTitle) {
+              multiPostTriggeredRef.current = resultId;
+              const generate = httpsCallable<
+                { title: string; description: string; platforms: string[]; resultId: string },
+                { x?: string[]; instagram?: string; linkedin?: string }
+              >(functions, 'generateRepurposing');
+              generate({
+                title: firstTitle,
+                description: data.description || '',
+                platforms: platforms as unknown as string[],
+                resultId,
+              }).catch((err: any) => {
+                console.error('MultiPost auto-generation failed:', err);
+                if (err?.code === 'functions/resource-exhausted') {
+                  toast('MultiPost monthly limit reached — upgrade your plan to keep using it.', 'error');
+                } else {
+                  toast(err?.message || 'MultiPost generation failed.', 'error');
+                }
+              });
+            }
+          }
         }
       }
     });
 
     return () => unsubscribe();
-  }, [user, resultId, toast]);
+  }, [user, resultId, toast, multiPostEnabled, multiPostPlatforms]);
 
   const handleFileSelect = async (file: File) => {
     if (!user) return;
@@ -367,6 +424,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setStatusIndex(0);
     setQuotaExceeded(false);
     recoveryAttemptedRef.current = false;
+    multiPostTriggeredRef.current = null;
     localStorage.removeItem('guestResultBackup');
     if (user) {
       localStorage.removeItem(`activeResultId_${user.uid}`);
@@ -379,6 +437,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       isUploading, uploadProgress, statusIndex, statusCycle,
       outputLanguage, setOutputLanguage,
       thumbnailPromptEnabled, setThumbnailPromptEnabled,
+      multiPostEnabled, setMultiPostEnabled,
+      multiPostPlatforms, setMultiPostPlatforms,
       resultId, setResultId,
       result, setResult,
       quotaExceeded, setQuotaExceeded,
