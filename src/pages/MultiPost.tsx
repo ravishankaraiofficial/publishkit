@@ -7,13 +7,16 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 
-interface RepurposingOutput {
+interface MultiPostOutput {
   x?: string[];
   instagram?: string;
   linkedin?: string;
 }
 
-const RepurposingPlanner: React.FC = () => {
+const PLAN_LIMITS: Record<string, number> = { free: 10, pro: 100, ultra: 1000 };
+const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
+
+const MultiPost: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
@@ -25,7 +28,7 @@ const RepurposingPlanner: React.FC = () => {
     instagram: true,
     linkedin: true,
   });
-  const [output, setOutput] = useState<RepurposingOutput | null>(null);
+  const [output, setOutput] = useState<MultiPostOutput | null>(null);
   const [activeTab, setActiveTab] = useState<'x' | 'instagram' | 'linkedin'>('x');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,20 +36,13 @@ const RepurposingPlanner: React.FC = () => {
 
   const plan = profile?.plan ?? 'free';
   const isFree = plan === 'free';
-  const isPro = plan === 'pro';
-  const isUltra = plan === 'ultra';
+  const planLabel = PLAN_LABELS[plan] ?? PLAN_LABELS.free;
+  const monthlyLimit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const ultraUsage =
+  const usage =
     profile?.repurposingUsageMonth === currentMonth ? (profile?.repurposingUsageThisMonth ?? 0) : 0;
-
-  const trialUsed = (() => {
-    if (isUltra) return ultraUsage >= 1000;
-    const last = profile?.repurposingTrialLastUsedAt?.toDate?.();
-    if (!last) return false;
-    const windowDays = isPro ? 7 : 30;
-    return Date.now() - last.getTime() < windowDays * 24 * 60 * 60 * 1000;
-  })();
+  const limitReached = usage >= monthlyLimit;
 
   // Fetch past results for dropdown
   useEffect(() => {
@@ -115,7 +111,7 @@ const RepurposingPlanner: React.FC = () => {
 
       const generateRepurposing = httpsCallable<
         { title: string; description: string; platforms: string[] },
-        RepurposingOutput
+        MultiPostOutput
       >(functions, 'generateRepurposing');
 
       const result = await generateRepurposing({
@@ -127,7 +123,7 @@ const RepurposingPlanner: React.FC = () => {
       setOutput(result.data);
       await refreshProfile();
     } catch (err: any) {
-      console.error('Error generating repurposing:', err);
+      console.error('Error generating MultiPost:', err);
       setError(err?.message || 'Failed to generate content. Please try again.');
       if (err?.code === 'functions/resource-exhausted' || err?.code === 'resource-exhausted') {
         await refreshProfile();
@@ -137,15 +133,21 @@ const RepurposingPlanner: React.FC = () => {
     }
   };
 
-  // Locked screen — trial / monthly quota exhausted
-  if (trialUsed) {
-    const headline = isUltra ? 'Monthly limit reached' : 'Trial used';
-    const body = isUltra
-      ? "You've used your 1000 repurposing runs for this month. Resets on the 1st."
-      : isPro
-      ? "You've used your Repurposing Planner trial this week. Upgrade to Ultra for 1000/month."
-      : "You've used your Repurposing Planner trial this month. Upgrade to Pro or Ultra for more.";
-    const ctaLabel = isUltra ? 'See plans' : isPro ? 'Upgrade to Ultra →' : 'Upgrade to Pro or Ultra →';
+  // Locked screen — monthly quota exhausted
+  if (limitReached) {
+    const headline = 'Monthly limit reached';
+    const body =
+      plan === 'ultra'
+        ? `You've used your ${monthlyLimit} MultiPost runs for this month. Resets on the 1st.`
+        : plan === 'pro'
+        ? `You've used your ${monthlyLimit} MultiPost runs this month. Upgrade to Max Plan for 1000/month.`
+        : `You've used your ${monthlyLimit} MultiPost runs this month. Upgrade to Pro Plan or Max Plan for more.`;
+    const ctaLabel =
+      plan === 'ultra'
+        ? 'See plans'
+        : plan === 'pro'
+        ? 'Upgrade to Max Plan →'
+        : 'Upgrade to Pro Plan or Max Plan →';
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 flex items-center justify-center">
@@ -167,7 +169,7 @@ const RepurposingPlanner: React.FC = () => {
   const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
     if (isFree) {
       return (
-        <span className="text-xs text-[#888888] italic">Copy not available on Free plan</span>
+        <span className="text-xs text-[#888888] italic">Copy not available on Free Plan</span>
       );
     }
     return (
@@ -186,32 +188,22 @@ const RepurposingPlanner: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Repurposing Planner</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">MultiPost</h1>
           <p className="text-gray-400">Turn your content into tailored posts for X, Instagram, and LinkedIn</p>
         </div>
 
-        {/* Plan banner */}
-        {isFree && (
-          <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 border border-orange-600/40 rounded-2xl p-4 mb-8">
-            <div className="flex items-start gap-3">
-              <Zap className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-white font-semibold">Free plan</p>
-                <p className="text-gray-300 text-sm">
-                  1 trial per month. Output is visible but copy buttons are not available on Free.
-                  Upgrade for monthly access and full copy support.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        {isUltra && (
-          <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+        {/* Usage counter — visible on every plan */}
+        <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
-              <span className="text-white font-semibold">{ultraUsage}</span> / 1000 used this month
+              <span className="text-white font-semibold">{usage}</span> / {monthlyLimit} used this month
+              <span className="text-[#888888] ml-2">({planLabel})</span>
             </p>
+            {isFree && (
+              <p className="text-xs text-[#888888] italic">Copy not available on Free Plan</p>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Input Section */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
@@ -338,7 +330,7 @@ const RepurposingPlanner: React.FC = () => {
 
                 {isFree ? (
                   <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
-                    Copy not available on Free plan — upgrade to Pro or Ultra
+                    Copy not available on Free Plan — upgrade to Pro Plan or Max Plan
                   </div>
                 ) : (
                   <button
@@ -379,12 +371,15 @@ const RepurposingPlanner: React.FC = () => {
         {!output && !loading && (
           <div className="bg-neutral-900 rounded-2xl border border-dashed border-gray-700 p-12 text-center">
             <Zap className="w-12 h-12 text-orange-600 mx-auto mb-4 opacity-50" />
-            <p className="text-gray-400">Generate repurposed content to get started</p>
+            <p className="text-gray-400">Generate MultiPost content to get started</p>
           </div>
         )}
+
+        {/* Spacer for mobile bottom nav */}
+        <div className="sm:hidden h-16" />
       </div>
     </div>
   );
 };
 
-export default RepurposingPlanner;
+export default MultiPost;

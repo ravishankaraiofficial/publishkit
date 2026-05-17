@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils';
 const navItems = [
   { to: '/', icon: Home, label: 'New' },
   { to: '/script-writer', icon: FileText, label: 'Script' },
-  { to: '/repurposing', icon: Share2, label: 'Repurpose' },
+  { to: '/multipost', icon: Share2, label: 'MultiPost' },
   { to: '/results', icon: Clock, label: 'History' },
   { to: '/pricing', icon: Sparkles, label: 'Pricing' },
   { to: '/feedback', icon: MessageSquare, label: 'Feedback' },
@@ -75,7 +75,7 @@ export function Navbar() {
                   ? 'bg-blue-600/20 text-blue-300'
                   : 'bg-gray-800 text-gray-300'
               )}>
-                {currentPlan === 'ultra' ? '✦ Ultra' : currentPlan === 'pro' ? 'Pro' : 'Free'}
+                {currentPlan === 'ultra' ? '✦ Max' : currentPlan === 'pro' ? 'Pro' : 'Free'}
               </div>
             )}
 

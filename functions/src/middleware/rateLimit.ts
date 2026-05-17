@@ -78,65 +78,52 @@ export async function getMonthlyUsage(uid: string): Promise<number> {
 
 type TrialFeature = 'script' | 'repurposing';
 
+const FEATURE_MONTHLY_LIMITS: Record<string, number> = {
+  free: 10,
+  pro: 100,
+  ultra: 1000,
+};
+
 /**
- * Plan-aware trial / usage enforcement for Script Writer and Repurposing Planner.
- *   Free  → 1 trial per 30 days (scriptTrialLastUsedAt / repurposingTrialLastUsedAt)
- *   Pro   → 1 trial per 7 days
- *   Ultra → metered, 1000 / calendar month (scriptUsageThisMonth + scriptUsageMonth)
+ * Plan-aware monthly usage enforcement for Script Writer and MultiPost.
+ *   Free  → 10  / calendar month
+ *   Pro   → 100 / calendar month
+ *   Ultra → 1000 / calendar month  (the "Max Plan" in UI)
  * Check + write happen in a single transaction to remove TOCTOU races.
- * Caller is "charged" before the Gemini call; on Gemini failure the trial/usage
- * still counts (matches the metadata-upload pattern in enforceRateLimit above).
+ * Counter resets the moment the stored YYYY-MM differs from the current month.
+ * Caller is "charged" before the Gemini call; on Gemini failure the usage still
+ * counts (matches the metadata-upload pattern in enforceRateLimit above).
+ *
+ * Legacy fields scriptTrialLastUsedAt / repurposingTrialLastUsedAt are no longer
+ * read or written here. They remain as harmless orphan data on older user docs.
  */
 async function enforceTrialOrUsage(uid: string, plan: string, feature: TrialFeature): Promise<void> {
   const userRef = db.doc(`users/${uid}`);
-  const lastUsedField = feature === 'script' ? 'scriptTrialLastUsedAt' : 'repurposingTrialLastUsedAt';
   const usageField = feature === 'script' ? 'scriptUsageThisMonth' : 'repurposingUsageThisMonth';
   const monthField = feature === 'script' ? 'scriptUsageMonth' : 'repurposingUsageMonth';
   const currentMonth = new Date().toISOString().slice(0, 7);
+  const limit = FEATURE_MONTHLY_LIMITS[plan] ?? FEATURE_MONTHLY_LIMITS.free;
 
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
     const data = snap.exists ? snap.data() || {} : {};
 
-    if (plan === 'ultra') {
-      const storedMonth = data[monthField];
-      const current = storedMonth === currentMonth ? (data[usageField] ?? 0) : 0;
-      if (current >= 1000) {
-        throw new functions.https.HttpsError(
-          'resource-exhausted',
-          'Monthly limit reached. Resets on the 1st of next month.'
-        );
-      }
-      const payload = {
-        [usageField]: current + 1,
-        [monthField]: currentMonth,
-      };
-      if (snap.exists) {
-        tx.update(userRef, payload);
-      } else {
-        tx.set(userRef, payload, { merge: true });
-      }
+    const storedMonth = data[monthField];
+    const current = storedMonth === currentMonth ? (data[usageField] ?? 0) : 0;
+    if (current >= limit) {
+      throw new functions.https.HttpsError(
+        'resource-exhausted',
+        `Monthly limit of ${limit} reached. Resets on the 1st of next month.`
+      );
+    }
+    const payload = {
+      [usageField]: current + 1,
+      [monthField]: currentMonth,
+    };
+    if (snap.exists) {
+      tx.update(userRef, payload);
     } else {
-      const last = data[lastUsedField];
-      const lastDate: Date | null = last?.toDate?.() ?? (last ? new Date(last) : null);
-      const windowDays = plan === 'pro' ? 7 : 30;
-      if (lastDate) {
-        const elapsed = Date.now() - lastDate.getTime();
-        const windowMs = windowDays * 24 * 60 * 60 * 1000;
-        if (elapsed < windowMs) {
-          const resetAt = new Date(lastDate.getTime() + windowMs);
-          throw new functions.https.HttpsError(
-            'resource-exhausted',
-            `Trial used. Available again on ${resetAt.toISOString().slice(0, 10)}.`
-          );
-        }
-      }
-      const payload = { [lastUsedField]: admin.firestore.FieldValue.serverTimestamp() };
-      if (snap.exists) {
-        tx.update(userRef, payload);
-      } else {
-        tx.set(userRef, payload, { merge: true });
-      }
+      tx.set(userRef, payload, { merge: true });
     }
   });
 }

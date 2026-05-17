@@ -27,7 +27,7 @@ const Pricing: React.FC = () => {
     badge?: string;
   }> = {
     free: {
-      name: 'Free',
+      name: 'Free Plan',
       price: '₹0',
       period: '',
       limit: 10,
@@ -35,13 +35,14 @@ const Pricing: React.FC = () => {
         { label: 'YouTube metadata generation (10/month)', included: true },
         { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
         { label: 'English + Hindi support', included: true },
-        { label: 'Script Writer (1 trial/month)', included: true },
-        { label: 'Repurposing Planner (1 trial/month)', included: true },
-        { label: 'Copy buttons (not available on Free)', included: false },
+        { label: 'Script Writer (10/month)', included: true },
+        { label: 'MultiPost (10/month)', included: true },
+        { label: 'Copy buttons on metadata results', included: true },
+        { label: 'Copy buttons on Script Writer + MultiPost', included: false },
       ],
     },
     pro: {
-      name: 'Pro',
+      name: 'Pro Plan',
       price: '₹299',
       period: '/month',
       limit: 100,
@@ -49,13 +50,13 @@ const Pricing: React.FC = () => {
         { label: 'YouTube metadata generation (100/month)', included: true },
         { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
         { label: 'English + Hindi support', included: true },
-        { label: 'Script Writer (1 trial/week)', included: true },
-        { label: 'Repurposing Planner (1 trial/week)', included: true },
-        { label: 'Copy buttons enabled', included: true },
+        { label: 'Script Writer (100/month)', included: true },
+        { label: 'MultiPost (100/month)', included: true },
+        { label: 'Copy buttons enabled everywhere', included: true },
       ],
     },
     ultra: {
-      name: 'Ultra',
+      name: 'Max Plan',
       price: '₹1,000',
       period: '/month',
       limit: 1000,
@@ -64,10 +65,10 @@ const Pricing: React.FC = () => {
         { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
         { label: 'English + Hindi support', included: true },
         { label: 'Script Writer (1000/month)', included: true },
-        { label: 'Repurposing Planner (1000/month)', included: true },
+        { label: 'MultiPost (1000/month)', included: true },
         { label: 'Copy buttons everywhere', included: true },
       ],
-      badge: 'Script Writer + Repurposing',
+      badge: 'Script Writer + MultiPost',
     },
   };
 
@@ -110,7 +111,7 @@ const Pricing: React.FC = () => {
         key: keyId,
         subscription_id: subscriptionId,
         name: 'PublishKit',
-        description: `${planKey === 'ultra' ? 'Ultra' : 'Pro'} Plan`,
+        description: `${planKey === 'ultra' ? 'Max' : 'Pro'} Plan`,
         handler: () => {
           toast('Payment successful! Your plan will activate shortly.', 'success');
           setTimeout(() => window.location.reload(), 3000);
@@ -255,13 +256,13 @@ const Pricing: React.FC = () => {
           <h3 className="text-xl font-semibold text-white mb-4">Need help choosing?</h3>
           <ul className="space-y-3 text-gray-300 text-sm">
             <li>
-              <strong className="text-white">Free:</strong> Perfect for testing and light content creators
+              <strong className="text-white">Free Plan:</strong> Perfect for testing — 10 of each per month, copy enabled on metadata
             </li>
             <li>
-              <strong className="text-white">Pro:</strong> Great for consistent creators wanting more outputs per month
+              <strong className="text-white">Pro Plan:</strong> Consistent creators — 100 of each per month, copy enabled everywhere
             </li>
             <li>
-              <strong className="text-white">Ultra:</strong> For professional creators who want unlimited outputs + Script Writer + Repurposing Planner
+              <strong className="text-white">Max Plan:</strong> Professional creators — 1000 of each per month, copy enabled everywhere
             </li>
           </ul>
         </div>

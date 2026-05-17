@@ -12,6 +12,9 @@ interface ScriptOutput {
   cta: string;
 }
 
+const PLAN_LIMITS: Record<string, number> = { free: 10, pro: 100, ultra: 1000 };
+const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
+
 const ScriptWriter: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
@@ -26,20 +29,13 @@ const ScriptWriter: React.FC = () => {
 
   const plan = profile?.plan ?? 'free';
   const isFree = plan === 'free';
-  const isPro = plan === 'pro';
-  const isUltra = plan === 'ultra';
+  const planLabel = PLAN_LABELS[plan] ?? PLAN_LABELS.free;
+  const monthlyLimit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const ultraUsage =
+  const usage =
     profile?.scriptUsageMonth === currentMonth ? (profile?.scriptUsageThisMonth ?? 0) : 0;
-
-  const trialUsed = (() => {
-    if (isUltra) return ultraUsage >= 1000;
-    const last = profile?.scriptTrialLastUsedAt?.toDate?.();
-    if (!last) return false;
-    const windowDays = isPro ? 7 : 30;
-    return Date.now() - last.getTime() < windowDays * 24 * 60 * 60 * 1000;
-  })();
+  const limitReached = usage >= monthlyLimit;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -85,7 +81,7 @@ ${output.cta}
       });
 
       setOutput(result.data);
-      // Pull the server-updated counter / timestamp so the UI reflects new state
+      // Pull the server-updated counter so the UI reflects new state
       await refreshProfile();
     } catch (err: any) {
       console.error('Error generating script:', err);
@@ -99,15 +95,21 @@ ${output.cta}
     }
   };
 
-  // Locked screen — trial / monthly quota exhausted
-  if (trialUsed) {
-    const headline = isUltra ? 'Monthly limit reached' : 'Trial used';
-    const body = isUltra
-      ? "You've used your 1000 scripts for this month. Resets on the 1st."
-      : isPro
-      ? "You've used your Script Writer trial this week. Upgrade to Ultra for 1000/month."
-      : "You've used your Script Writer trial this month. Upgrade to Pro or Ultra for more.";
-    const ctaLabel = isUltra ? 'See plans' : isPro ? 'Upgrade to Ultra →' : 'Upgrade to Pro or Ultra →';
+  // Locked screen — monthly quota exhausted
+  if (limitReached) {
+    const headline = 'Monthly limit reached';
+    const body =
+      plan === 'ultra'
+        ? `You've used your ${monthlyLimit} scripts for this month. Resets on the 1st.`
+        : plan === 'pro'
+        ? `You've used your ${monthlyLimit} scripts this month. Upgrade to Max Plan for 1000/month.`
+        : `You've used your ${monthlyLimit} scripts this month. Upgrade to Pro Plan or Max Plan for more.`;
+    const ctaLabel =
+      plan === 'ultra'
+        ? 'See plans'
+        : plan === 'pro'
+        ? 'Upgrade to Max Plan →'
+        : 'Upgrade to Pro Plan or Max Plan →';
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 flex items-center justify-center">
@@ -129,7 +131,7 @@ ${output.cta}
   const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
     if (isFree) {
       return (
-        <span className="text-xs text-[#888888] italic">Copy not available on Free plan</span>
+        <span className="text-xs text-[#888888] italic">Copy not available on Free Plan</span>
       );
     }
     return (
@@ -152,28 +154,18 @@ ${output.cta}
           <p className="text-gray-400">Generate engaging video scripts tailored to your niche</p>
         </div>
 
-        {/* Plan banner */}
-        {isFree && (
-          <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 border border-orange-600/40 rounded-2xl p-4 mb-8">
-            <div className="flex items-start gap-3">
-              <Zap className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-white font-semibold">Free plan</p>
-                <p className="text-gray-300 text-sm">
-                  1 trial per month. Output is visible but copy buttons are not available on Free.
-                  Upgrade for monthly access and full copy support.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        {isUltra && (
-          <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+        {/* Usage counter — visible on every plan */}
+        <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
-              <span className="text-white font-semibold">{ultraUsage}</span> / 1000 used this month
+              <span className="text-white font-semibold">{usage}</span> / {monthlyLimit} used this month
+              <span className="text-[#888888] ml-2">({planLabel})</span>
             </p>
+            {isFree && (
+              <p className="text-xs text-[#888888] italic">Copy not available on Free Plan</p>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Input Section */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
@@ -288,7 +280,7 @@ ${output.cta}
             {/* Copy Full Script */}
             {isFree ? (
               <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
-                Copy not available on Free plan — upgrade to Pro or Ultra
+                Copy not available on Free Plan — upgrade to Pro Plan or Max Plan
               </div>
             ) : (
               <button
@@ -308,6 +300,9 @@ ${output.cta}
             <p className="text-gray-400">Generate a script to get started</p>
           </div>
         )}
+
+        {/* Spacer for mobile bottom nav */}
+        <div className="sm:hidden h-16" />
       </div>
     </div>
   );
