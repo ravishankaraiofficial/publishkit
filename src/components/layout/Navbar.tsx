@@ -1,12 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useUpload } from '../../hooks/useUpload';
-import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles } from 'lucide-react';
+import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles, FileText, Share2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
 
 const navItems = [
   { to: '/', icon: Home, label: 'New' },
+  { to: '/script-writer', icon: FileText, label: 'Script' },
+  { to: '/repurposing', icon: Share2, label: 'Repurpose' },
   { to: '/results', icon: Clock, label: 'History' },
   { to: '/pricing', icon: Sparkles, label: 'Pricing' },
   { to: '/feedback', icon: MessageSquare, label: 'Feedback' },
@@ -52,7 +54,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-6 text-sm font-medium">
+          <div className="flex items-center gap-5 text-sm font-medium">
             {navItems.map(({ to, label }) => (
               <Link
                 key={to}
@@ -119,7 +121,7 @@ export function Navbar() {
 
       {/* ── Mobile bottom nav bar ── */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-md border-t border-[#2A2A2A]">
-        <div className="flex items-center justify-around py-2 px-2">
+        <div className="flex items-stretch py-1.5 px-0.5">
           {navItems.map(({ to, icon: Icon, label }) => {
             const active = location.pathname === to;
             return (
@@ -128,16 +130,16 @@ export function Navbar() {
                 to={to}
                 onClick={to === '/' ? reset : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-5 py-2 rounded-xl transition-all active:scale-90",
+                  "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 rounded-xl transition-all active:scale-90",
                   active
                     ? "text-[#E05A1E]"
                     : "text-[#555555] hover:text-[#888888]"
                 )}
               >
                 <Icon className={cn("w-5 h-5", active && "drop-shadow-[0_0_6px_rgba(224,90,30,0.8)]")} />
-                <span className="text-[10px] font-medium">{label}</span>
+                <span className="text-[9px] font-medium leading-tight">{label}</span>
                 {active && (
-                  <div className="absolute -bottom-px w-8 h-0.5 bg-[#E05A1E] rounded-full" />
+                  <div className="absolute -bottom-px w-6 h-0.5 bg-[#E05A1E] rounded-full" />
                 )}
               </Link>
             );
