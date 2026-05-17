@@ -38,7 +38,6 @@ const Pricing: React.FC = () => {
         { label: 'Script Writer (10/month)', included: true },
         { label: 'MultiPost (10/month)', included: true },
         { label: 'Copy buttons on metadata results', included: true },
-        { label: 'Copy buttons on Script Writer + MultiPost', included: false },
       ],
     },
     pro: {
@@ -227,9 +226,10 @@ const Pricing: React.FC = () => {
                   </div>
 
                   {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free.
-                      Lines use the same green tick mark as the features list below for visual continuity. */}
+                      Lines use the same tick mark, font, and spacing as the features list below so
+                      they read as a single continuous checklist with no visual seam. */}
                   {planKey === 'free' ? (
-                    <div className="mb-8">
+                    <>
                       {[
                         "Get unique Titles tuned to YouTube's algorithm",
                         "Get Description tuned to YouTube's algorithm",
@@ -238,10 +238,10 @@ const Pricing: React.FC = () => {
                       ].map((line) => (
                         <div key={line} className="flex items-start gap-3 py-2">
                           <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-100 text-sm leading-snug">{line}</span>
+                          <span className="text-gray-100">{line}</span>
                         </div>
                       ))}
-                    </div>
+                    </>
                   ) : (
                     <button
                       onClick={() => handleUpgrade(planKey as 'pro' | 'ultra')}
