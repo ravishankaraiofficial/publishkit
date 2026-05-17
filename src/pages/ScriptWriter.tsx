@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
+import { PageContainer } from '../components/layout/PageContainer';
 
 interface ScriptOutput {
   hook: string;
@@ -112,19 +113,21 @@ ${output.cta}
         : 'Upgrade to Pro Plan or Max Plan →';
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 flex items-center justify-center">
-        <div className="max-w-md bg-neutral-900 rounded-2xl border border-gray-800 p-8 text-center">
-          <AlertCircle className="w-16 h-16 text-orange-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">{headline}</h2>
-          <p className="text-gray-400 mb-6">{body}</p>
-          <button
-            onClick={() => navigate('/pricing')}
-            className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all"
-          >
-            {ctaLabel}
-          </button>
+      <PageContainer>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="max-w-md bg-neutral-900 rounded-2xl border border-gray-800 p-8 text-center">
+            <AlertCircle className="w-16 h-16 text-orange-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">{headline}</h2>
+            <p className="text-gray-400 mb-6">{body}</p>
+            <button
+              onClick={() => navigate('/pricing')}
+              className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all"
+            >
+              {ctaLabel}
+            </button>
+          </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -146,7 +149,7 @@ ${output.cta}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 md:p-12">
+    <PageContainer>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -301,10 +304,8 @@ ${output.cta}
           </div>
         )}
 
-        {/* Spacer for mobile bottom nav */}
-        <div className="sm:hidden h-16" />
       </div>
-    </div>
+    </PageContainer>
   );
 };
 
