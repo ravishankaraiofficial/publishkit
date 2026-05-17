@@ -197,7 +197,7 @@ const Pricing: React.FC = () => {
                 key={planKey}
                 className={`group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
                   isUltra
-                    ? 'md:scale-105 bg-gradient-to-b from-orange-950 to-neutral-900 border-2 border-orange-600 shadow-2xl shadow-orange-600/20 hover:shadow-orange-600/50 hover:border-orange-500'
+                    ? 'md:scale-105 bg-gradient-to-b from-orange-950 to-neutral-900 border-2 border-orange-600/70 shadow-xl shadow-orange-600/10 hover:shadow-2xl hover:shadow-orange-600/25 hover:border-orange-500'
                     : 'bg-neutral-900 border border-gray-800 hover:border-orange-600/60 hover:shadow-2xl hover:shadow-orange-600/30'
                 } ${isCurrent && !isUltra ? 'border-orange-600/50' : ''}`}
               >
@@ -208,9 +208,9 @@ const Pricing: React.FC = () => {
                   </div>
                 )}
 
-                {/* Ultra badge */}
+                {/* Max badge — top banner, top corners rounded to match card */}
                 {plan.badge && (
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-600 to-orange-500 text-white text-center py-2 text-xs font-bold tracking-wide">
+                  <div className="absolute top-0 left-0 right-0 rounded-t-2xl bg-gradient-to-r from-orange-600 to-orange-500 text-white text-center py-2 text-xs font-bold tracking-wide">
                     {plan.badge}
                   </div>
                 )}
@@ -226,22 +226,20 @@ const Pricing: React.FC = () => {
                     <p className="text-sm text-gray-400 mt-3 mb-4">{plan.limit} uploads per month</p>
                   </div>
 
-                  {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free */}
+                  {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free.
+                      Lines use the same green tick mark as the features list below for visual continuity. */}
                   {planKey === 'free' ? (
-                    <div className="mb-8 space-y-2">
+                    <div className="mb-8">
                       {[
                         "Get unique Titles tuned to YouTube's algorithm",
                         "Get Description tuned to YouTube's algorithm",
                         'Get Timestamps with headings',
                         'Get Hashtags that help rank your video and get more views',
                       ].map((line) => (
-                        <p
-                          key={line}
-                          className="flex items-start gap-2 text-sm text-gray-200 leading-snug"
-                        >
-                          <span className="text-orange-500 flex-shrink-0 font-bold">→</span>
-                          <span>{line}</span>
-                        </p>
+                        <div key={line} className="flex items-start gap-3 py-2">
+                          <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-100 text-sm leading-snug">{line}</span>
+                        </div>
                       ))}
                     </div>
                   ) : (
