@@ -6,6 +6,7 @@ import { db, functions } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
+import { PageContainer } from '../components/layout/PageContainer';
 
 const Pricing: React.FC = () => {
   const { user, profile } = useAuth();
@@ -148,8 +149,7 @@ const Pricing: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-950 to-black p-6 md:p-12">
-
+    <PageContainer>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -266,7 +266,7 @@ const Pricing: React.FC = () => {
           </ul>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 
