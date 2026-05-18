@@ -352,7 +352,14 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setStatusIndex(0);
     setUploadProgress(0);
 
-    const fileName = `${Date.now()}-${file.name}`;
+    // Sanitize filename — strips path traversal segments, slashes, and any
+    // characters that aren't alphanumeric / dot / underscore / hyphen. Cap at
+    // 100 chars. Defense in depth: Firebase Storage rules already reject paths
+    // with extra segments, but normalizing here means a well-behaved path
+    // every time and prevents confusing rule-denial errors for legitimate users
+    // whose OS allowed weird characters in the original filename.
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
+    const fileName = `${Date.now()}-${safeName}`;
     const isAudio = file.type.startsWith('audio/');
     const folder = isAudio ? 'audio' : 'uploads';
     const storagePath = `users/${user.uid}/${folder}/${fileName}`;
