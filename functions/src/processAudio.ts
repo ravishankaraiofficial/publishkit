@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { db, storage } from './lib/firestore';
 import { verifyWhitelist } from './middleware/auth';
-import { enforceRateLimit } from './middleware/rateLimit';
+import { enforceRateLimit, enforceBurstLimit } from './middleware/rateLimit';
 import { transcribeAudio } from './transcribe';
 import { generateOutputs, analyzeDocument } from './generate';
 import { geminiApiKey } from './lib/gemini';
@@ -104,7 +104,11 @@ export const processAudio = functions
       const userDoc = await db.doc(`users/${uid}`).get();
       const plan = (userDoc.data()?.plan as string) || 'free';
 
-      // Enforce atomic rate limits (UID + IP based)
+      // Burst rate limit: blocks single-user request floods (Free 2/min,
+      // Pro 8/min, Max 20/min). Catches DoS attacks before monthly enforcement.
+      await enforceBurstLimit(uid, plan);
+
+      // Enforce atomic monthly rate limits (UID + IP based)
       const rawIp = context.rawRequest.ip || 'unknown';
       await enforceRateLimit(uid, rawIp, plan);
 

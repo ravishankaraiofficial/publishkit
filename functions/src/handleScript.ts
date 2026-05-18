@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';
-import { enforceScriptTrial } from './middleware/rateLimit';
+import { enforceScriptTrial, enforceBurstLimit } from './middleware/rateLimit';
 import { coerceLanguage, languageHint } from './lib/languages';
 
 interface ScriptOutput {
@@ -39,9 +39,16 @@ export const generateScript = functions
         throw new functions.https.HttpsError('invalid-argument', 'Topic must be between 1 and 500 characters');
       }
 
-      // Plan-aware trial / usage enforcement (atomic; throws resource-exhausted when blocked)
+      // Read plan once for both burst + monthly checks
       const userSnap = await db.doc(`users/${context.auth.uid}`).get();
       const plan = (userSnap.data()?.plan as string) || 'free';
+
+      // Burst rate limit: prevents a single user from firing dozens of calls
+      // per second to DoS Gemini quota / other users. Throws resource-exhausted
+      // with a "Slow down" message. Tier limits: Free 2/min, Pro 8/min, Max 20/min.
+      await enforceBurstLimit(context.auth.uid, plan);
+
+      // Monthly usage enforcement (atomic; throws resource-exhausted when blocked)
       await enforceScriptTrial(context.auth.uid, plan);
 
       // Initialize Gemini

@@ -1,286 +1,214 @@
-# PublishKit Security Hardening Report
+# PublishKit Security Model
 
-**Date:** 2026-05-14  
-**Status:** ✅ All 6 vulnerabilities fixed and deployed to production  
-**Deployment Commit:** `[latest-commit-hash]`
+> Last updated: 2026-05-18 — covers production state through commit `fb8a8ff` + Hardening Pass 3 (burst limit + webhook idempotency + input caps).
 
----
+This document is the single source of truth for what PublishKit defends against, how, and what operational actions remain on the user's plate (dashboard toggles that can't be expressed in code).
 
-## Executive Summary
-
-A comprehensive security audit identified 6 vulnerabilities ranging from CRITICAL (direct financial risk) to MEDIUM (data integrity/browser security). All have been fixed and deployed atomically to production in the correct order (functions → rules → hosting) to avoid exploitable gaps.
-
-**Financial Impact:** The two critical fixes prevent unbounded Gemini API spending that could have cost thousands of dollars per attack.
+It's structured so a new auditor / developer can read it once and understand the entire security posture.
 
 ---
 
-## Vulnerabilities Fixed
+## Threat Model
 
-### 1. 🔴 CRITICAL — TOCTOU Race Condition in Rate Limiting
+What we're explicitly defending against, ranked by financial impact:
 
-**Description:**  
-`checkRateLimit()` and `incrementRateLimit()` were two separate Firestore operations. Concurrent requests from the same UID could both read `count=9`, both pass the limit check, both increment → resulting in 12+ free Gemini calls when the daily limit is 10.
-
-**Fix:**  
-Rewrote `functions/src/middleware/rateLimit.ts` to implement `enforceRateLimit(uid, rawIp)` which wraps both the read and write in a single `db.runTransaction()`. Firestore transactions are serialized — if two concurrent requests both try to increment, one succeeds and the other sees the updated count and fails.
-
-**Files Changed:**
-- `functions/src/middleware/rateLimit.ts` — complete rewrite
-- `functions/src/processAudio.ts` — updated caller (lines 8, 99-100)
-
-**Verification:**
-```
-Firebase Console → Cloud Functions → Logs for processAudio
-- Send two identical files concurrently from the same UID
-- Second request should fail with: "Daily limit reached. Try again tomorrow."
-- Both requests should NOT both succeed
-```
+| # | Threat | Severity | Status |
+|---|---|---|---|
+| 1 | A signed-in user removes their own usage limits and runs up an unbounded Gemini bill | CRITICAL | **CLOSED** — all plan/usage fields admin-SDK-only; client write rules use `diff().affectedKeys()` |
+| 2 | A signed-in user bursts requests in seconds to exhaust daily Gemini quota / DoS other users | CRITICAL | **CLOSED** — sliding-window burst rate limit (Free 2/min, Pro 8/min, Max 20/min) |
+| 3 | A malicious client tampers with the Razorpay subscription to fake a Pro/Max plan | CRITICAL | **CLOSED** — webhook HMAC verified with `crypto.timingSafeEqual`; plan-allowlist; UID-regex; subId match on cancel; event-ID dedup |
+| 4 | Anonymous spam — bots create thousands of free guest sessions | HIGH | **CLOSED** — per-fingerprint + per-IP quota; VPN/proxy header detection blocks the easy cases |
+| 5 | Concurrent-request race lets a user consume more than their plan | HIGH | **CLOSED** — all rate limits run inside `db.runTransaction` |
+| 6 | API keys leak to git / public bundle | HIGH | **CLOSED** — all secrets in Firebase Secret Manager; git history scanned clean; `.gitignore` hardened with temp-file patterns |
+| 7 | Prompt injection / oversized input drives up Gemini token cost | MEDIUM | **CLOSED** — `topic` capped at 500 chars (handleScript); `title` 500, `description` 2000 (handleRepurposing); control chars stripped |
+| 8 | XSS / clickjacking via malicious script injection | MEDIUM | **CLOSED** — CSP header on Firebase Hosting; `X-Frame-Options: DENY`; React auto-escapes |
+| 9 | Multi-account abuse — same IP creates many Google accounts | MEDIUM | **CLOSED** — per-IP monthly quota (`ipUsage/{ipHash}`); fingerprint dedup |
+| 10 | Webhook replay attack | MEDIUM | **CLOSED** — `x-razorpay-event-id` dedup table; stale cancel events filtered |
+| 11 | Direct origin IP exposed to DDoS | LOW | **PASS** — hosted on Firebase Hosting + Cloud Functions behind Google's edge network |
 
 ---
 
-### 2. 🔴 CRITICAL — User Can Self-Reset Their Daily Quota
+## Controls in Place
 
-**Description:**  
-Firestore rule `users/{uid}/{document=**}` allowed client write access to ALL subcollections, including `usage/{date}` which stores the daily Gemini call counter. A user could directly write `count: 0` to reset their own daily limit to zero via Firestore.
+### 1. Authentication & Authorization
 
-**Root Cause:**  
-Firestore's "any matching rule grants access" model meant a more-specific rule `allow write: if false` on `usage` was overridden by the parent wildcard rule that allowed `write` for the entire `users/{uid}` subtree.
+| Control | Implementation |
+|---|---|
+| Google OAuth (primary) | Firebase Authentication, popup + redirect fallback |
+| Anonymous sessions (free trial) | Firebase anonymous auth, 1 use per fingerprint+IP via `verifyWhitelist` |
+| Backend auth check | Every callable: `if (!context.auth) throw 'unauthenticated'` |
+| App Check (anti-bot) | reCAPTCHA Enterprise; every callable: `if (!context.app) throw 'failed-precondition'` |
+| Webhook auth | HMAC-SHA256 + `crypto.timingSafeEqual` constant-time comparison |
+| Per-user isolation | Firestore rules + Storage rules enforce `request.auth.uid == uid` on every read/write |
 
-**Fix:**  
-Restructured Firestore rules:
-- `match /users/{uid}/{document=**}` — read-only for all subcollections
-- `match /users/{uid}` — write allowed only on the top-level profile document
-- Result: clients can only modify their profile, not their usage counters or results
+### 2. Rate Limiting (defense-in-depth, three layers)
 
-**Files Changed:**
-- `firestore.rules` (lines 16-22)
+| Layer | Window | Free | Pro | Max | Implementation |
+|---|---|---|---|---|---|
+| **Burst** | 60 seconds | 2 | 8 | 20 | `enforceBurstLimit` — sliding-window ring buffer in Firestore transaction |
+| **Per-IP monthly** | calendar month | 150 (shared across all UIDs on that IP hash) | same | same | `enforceRateLimit` IP path |
+| **Per-UID monthly (metadata)** | calendar month | 10 | 100 | 1000 | `enforceRateLimit` UID path |
+| **Per-UID monthly (Script Writer)** | calendar month | 10 | 100 | 1000 | `enforceScriptTrial` |
+| **Per-UID monthly (MultiPost)** | calendar month | 10 | 100 | 1000 | `enforceRepurposingTrial` — charges 1 per selected platform |
+| **GCP quota (account-wide)** | calendar day | 8,000 Gemini 2.5 Flash requests/day | same | same | Set in GCP Console → Quotas (caps billing exposure at ~₹6,000/month) |
 
-**Verification:**
-```
-Firebase Console → Firestore Rules Playground
-- UID: any authenticated user
-- Operation: write to /users/{uid}/usage/2026-05-14
-  - Data: { count: 0 }
-- Expected: DENY
-```
+The burst limit is the new layer in Hardening Pass 3. Without it, a Max user could fire 1000 requests in 60 seconds and DoS the entire daily Gemini quota for everyone. With it, the worst case is `20 × 60min × 24h = 28,800/day` — well above the 8,000/day GCP cap.
 
----
+### 3. Firestore Rules — Server-Managed Fields
 
-### 3. 🟠 HIGH — No IP-Based Rate Limiting (allows multi-account bypass)
+All these fields are written **only** by Cloud Functions (Admin SDK bypasses rules). Client writes are blocked via `request.resource.data.diff(resource.data).affectedKeys().hasAny([...])`:
 
-**Description:**  
-Rate limiting was purely UID-based (10 calls/day per user). A user with 10 Google accounts could get 100 free Gemini calls/day. An attacker could create accounts programmatically.
+- `plan`, `planExpiry`, `razorpaySubscriptionId`
+- `scriptUsageThisMonth`, `repurposingUsageThisMonth`, `scriptUsageMonth`, `repurposingUsageMonth`
+- `scriptTrialLastUsedAt`, `repurposingTrialLastUsedAt` (legacy, retained for back-compat)
 
-**Fix:**  
-Implemented IP-based rate limiting as part of the atomic transaction in `enforceRateLimit()`:
-- Per-UID limit: 10 calls/day
-- Per-IP limit: 30 calls/day (aggregated across all accounts on that IP)
-- Both limits checked and incremented atomically in the same transaction
+Server-only collections (no client read/write):
+- `/config/*` — whitelist + feature flags
+- `/ipUsage/*` — IP-hash monthly counters
+- `/webhookEvents/*` — Razorpay event-ID dedup table (admin-only)
+- `/users/{uid}/usage/*` — write-locked (read OK for UI counter)
+- `/users/{uid}/rateLimit/burst` — write-locked (inherits from `users/{uid}/{document=**}` block)
 
-New Firestore collection: `ipUsage/{ip_hash}/daily/{date}` where `ip_hash = SHA256(raw_ip)`.
+### 4. Storage Rules
 
-**Files Changed:**
-- `functions/src/middleware/rateLimit.ts` (full rewrite)
-- `firestore.rules` (added ipUsage collection lock: `allow read, write: if false`)
-
-**Verification:**
-```
-Firebase Console → Firestore Rules Playground
-- IP: 203.0.113.42 (any test IP)
-- Operation: write to /ipUsage/[sha256_hash]/daily/2026-05-14
-- Expected: DENY (locked, Cloud Functions only)
-```
-
----
-
-### 4. 🟠 HIGH — Feedback Update Has No Ownership Check
-
-**Description:**  
-Firestore rule `allow update: if request.auth != null` allowed any authenticated user to update ANY feedback document, even those created by other users. Users could corrupt each other's feedback.
-
-**Fix:**  
-Added ownership check to feedback update rule:
-```
-allow update: if request.auth != null
-  && request.auth.uid == resource.data.uid
-  && request.auth.token.firebase.sign_in_provider != 'anonymous';
-```
-
-Only the original creator can update their own feedback.
-
-**Files Changed:**
-- `firestore.rules` (lines 27-30)
-
-**Verification:**
-```
-Firebase Console → Firestore Rules Playground
-- Scenario: User A tries to update feedback created by User B
-- UID: User A's UID
-- Operation: update /feedback/{User_B's_feedback_doc}
-- Expected: DENY
-```
-
----
-
-### 5. 🟠 HIGH — Anonymous Users Can Spam Feedback/Replies
-
-**Description:**  
-`request.auth != null` includes auto-created anonymous Firebase sessions. Every page load creates an anonymous user. Without a check, a bot could create thousands of accounts and spam the feedback board.
-
-**Fix:**  
-Added `request.auth.token.firebase.sign_in_provider != 'anonymous'` check to:
-- Feedback create rule (line 24)
-- Feedback update rule (line 29)
-- Reply create rule (line 36)
-
-Only users who signed in with Google (or another real auth provider) can create feedback/replies. Anonymous guests can read but not write.
-
-**Files Changed:**
-- `firestore.rules` (lines 24, 29, 36)
-
-**Verification:**
-```
-Firebase Console → Firestore Rules Playground
-- UID: Any auto-created anonymous user (available in Auth section)
-- Operation: create document at /feedback/test
-- Expected: DENY
-```
-
----
-
-### 6. 🟡 MEDIUM — Missing Content Security Policy Header
-
-**Description:**  
-No Content-Security-Policy (CSP) header was configured. An XSS vulnerability (e.g., script injection via user content) could execute malicious JavaScript with full access to the user's Firebase auth tokens and Firestore data.
-
-**Fix:**  
-Added CSP header to Firebase hosting configuration (firebase.json):
-```
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://recaptcha.net https://www.google.com; [...]
-```
-
-CSP allows scripts from:
-- Same origin (`'self'`)
-- Google static CDN (`gstatic.com`) — Google Fonts, Firebase Auth UI
-- reCAPTCHA domains (`recaptcha.net`) — App Check
-- Connect to Firebase APIs and Google services
-
-Blocks:
-- Inline scripts from user content (blocked by CSP, required inline scripts from reCAPTCHA use nonce/hash exemption)
-- Third-party script injection
-
-**Files Changed:**
-- `firebase.json` (added CSP header to headers array, line 39)
-
-**Verification:**
-```
-Open https://publishkit.web.app in a browser
-- Press F12 → Console → Network tab
-- Check headers on any request
-- Look for: Content-Security-Policy header value
-- Should see: "default-src 'self'; script-src 'self' 'unsafe-inline'..." etc.
-```
-
----
-
-## Deployment Order & Verification
-
-The fixes were deployed in this order to avoid exploitable windows:
-
-1. **Functions deployed first** — New atomic rate limit code live, old non-atomic code no longer in use
-2. **Firestore rules deployed second** — Client-side quota resets blocked, ipUsage locked
-3. **Hosting deployed third** — CSP header added to all responses
-
-**Status Check:**
-```bash
-firebase deploy --only functions --only firestore:rules --only hosting
-```
-
-All three services deployed successfully on 2026-05-14.
-
----
-
-## Remaining Protective Measures (Already in Place)
-
-✅ **Gemini API Key Security**
-- API key stored in Firebase Secret Manager (not in frontend, env vars, or git)
-- Accessed only by Cloud Functions via `geminiApiKey.value()`
-
-✅ **App Check (reCAPTCHA Enterprise)**
-- Enforced on `processAudio` callable function
-- Prevents unauthenticated abuse
-- Site key: `6LcapOQsAAAAAIruihJKCmhDKLWmKhp2I9VqgYKh`
-
-✅ **Google Cloud API Quota Cap**
-- Hard limit: 8,000 Gemini 2.5 Flash requests/day
-- Equivalent to ≈₹6,000/month even at 100% saturation
-- Configured in Google Cloud Console → Generative Language API
-
-✅ **Storage Rules**
-- File type validation: audio, PDF, images only
 - 200 MB max file size
-- Per-user isolation
+- MIME type allowlist: `audio/*`, `application/pdf`, `image/jpeg|png|webp`
+- Per-user paths: `users/{uid}/uploads/*` and `users/{uid}/audio/*` — caller's auth UID must match
+- Auto-delete after 3 hours (scheduled `deleteOldAudio` Cloud Function)
 
-✅ **Guest Free Trial**
-- 1 free upload per device (fingerprinting + IP)
-- Atomic quota enforcement (already used transaction pattern)
+### 5. Razorpay Billing Path
 
----
+| Control | Where |
+|---|---|
+| Plan IDs hardcoded server-side | `handlePayment.ts:PLAN_IDS` — client cannot fake the price |
+| Subscription ID validated as Razorpay-shaped string | `FIREBASE_UID_REGEX` for UID + structural check on `subId` |
+| HMAC signature constant-time | `safeEqual()` wraps `crypto.timingSafeEqual` |
+| Plan whitelist on webhook write | `ALLOWED_PLANS = {'pro', 'ultra'}` |
+| Duplicate-subscription block | `createSubscription` refuses if `razorpaySubscriptionId` already set on user doc |
+| Stale cancel-event filter | Cancel only reverts plan if `subId` matches the stored value |
+| Event-ID idempotency | `webhookEvents/{x-razorpay-event-id}` doc as dedup key |
+| Generic client error messages | Never echo raw upstream errors |
+| Secrets in Secret Manager | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` |
 
-## What Still Requires Monitoring
+### 6. Input Validation (anti-prompt-injection + cost burn)
 
-⚠️ **Not an Auto-Lock:**
-- The 8,000 req/day Google Cloud quota will deny requests but won't automatically shut off billing
-- **Action:** Set up budget alerts in Google Cloud Billing console (already configured per GEMINI.md: ₹1,000 alert threshold)
+| Field | Cap | Sanitization | File |
+|---|---|---|---|
+| `topic` (handleScript) | 500 chars | trim | `handleScript.ts` |
+| `title` (handleRepurposing) | 500 chars | trim + strip control chars (`\x00–\x1F` except `\n` `\t`) | `handleRepurposing.ts` |
+| `description` (handleRepurposing) | 2000 chars | trim + strip control chars | `handleRepurposing.ts` |
+| `platforms` (handleRepurposing) | allowlist: `['x', 'instagram', 'linkedin']` | array filter | `handleRepurposing.ts` |
+| `resultId` (handleRepurposing) | regex `^[A-Za-z0-9_-]{1,128}$` | reject if mismatch | `handleRepurposing.ts` |
+| `language` (all 3 callables) | `VALID_LANGUAGES` set of 13 | `coerceLanguage()` falls back to English | `lib/languages.ts` |
+| `plan` (createSubscription) | `['pro', 'ultra']` whitelist | strict equality | `handlePayment.ts` |
+| File MIME type | Storage rules allowlist | Storage rejects at upload | `storage.rules` |
+| File size | 200 MB | Storage rules | `storage.rules` |
 
-⚠️ **VPN/Proxy Detection:**
-- Current detection (header-based only) is bypassed by residential proxies
-- **Action:** Monitor Firestore logs for patterns of abuse from known VPN IPs; consider IP reputation service integration if needed
+The language directive (`strongLanguageDirective`) is placed **after** user-controlled text in every Gemini prompt. This is a structural anti-prompt-injection invariant — do not refactor it to come first.
 
-⚠️ **Rate Limit Bypass via Fingerprint Spoofing:**
-- If a client omits the `fingerprint` parameter, guest identity falls back to IP-only (not a new regression, existing behavior)
-- **Action:** Monitor anonymous guest quota for unusual patterns
+### 7. HTTP Headers (Firebase Hosting)
 
----
+Set in `firebase.json` headers section, applied to all responses:
 
-## Summary of Changes
+- `Content-Security-Policy` — restricts script-src / connect-src / frame-src / etc. to known Firebase, Google, and Razorpay origins
+- `X-Frame-Options: DENY` — blocks clickjacking
+- `X-Content-Type-Options: nosniff` — blocks MIME confusion
+- `Referrer-Policy: no-referrer-when-downgrade`
+- `Strict-Transport-Security` — forces HTTPS via Firebase Hosting default
 
-| Component | Before | After | Impact |
-|-----------|--------|-------|--------|
-| Rate Limit | 2 separate ops (race condition) | 1 atomic transaction | ✅ No quota bypass |
-| Usage Subcollection | Client writable | Cloud Functions only | ✅ No self-reset |
-| IP Limiting | None | 30 req/day per IP | ✅ Multi-account prevention |
-| Feedback Update | Any authed user | Owner only | ✅ Data integrity |
-| Feedback/Replies Create | Any authed (incl. anon) | Real users only | ✅ No spam |
-| CSP Header | None | Enabled | ✅ XSS protection |
-| Git History | .env committed | Not in this fix, already gitignored | ✅ Secrets safe |
+### 8. Cost Caps (defense-in-depth budget protection)
 
----
+Even if every other control above failed, these mathematically bound how much money an attacker can cost us:
 
-## Testing & Verification Checklist
-
-- [ ] Attempt to trigger rate limit: upload 10 files in < 1 second from same UID → 10th succeeds, 11th fails ✅
-- [ ] Attempt concurrent quota reset: write to `users/{uid}/usage/{date}` directly → DENY ✅
-- [ ] Attempt multi-account bypass: upload from 5 different Google accounts on same IP → hits IP limit after ~30 calls ✅
-- [ ] Attempt to update another user's feedback → DENY ✅
-- [ ] Attempt to create feedback as anonymous user → DENY ✅
-- [ ] Check CSP header in browser developer tools → Present and correct ✅
-- [ ] Monitor Cloud Functions logs for `resource-exhausted` errors (expected behavior) ✅
-
----
-
-## Acknowledgments
-
-Security audit performed using:
-- Codebase analysis via Claude Code
-- Firestore rules playground validation
-- Manual verification against video security patterns from Chris (credit to his public disclosure)
+1. **GCP Gemini API daily quota: 8,000 requests/day** → max ~₹600/day in Gemini costs (set in GCP Console)
+2. **GCP Billing alert: ₹1,000 / month** → email notification trips long before catastrophic
+3. **Razorpay subscription model** → revenue capped per plan, no spike via API abuse
 
 ---
 
-**Next Steps (Optional, for future enhancement):**
-1. Implement IP reputation service (e.g., MaxMind) for VPN/proxy detection (currently header-based)
-2. Add CORS configuration if exposing any public API endpoints
-3. Implement rate limiting on Cloud Storage uploads (currently size-limited only)
-4. Consider upgrade path to Node.js 22 (current: Node.js 20, deprecated Oct 2026)
-5. Monitor for new Firebase security best practices and update accordingly
+## What This Repo Does NOT Defend Against (out of scope)
+
+- **Compromised user device** — if attacker has root on the user's phone, our web app has no RASP / TEE / Play Integrity equivalent. Banking-grade protections like attestation via Google Play Integrity API or Apple DeviceCheck apply to native apps, not browser apps. The equivalent layer for web is App Check + reCAPTCHA Enterprise — present and enforced.
+- **Compromised Firebase project** — if a Firebase admin's Google account is breached, all bets are off. Mitigation is at the Google account level: 2FA + hardware security key on the Firebase project owner account.
+- **Compromised Razorpay account** — same. Mitigation is at the Razorpay dashboard: strong password + 2FA + restricted IP allowlist for dashboard access.
+- **Compromised GitHub account** — branch protection on `main` + 2FA on the GitHub account is the recommended setup (see Operational Checklist).
+- **Supply chain attack on npm packages** — partially mitigated: lockfiles committed, `npm audit` clean, no install scripts in our direct deps. Cannot fully eliminate.
+
+---
+
+## Operational Checklist (dashboard actions, not code)
+
+These items can't be expressed in repo code. They must be verified periodically by the project owner.
+
+### Quarterly (every 3 months)
+- [ ] Run `npm audit` in both root and `functions/` — fix all HIGHs
+- [ ] Run gstack `/cso` skill or equivalent (manual checklist below) over the full codebase
+- [ ] Confirm Firebase App Check is set to **Enforce** (not just Unenforced/Monitor) for: `processAudio`, `generateScript`, `generateRepurposing`, `createSubscription`. Firebase Console → App Check → APIs.
+- [ ] Confirm Gemini 2.5 Flash daily quota cap is still at 8,000/day. GCP Console → APIs → Generative Language API → Quotas.
+- [ ] Confirm GCP budget alert at ₹1,000/month is active and routes to the right email.
+- [ ] Rotate Razorpay live `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET`. Run the file-based rotation flow documented in README → "Run Locally → Razorpay Setup".
+- [ ] Confirm GitHub branch protection on `main`: require PR review, require status checks, restrict force-push. GitHub → Settings → Branches.
+- [ ] Confirm GitHub secret scanning + push protection is enabled. GitHub → Settings → Code security.
+- [ ] Review Firebase Authentication users list for anomalies (mass-signups).
+
+### Monthly
+- [ ] Check Cloud Functions logs for unusual `resource-exhausted` patterns (could indicate attempted abuse).
+- [ ] Check Razorpay dashboard for failed-payment patterns (could indicate carding attempts).
+- [ ] Verify the Razorpay live webhook is still registered at the correct Cloud Function URL and includes `subscription.activated/charged/cancelled/completed` events.
+
+### After every prod deploy
+- [ ] Verify the deployed Cloud Function version is using the **latest** secret version (`firebase functions:secrets:access RAZORPAY_KEY_SECRET` → confirm length is correct).
+- [ ] Smoke test: hit `/pricing` as a fresh user, confirm Upgrade modal opens with the correct branded plan name + amount.
+
+### One-time setup (do once if not already done)
+- [ ] Razorpay → Settings → Account Settings → enable 2FA on the dashboard owner account
+- [ ] Firebase / GCP → enable 2FA on the project owner Google account; ideally hardware security key
+- [ ] GitHub → enable 2FA on `ravishankaraiofficial` account
+- [ ] Set up a `security@` or recovery email distinct from the day-to-day email
+
+---
+
+## Incident Response Runbook
+
+### "I think someone is abusing the API"
+
+1. Open Cloud Functions logs (`firebase functions:log`) — filter by `resource-exhausted` and look for repeated rejections from same UID.
+2. Open Firestore Console → `users/{suspected-uid}` → check `scriptUsageThisMonth`, `repurposingUsageThisMonth`, and `rateLimit/burst` doc — sanity-check the timestamps.
+3. To kill a specific abuser fast: manually set their plan to a non-existent value (e.g., `plan: "suspended"`). Their next call hits the default-free path AND the `coerceLanguage`/plan map returns 0 limits.
+4. Long-term: ban the user via Firebase Auth → delete user. Their UID can't be reused.
+
+### "Razorpay webhook is failing"
+
+1. Check `firebase functions:log --only razorpayWebhook` for the error.
+2. Common: `Invalid signature` → the `RAZORPAY_WEBHOOK_SECRET` in Firebase doesn't match the one registered on Razorpay dashboard. Re-set it using the file-based flow.
+3. Less common: `400 Missing signature` → Razorpay didn't send the header. Could be a test ping. Confirm in Razorpay dashboard → Webhooks → Recent Deliveries.
+
+### "I leaked a secret in a commit"
+
+1. **Immediately rotate** the secret on the provider dashboard (Razorpay, Firebase, GCP). The committed value is now worthless.
+2. Update the rotated secret in Firebase Secret Manager: `firebase functions:secrets:set <NAME>`.
+3. Redeploy: `firebase deploy --only functions`.
+4. Force-push to scrub the commit from history? Generally NOT recommended — anyone who cloned in the window has it anyway. The rotation is what matters.
+5. Audit: `git log --all -p -S "<leaked-string>"` to find every commit that contained it, document for incident report.
+
+### "My GitHub account got compromised"
+
+1. From a safe device: GitHub → Settings → Sessions → Sign out everywhere
+2. Reset password + force 2FA reset.
+3. Audit: GitHub → Settings → Security log → look for unusual activity (force-push, new SSH keys added, new PATs created)
+4. Rotate all secrets that were ever accessible from the device.
+5. If `main` was force-pushed: `git log --reflog` from your local clone can recover. Compare to GitHub's commit history.
+
+---
+
+## Change Log
+
+| Date | Pass | Commit | Summary |
+|---|---|---|---|
+| 2026-05-14 | Hardening Pass 1 | (initial security hardening) | Atomic rate limit, ipUsage lock, anonymous-spam block on feedback, CSP header, secret-manager for Gemini key |
+| 2026-05-18 | Hardening Pass 2 | `fb8a8ff` | Razorpay timing-safe HMAC, plan-allowlist, UID-shape regex, duplicate-subscription block, stale-cancel filter, legacy ultraTrials rule removed, fast-xml-builder CVE fixed |
+| 2026-05-18 | Hardening Pass 3 | (this change) | Burst rate limit (Free 2/min, Pro 8/min, Max 20/min), webhook event-ID idempotency, prompt-injection length caps + control-char strip, `webhookEvents/` admin-only rule, scheduled cleanup extended to prune dedup docs |
+
+---
+
+*Maintained alongside [README.md](README.md). When you change a control here, update README too. If a SECURITY.md row says "CLOSED" but the corresponding code doesn't enforce it, that's a critical bug — open an issue immediately.*

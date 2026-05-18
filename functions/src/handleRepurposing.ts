@@ -2,7 +2,17 @@ import * as functions from 'firebase-functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';
-import { enforceRepurposingTrial } from './middleware/rateLimit';
+import { enforceRepurposingTrial, enforceBurstLimit } from './middleware/rateLimit';
+
+// Strip null bytes and non-newline control characters. Keeps \n and \t.
+// Prevents weird prompt-injection payloads that lean on \x00 or ANSI escapes.
+function sanitizeUserText(s: string): string {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+}
+
+const MAX_TITLE_CHARS = 500;
+const MAX_DESCRIPTION_CHARS = 2000;
 import { coerceLanguage, languageHint } from './lib/languages';
 
 interface RepurposingOutput {
@@ -28,9 +38,14 @@ export const generateRepurposing = functions
         throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
       }
 
-      // Validate inputs
-      const title = typeof data.title === 'string' ? data.title.trim() : '';
-      const description = typeof data.description === 'string' ? data.description.trim() : '';
+      // Validate inputs. Sanitize control chars + apply hard length caps before
+      // anything touches Gemini. These caps protect against (a) input-token cost
+      // burn from oversized payloads, and (b) prompt-injection payloads padding
+      // novel instructions far below the visible portion.
+      const rawTitle = typeof data.title === 'string' ? sanitizeUserText(data.title.trim()) : '';
+      const rawDescription = typeof data.description === 'string' ? sanitizeUserText(data.description.trim()) : '';
+      const title = rawTitle;
+      const description = rawDescription;
       const platforms = Array.isArray(data.platforms) ? data.platforms : [];
       const language = coerceLanguage(data.language);
       // Optional: when provided, the resulting MultiPost output is persisted
@@ -44,6 +59,18 @@ export const generateRepurposing = functions
       if (!title || title.length === 0) {
         throw new functions.https.HttpsError('invalid-argument', 'Title is required');
       }
+      if (title.length > MAX_TITLE_CHARS) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `Title is too long (max ${MAX_TITLE_CHARS} characters)`
+        );
+      }
+      if (description.length > MAX_DESCRIPTION_CHARS) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `Description is too long (max ${MAX_DESCRIPTION_CHARS} characters)`
+        );
+      }
 
       if (platforms.length === 0) {
         throw new functions.https.HttpsError('invalid-argument', 'At least one platform must be selected');
@@ -56,10 +83,15 @@ export const generateRepurposing = functions
         throw new functions.https.HttpsError('invalid-argument', 'Invalid platforms selected');
       }
 
-      // Plan-aware trial / usage enforcement (atomic; throws resource-exhausted when blocked)
-      // Charges once per selected platform — 3 platforms = 3 generations.
+      // Read plan once for both burst + monthly checks
       const userSnap = await db.doc(`users/${context.auth.uid}`).get();
       const plan = (userSnap.data()?.plan as string) || 'free';
+
+      // Burst rate limit: blocks single-user request floods. Tier limits:
+      // Free 2/min, Pro 8/min, Max 20/min. Sliding 60s window.
+      await enforceBurstLimit(context.auth.uid, plan);
+
+      // Monthly usage — charges once per selected platform (3 platforms = 3).
       await enforceRepurposingTrial(context.auth.uid, plan, selectedPlatforms.length);
 
       // Initialize Gemini

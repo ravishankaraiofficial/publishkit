@@ -163,6 +163,33 @@ export const razorpayWebhook = functions
         return;
       }
 
+      // Idempotency / replay protection. Razorpay sends a unique event ID per
+      // delivery; their own retry mechanism reuses the same ID, and an
+      // attacker who captured a valid signed payload would also reuse it.
+      // We dedupe via Firestore doc webhookEvents/{eventId}. Admin-SDK-only
+      // (firestore.rules denies client read/write on this collection).
+      // Old entries are pruned by the scheduled cleanup function.
+      const eventIdRaw = req.headers['x-razorpay-event-id'];
+      const eventId = typeof eventIdRaw === 'string' ? eventIdRaw : '';
+      if (eventId && /^[A-Za-z0-9_-]{1,128}$/.test(eventId)) {
+        const eventRef = db.doc(`webhookEvents/${eventId}`);
+        const eventDoc = await eventRef.get();
+        if (eventDoc.exists) {
+          // Already processed — return 200 so Razorpay doesn't retry. Do not
+          // re-write anything to the user doc.
+          res.status(200).send('OK');
+          return;
+        }
+        // Reserve the event ID before doing work. If two retries race here,
+        // one will succeed and the other will hit `exists` on its next read.
+        await eventRef.set({
+          processedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+      // If the header is missing/malformed we still process the event — better
+      // to risk a duplicate write than to drop a real Razorpay delivery. The
+      // existing subId-match check on cancel events catches stale replays anyway.
+
       const event = req.body.event;
       const subscription = req.body.payload?.subscription?.entity;
       const uid = subscription?.notes?.uid;

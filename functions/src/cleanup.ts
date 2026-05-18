@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 import { db, storage } from './lib/firestore';
 
 /**
@@ -15,8 +16,10 @@ export const deleteOldAudio = functions.pubsub
     const bucket = storage.bucket();
     const now = Date.now();
     const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
     let storageDeleted = 0;
     let firestoreDeleted = 0;
+    let webhookEventsDeleted = 0;
 
     try {
       const [files] = await bucket.getFiles({ prefix: 'users/' });
@@ -75,9 +78,31 @@ export const deleteOldAudio = functions.pubsub
       console.error('Cleanup error:', err?.message);
     }
 
+    // Prune Razorpay webhook event-ID dedup docs older than 7 days. Razorpay's
+    // own retry window is much shorter than that, so anything older than a
+    // week will never be re-delivered and the dedup record is no longer needed.
+    try {
+      const sevenDaysAgo = admin.firestore.Timestamp.fromMillis(now - SEVEN_DAYS_MS);
+      const oldEventsSnap = await db
+        .collection('webhookEvents')
+        .where('processedAt', '<', sevenDaysAgo)
+        .limit(500) // Hard cap per run to keep within Firestore batched-delete safety
+        .get();
+
+      if (!oldEventsSnap.empty) {
+        const batch = db.batch();
+        oldEventsSnap.docs.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+        webhookEventsDeleted = oldEventsSnap.size;
+      }
+    } catch (err: any) {
+      console.error('webhookEvents cleanup error:', err?.message);
+    }
+
     console.log(
       `Cleanup complete — storage files deleted: ${storageDeleted}, ` +
-      `Firestore docs deleted: ${firestoreDeleted}`
+      `Firestore result docs deleted: ${firestoreDeleted}, ` +
+      `webhookEvents pruned: ${webhookEventsDeleted}`
     );
     return null;
   });

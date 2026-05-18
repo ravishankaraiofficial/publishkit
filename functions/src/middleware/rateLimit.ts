@@ -154,3 +154,70 @@ export async function enforceRepurposingTrial(
 ): Promise<void> {
   return enforceTrialOrUsage(uid, plan, 'repurposing', count);
 }
+
+/**
+ * Per-minute burst rate limit — sliding 60-second window.
+ *
+ * Why this exists separately from the monthly quota: a Max user with 1000
+ * monthly calls could fire all 1000 in a single minute, exhausting the
+ * Gemini daily quota in seconds AND DoS-ing other users via cold-start
+ * storm + concurrent-instance contention. Monthly caps protect the budget
+ * over the month; burst caps protect against single-attacker DoS.
+ *
+ * Tier limits per 60-second window:
+ *   Free  →  2  (legitimate users never hit this — 1/min is normal)
+ *   Pro   →  8  (covers manual rapid testing comfortably)
+ *   Ultra → 20  (the "Max Plan" — generous headroom)
+ *
+ * Implementation: small ring buffer of request timestamps stored at
+ * users/{uid}/rateLimit/burst. On each call we transactionally prune
+ * timestamps older than 60s, check size, append now if under limit,
+ * write back. The doc is admin-SDK-only (firestore.rules already blocks
+ * everything under users/{uid}/* writes by client; this subdoc inherits).
+ *
+ * Cost: one read + one write per gated request. Negligible vs Gemini call cost.
+ */
+const BURST_LIMITS: Record<string, number> = {
+  free: 2,
+  pro: 8,
+  ultra: 20,
+};
+const BURST_WINDOW_MS = 60 * 1000;
+
+export async function enforceBurstLimit(uid: string, plan: string): Promise<void> {
+  const limit = BURST_LIMITS[plan] ?? BURST_LIMITS.free;
+  const burstRef = db.doc(`users/${uid}/rateLimit/burst`);
+  const nowMs = Date.now();
+  const windowStart = nowMs - BURST_WINDOW_MS;
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(burstRef);
+    const raw: unknown = snap.exists ? snap.data()?.timestamps : undefined;
+    const existing: number[] = Array.isArray(raw)
+      ? raw.filter((n): n is number => typeof n === 'number')
+      : [];
+
+    // Prune anything older than the window. Cap retained length defensively at
+    // 100 in case something pathological grew the array (a buggy client, a
+    // dropped transaction, etc.). Plan tier limits are all <= 20 so this is
+    // pure paranoia.
+    const recent = existing.filter((t) => t > windowStart).slice(-100);
+
+    if (recent.length >= limit) {
+      // How long until the oldest timestamp falls out of the window?
+      const oldest = recent[0];
+      const retryInSec = Math.max(1, Math.ceil((oldest + BURST_WINDOW_MS - nowMs) / 1000));
+      throw new functions.https.HttpsError(
+        'resource-exhausted',
+        `Too many requests. Slow down — try again in ${retryInSec}s.`
+      );
+    }
+
+    recent.push(nowMs);
+    if (snap.exists) {
+      tx.update(burstRef, { timestamps: recent, lastRequest: admin.firestore.FieldValue.serverTimestamp() });
+    } else {
+      tx.set(burstRef, { timestamps: recent, lastRequest: admin.firestore.FieldValue.serverTimestamp() });
+    }
+  });
+}

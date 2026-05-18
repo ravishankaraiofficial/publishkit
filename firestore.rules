@@ -7,6 +7,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Razorpay webhook event-ID dedup table — Cloud Functions only.
+    // Pruned weekly by the scheduled cleanup function.
+    match /webhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+
     // IP usage counters — Cloud Functions only (Admin SDK bypasses rules)
     match /ipUsage/{document=**} {
       allow read, write: if false;
