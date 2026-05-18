@@ -44,3 +44,20 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# ── Secrets, credentials, temp files (NEVER commit) ──────────────────────────
+# Catch the patterns we used during Razorpay live-mode migration and any
+# similar defensive holding files. Service account JSONs MUST never land here.
+*.tmp
+*.tmp.txt
+creds.*
+.secret_*
+*.credentials.json
+*.serviceaccount.json
+firebase-adminsdk-*.json
+service-account-*.json
+gcloud-service-key.json
+
+# ── Worktrees & local Claude state ───────────────────────────────────────────
+.claude/worktrees/
+.gemini/
