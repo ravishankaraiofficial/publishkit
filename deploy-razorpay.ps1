@@ -1,14 +1,14 @@
-# Razorpay Deployment & Diagnostic Script (PowerShell — Windows-safe)
+# Razorpay Deployment & Diagnostic Script (PowerShell 5.1 - Windows-safe)
 # Sets up secrets, builds, deploys, and prints a smoke-test runbook.
 #
 # Usage:  .\deploy-razorpay.ps1
 #
-# This script is idempotent: it never overwrites a secret silently. If a
-# secret is already set it asks before changing it.
+# Pure ASCII content - PowerShell 5.1 mis-reads UTF-8 multi-byte chars
+# without a BOM, which breaks string parsing. No em dashes, no smart
+# quotes, no Unicode anywhere in this file.
 
-# DO NOT set $ErrorActionPreference = "Stop" globally — Firebase CLI prints
-# progress messages to stderr (e.g. "- Preparing the list of your Firebase
-# projects") which PowerShell 5.1 turns into terminating NativeCommandErrors
+# Do NOT set $ErrorActionPreference to "Stop". Firebase CLI writes progress
+# messages to stderr which PS 5.1 turns into terminating NativeCommandError
 # under strict mode. We use explicit $LASTEXITCODE checks instead.
 $ErrorActionPreference = "Continue"
 
@@ -27,8 +27,7 @@ if ($LASTEXITCODE -ne 0 -or -not $firebaseVersion) {
 }
 Write-Host "[OK] Firebase CLI found: $firebaseVersion" -ForegroundColor Green
 
-# Active project — skip the dashboard-list lookup (it writes progress to stderr
-# which trips PowerShell under strict mode). Just verify .firebaserc exists.
+# Active project - read .firebaserc directly to avoid firebase CLI stderr noise.
 if (Test-Path ".firebaserc") {
     $rcContent = Get-Content ".firebaserc" -Raw
     if ($rcContent -match '"default"\s*:\s*"([^"]+)"') {
@@ -37,7 +36,7 @@ if (Test-Path ".firebaserc") {
         Write-Host "[!] .firebaserc found but no default project" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "[!] No .firebaserc — run: firebase use <project-id>" -ForegroundColor Yellow
+    Write-Host "[!] No .firebaserc. Run: firebase use PROJECT_ID" -ForegroundColor Yellow
 }
 
 # ============ STEP 2: Build Functions ============
@@ -61,7 +60,7 @@ Pop-Location
 # ============ STEP 3: Set / Update Secrets ============
 Write-Host ""
 Write-Host "Step 3: Setting Razorpay secrets..." -ForegroundColor Yellow
-Write-Host "(Existing secrets are listed; you'll be asked before any change.)" -ForegroundColor DarkGray
+Write-Host "(Existing secrets are listed. You will be asked before any change.)" -ForegroundColor DarkGray
 Write-Host ""
 
 # List existing secrets once
@@ -95,8 +94,10 @@ function Set-RazorpaySecret {
         return
     }
 
-    # PowerShell-safe: pipe the value to firebase via STDIN using --data-file=-
-    $plain.Trim() | firebase functions:secrets:set $Name --data-file=-
+    # Trim whitespace (catches trailing newlines from paste) and pipe via STDIN.
+    $cleaned = $plain.Trim()
+    Write-Host "    Value length after trim: $($cleaned.Length) chars" -ForegroundColor DarkGray
+    $cleaned | firebase functions:secrets:set $Name --data-file=-
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host "    [OK] $Name set" -ForegroundColor Green
@@ -105,9 +106,9 @@ function Set-RazorpaySecret {
     }
 }
 
-Set-RazorpaySecret -Name "RAZORPAY_KEY_ID"         -Hint "Live key starts with rzp_live_  (test with rzp_test_)"
-Set-RazorpaySecret -Name "RAZORPAY_KEY_SECRET"     -Hint "Live key secret, ~24 chars"
-Set-RazorpaySecret -Name "RAZORPAY_WEBHOOK_SECRET" -Hint "Secret shown when you registered the webhook URL on the live dashboard"
+Set-RazorpaySecret -Name "RAZORPAY_KEY_ID"         -Hint "Live key starts with rzp_live_  (test starts with rzp_test_)"
+Set-RazorpaySecret -Name "RAZORPAY_KEY_SECRET"     -Hint "Live key secret, exactly 24 chars"
+Set-RazorpaySecret -Name "RAZORPAY_WEBHOOK_SECRET" -Hint "Secret you set when registering the webhook URL on the live dashboard"
 
 # ============ STEP 4: Deploy ============
 Write-Host ""
@@ -130,14 +131,14 @@ Write-Host "     firebase functions:log --only createSubscription,razorpayWebhoo
 Write-Host ""
 Write-Host "2. Open https://publishkit.web.app/pricing as a signed-in non-Pro user." -ForegroundColor Cyan
 Write-Host ""
-Write-Host "3. Click 'Upgrade' on the Pro card. The Razorpay modal should say" -ForegroundColor Cyan
+Write-Host "3. Click Upgrade on the Pro card. The Razorpay modal should say" -ForegroundColor Cyan
 Write-Host "   'PublishKit Pro' and Rs.299/month. Complete with a real card you own." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "4. Within ~10 seconds the log window should show:" -ForegroundColor Cyan
 Write-Host "     [createSubscription] Success! Subscription ID: sub_..." -ForegroundColor White
 Write-Host "     subscription.activated event received (from razorpayWebhook)" -ForegroundColor White
 Write-Host ""
-Write-Host "5. Reload /pricing -> Pro card shows 'Current Plan'. Navbar pill -> 'Pro'." -ForegroundColor Cyan
+Write-Host "5. Reload /pricing. Pro card should show 'Current Plan'. Navbar pill 'Pro'." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "6. Refund the test payment from the Razorpay dashboard if desired." -ForegroundColor Cyan
 Write-Host ""

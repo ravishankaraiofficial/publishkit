@@ -12,6 +12,7 @@ const db = admin.firestore();
 
 // Live-mode plan IDs (Razorpay dashboard → Subscriptions → Plans).
 // 'ultra' is the internal plan key — surfaces as "PublishKit Max" to customers.
+// Last rebound to latest secret versions: 2026-05-18.
 const PLAN_IDS: Record<string, string> = {
   pro: 'plan_Spz2M0sp8rv1SA',
   ultra: 'plan_SqU3YCU38LA6aw',
