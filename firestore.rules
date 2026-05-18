@@ -46,10 +46,12 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
     }
 
-    // Ultra trials for Script Writer and Repurposing Planner
-    match /users/{uid}/ultraTrials/{feature} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
+    // (Removed) Legacy /users/{uid}/ultraTrials/{feature} subcollection that
+    // backed the old client-side trial gate. Trial / monthly-counter state
+    // now lives in admin-only fields on the user doc (scriptUsageThisMonth,
+    // repurposingUsageThisMonth, etc.) and is written exclusively by Cloud
+    // Functions via the Admin SDK. Removing the client-writable rule closes
+    // the surface even though no code currently reads from this path.
 
     // Feedback board — anyone can read, only real signed-in users can create/vote
     match /feedback/{feedbackId} {

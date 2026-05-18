@@ -38,13 +38,23 @@ export const createSubscription = functions
         throw new functions.https.HttpsError('invalid-argument', 'Invalid plan: must be "pro" or "ultra"');
       }
 
+      // Defense-in-depth: refuse to create a second active subscription. Without
+      // this, a Pro user could click "Upgrade" on Max and end up paying for BOTH
+      // plans (Razorpay creates the second subscription happily; webhook would
+      // overwrite the user's plan field but the first subscription keeps billing).
+      const existingDoc = await db.doc(`users/${context.auth.uid}`).get();
+      const existingSubId = existingDoc.data()?.razorpaySubscriptionId;
+      if (existingSubId) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'You already have an active subscription. Cancel it on the Pricing page before upgrading.'
+        );
+      }
+
       const keyId = razorpayKeyId.value();
       const keySecret = razorpayKeySecret.value();
 
       console.log('[createSubscription] Plan:', plan);
-      console.log('[createSubscription] Plan ID:', PLAN_IDS[plan]);
-      console.log('[createSubscription] Key ID loaded:', keyId ? `${keyId.slice(0, 10)}...` : 'MISSING');
-      console.log('[createSubscription] Key Secret loaded:', keySecret ? `length=${keySecret.length}` : 'MISSING');
 
       // Make direct HTTPS call to Razorpay API (bypassing SDK)
       const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
@@ -96,32 +106,59 @@ export const createSubscription = functions
         keyId: keyId,
       };
     } catch (error: any) {
-      console.error('[createSubscription] ERROR caught:', error);
-      console.error('[createSubscription] Error type:', typeof error);
-      console.error('[createSubscription] Error toString:', error?.toString?.());
-      console.error('[createSubscription] Error message:', error?.message);
-      console.error('[createSubscription] Error code:', error?.code);
-      console.error('[createSubscription] Error statusCode:', error?.statusCode);
-      console.error('[createSubscription] Error response:', JSON.stringify(error?.response?.data));
-      console.error('[createSubscription] Full error JSON:', JSON.stringify(error));
+      // Log just the safe summary. Full error objects can include response
+      // bodies, headers, and internal stack traces — keep them out of logs.
+      console.error('[createSubscription] error:', error?.message || String(error));
       if (error instanceof functions.https.HttpsError) throw error;
-      throw new functions.https.HttpsError('internal', error?.message || error?.toString?.() || 'Failed to create subscription');
+      // Never echo raw upstream errors to the client — they can contain API
+      // implementation details. Return a generic message; full diagnosis is in logs.
+      throw new functions.https.HttpsError('internal', 'Failed to create subscription. Please try again.');
     }
   });
+
+// Plan values the webhook is allowed to set on a user doc. Anything else is
+// dropped before the Firestore write. Defense-in-depth: if Razorpay's
+// notes.plan ever returned something unexpected (or were tampered with),
+// we won't blindly write it.
+const ALLOWED_PLANS = new Set(['pro', 'ultra']);
+
+// Firebase Auth UIDs are 28-character alphanumerics. Validating the shape
+// prevents the webhook from writing to /users/<weird-path-with-slashes>
+// even in the theoretical case where notes.uid got corrupted upstream.
+const FIREBASE_UID_REGEX = /^[A-Za-z0-9]{20,128}$/;
+
+/**
+ * Constant-time string comparison wrapping crypto.timingSafeEqual.
+ * Required for any secret/HMAC comparison — using `!==` leaks signature
+ * bytes to attackers via response-time differences (textbook side channel).
+ */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'hex');
+  const bufB = Buffer.from(b, 'hex');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export const razorpayWebhook = functions
   .runWith({ secrets: [razorpayWebhookSecret] })
   .https.onRequest(async (req, res) => {
     try {
-      const signature = req.headers['x-razorpay-signature'] as string;
-      const body = JSON.stringify(req.body);
+      const signature = req.headers['x-razorpay-signature'] as string | undefined;
+      if (!signature || typeof signature !== 'string') {
+        res.status(400).send('Missing signature');
+        return;
+      }
 
+      const body = JSON.stringify(req.body);
       const expectedSig = crypto
         .createHmac('sha256', razorpayWebhookSecret.value())
         .update(body)
         .digest('hex');
 
-      if (signature !== expectedSig) {
+      // CRITICAL: constant-time comparison. `signature !== expectedSig` is
+      // vulnerable to timing attacks — an attacker can recover the HMAC
+      // byte-by-byte by measuring response latency.
+      if (!safeEqual(signature, expectedSig)) {
         res.status(400).send('Invalid signature');
         return;
       }
@@ -130,35 +167,59 @@ export const razorpayWebhook = functions
       const subscription = req.body.payload?.subscription?.entity;
       const uid = subscription?.notes?.uid;
       const plan = subscription?.notes?.plan;
+      const subId = subscription?.id;
 
-      if (!uid || !plan) {
+      // Defense-in-depth input validation. notes.* come from Razorpay's
+      // verified payload, but we still validate shape before any Firestore write.
+      if (!uid || typeof uid !== 'string' || !FIREBASE_UID_REGEX.test(uid)) {
         res.status(200).send('OK');
         return;
       }
+      if (!plan || typeof plan !== 'string' || !ALLOWED_PLANS.has(plan)) {
+        // Activated/charged with unknown plan? Silently 200 — Razorpay will retry
+        // and we don't want them disabling the webhook. But never write a
+        // non-whitelisted plan value into the user doc.
+        res.status(200).send('OK');
+        return;
+      }
+      if (typeof subId !== 'string' || subId.length === 0) {
+        res.status(200).send('OK');
+        return;
+      }
+
+      const userRef = db.doc(`users/${uid}`);
 
       if (event === 'subscription.activated' || event === 'subscription.charged') {
         const nextBilling = subscription.charge_at
           ? new Date(subscription.charge_at * 1000)
           : new Date(Date.now() + 32 * 24 * 60 * 60 * 1000);
 
-        await db.doc(`users/${uid}`).set({
+        await userRef.set({
           plan,
           planExpiry: nextBilling.toISOString(),
-          razorpaySubscriptionId: subscription.id,
-}, { merge: true });
+          razorpaySubscriptionId: subId,
+        }, { merge: true });
       }
 
       if (event === 'subscription.cancelled' || event === 'subscription.completed') {
-        await db.doc(`users/${uid}`).set({
-        plan: 'free',
-        planExpiry: admin.firestore.FieldValue.delete(),
-        razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
-}, { merge: true });
+        // Defense-in-depth: only revert plan if the cancellation event refers
+        // to the subscription currently attached to this user. Without this,
+        // an old/stale cancellation event could downgrade a user who has
+        // since started a fresh subscription.
+        const userDoc = await userRef.get();
+        const storedSubId = userDoc.data()?.razorpaySubscriptionId;
+        if (storedSubId && storedSubId === subId) {
+          await userRef.set({
+            plan: 'free',
+            planExpiry: admin.firestore.FieldValue.delete(),
+            razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+          }, { merge: true });
+        }
       }
 
       res.status(200).send('OK');
     } catch (error: any) {
-      console.error('Webhook error:', error);
+      console.error('[razorpayWebhook] error:', error?.message || String(error));
       res.status(500).send('Internal error');
     }
   });
