@@ -46,7 +46,7 @@ export function Navbar() {
   return (
     <>
       {/* ── Desktop top bar ── */}
-      <nav className="hidden sm:flex bg-[#0D0D0D]/90 backdrop-blur-md sticky top-0 z-50">
+      <nav className="hidden sm:flex bg-transparent sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 w-full flex justify-between h-16 items-center">
           <Link to="/" onClick={reset} className="flex items-center gap-2 group transition-all active:scale-95">
             <Zap className="w-5 h-5 text-[#E05A1E]" />
@@ -99,7 +99,7 @@ export function Navbar() {
       </nav>
 
       {/* ── Mobile top bar ── */}
-      <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-[#0D0D0D]/95 backdrop-blur-md sticky top-0 z-50">
+      <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-transparent sticky top-0 z-50">
         <Link to="/" onClick={reset} className="flex items-center gap-2 active:scale-95 transition-all">
           <Zap className="w-4 h-4 text-[#E05A1E]" />
           <span className="text-[#E05A1E] font-bold text-lg tracking-tight">PublishKit</span>
