@@ -3,18 +3,64 @@ import type { OutputLanguage } from '../lib/languages';
 
 export type PlanTier = 'free' | 'pro' | 'ultra';
 
+// Address-form preference for Hindi/Hinglish output. Used by the Script
+// Writer prompt to match the creator's audience-talk style. `na` =
+// not applicable (output language is not Hindi/Hinglish).
+export type AddressForm = 'tum' | 'aap' | 'mixed' | 'na';
+
+export type AudienceLevel = 'beginner' | 'intermediate' | 'advanced' | 'mixed';
+
+export type VideoLength = '15' | '30' | '45' | '60' | '90' | 'long';
+
 export interface CreatorProfile {
+  // ─── Required basics ────────────────────────────────────────────────────
   name: string;
   handle?: string;
+  niche: string;
+  language: OutputLanguage;
+
+  // Required for thumbnails (existing)
   appearance: string;
   brandColor1: string;
   brandColor2: string;
-  language: OutputLanguage;
-  niche: string;
+
+  // ─── NEW required for script quality ────────────────────────────────────
+  // One-line positioning, e.g. "18 y/o building a 6-figure AI agency"
+  positioning?: string;
+  // Who watches your content, e.g. "20-25 y/o aspiring Indian creators"
+  targetAudience?: string;
+  // Overall tone preset for scripts
+  tone?: string;
+
+  // ─── Recommended optionals (sharper scripts) ────────────────────────────
+  audiencePainPoint?: string;
+  audienceLevel?: AudienceLevel;
+  audienceTransformation?: string;
+  catchphrases?: string;
+  avoidWords?: string;
+  hookStyle?: string;
+  ctaStyle?: string;
+  contentPillars?: string;
+  preferredVideoLength?: VideoLength;
+
+  // ─── Advanced optionals (fine-tune voice) ───────────────────────────────
+  age?: number;
+  whatMakesDifferent?: string;
+  personalStory?: string;
+  credentials?: string;
+  addressForm?: AddressForm;
+  usesSlang?: boolean;
+  usesMemes?: boolean;
+  usesCursing?: boolean;
+  bestVideoHooks?: string;
+  hookFormulas?: string;
+
+  // ─── Plan / billing (server-managed) ────────────────────────────────────
   plan?: PlanTier;
   planExpiry?: string;
   razorpaySubscriptionId?: string;
-  // Server-managed trial / usage fields (Admin SDK only — see firestore.rules)
+
+  // ─── Server-managed trial / usage (Admin SDK only — see firestore.rules) ─
   scriptTrialLastUsedAt?: Timestamp | null;
   repurposingTrialLastUsedAt?: Timestamp | null;
   scriptUsageThisMonth?: number;
