@@ -13,7 +13,8 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { cn } from '../lib/utils';
 import { colorNameToHex } from '../lib/colors';
 import { ColorPicker } from '../components/ui/ColorPicker';
-import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_VALUES, formatLanguageOption } from '../lib/languages';
+import { OUTPUT_LANGUAGE_VALUES } from '../lib/languages';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
 import { ChevronDown } from 'lucide-react';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -284,7 +285,7 @@ export function Settings() {
         {...props.register}
         rows={props.rows ?? 3}
         placeholder={props.placeholder}
-        className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D] px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
+        className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
       />
       {props.error && <p className="mt-1.5 text-sm text-[#EF4444]">{props.error}</p>}
     </div>
@@ -401,21 +402,11 @@ export function Settings() {
                     <p className="text-xs text-[#555555] mb-2">
                       Used for titles, descriptions, timestamps, scripts, and MultiPost.
                     </p>
-                    <select
+                    <LanguagePicker
                       value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      className={cn(
-                        'w-full py-3 px-4 rounded-xl text-sm font-medium border transition-all',
-                        'bg-[#0D0D0D] border-[#2A2A2A] text-white',
-                        'focus:outline-none focus:border-[#E05A1E]/60 cursor-pointer'
-                      )}
-                    >
-                      {OUTPUT_LANGUAGES.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {formatLanguageOption(opt)}
-                        </option>
-                      ))}
-                    </select>
+                      variant="input"
+                      onChange={(v) => field.onChange(v)}
+                    />
                   </div>
                 )}
               />

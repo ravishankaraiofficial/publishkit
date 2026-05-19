@@ -6,8 +6,10 @@ import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
+import { Picker } from '../components/ui/Picker';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
 
 interface ScriptOutput {
   hook: string;
@@ -185,7 +187,7 @@ ${output.cta}
               placeholder="What is your video about? E.g., 'How to create viral content on TikTok'"
               rows={3}
               disabled={loading}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-neutral-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           </div>
@@ -194,53 +196,46 @@ ${output.cta}
           <div className="grid md:grid-cols-3 gap-6 mb-6">
             <div>
               <label className="block text-white font-semibold mb-2">Tone</label>
-              <select
+              <Picker<'Casual' | 'Educational' | 'Storytelling'>
                 value={tone}
-                onChange={(e) => setTone(e.target.value as any)}
+                options={[
+                  { value: 'Casual', label: 'Casual' },
+                  { value: 'Educational', label: 'Educational' },
+                  { value: 'Storytelling', label: 'Storytelling' },
+                ]}
+                onChange={(v) => setTone(v)}
                 disabled={loading}
-                className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option>Casual</option>
-                <option>Educational</option>
-                <option>Storytelling</option>
-              </select>
+              />
             </div>
 
             <div>
               <label className="block text-white font-semibold mb-2">Duration</label>
-              <select
+              <Picker<'5' | '10' | '15'>
                 value={duration}
-                onChange={(e) => setDuration(e.target.value as any)}
+                options={[
+                  { value: '5', label: '5 minutes' },
+                  { value: '10', label: '10 minutes' },
+                  { value: '15', label: '15 minutes' },
+                ]}
+                onChange={(v) => setDuration(v)}
                 disabled={loading}
-                className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="5">5 minutes</option>
-                <option value="10">10 minutes</option>
-                <option value="15">15 minutes</option>
-              </select>
+              />
             </div>
 
             <div>
               <label className="block text-white font-semibold mb-2">Language</label>
-              <select
+              <LanguagePicker
                 value={language}
-                onChange={(e) => {
-                  const next = e.target.value as OutputLanguage;
+                variant="input"
+                disabled={loading}
+                onChange={(next) => {
                   const prev = language;
                   setLanguage(next);
                   if (next !== 'English' && next !== prev) {
                     toast(`Output will be in ${toastNativeName(next)}`, 'info');
                   }
                 }}
-                disabled={loading}
-                className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {OUTPUT_LANGUAGES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {formatLanguageOption(opt)}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 

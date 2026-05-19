@@ -43,7 +43,7 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const glowOpacity = isTouchRef.current ? 0.4 : overContent ? 0.05 : 0.7;
+  const glowOpacity = isTouchRef.current ? 0.4 : overContent ? 0.15 : 0.7;
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white relative overflow-hidden font-sans">

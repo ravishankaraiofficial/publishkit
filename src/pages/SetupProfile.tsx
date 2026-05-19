@@ -120,7 +120,7 @@ export function SetupProfile() {
                   {...register('appearance')}
                   rows={3}
                   placeholder="e.g. Indian male in his 20s, usually wearing a black hoodie"
-                  className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D] px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
+                  className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
                 />
                 {errors.appearance && <p className="mt-1.5 text-sm text-[#EF4444]">{errors.appearance.message}</p>}
               </div>

@@ -285,7 +285,7 @@ export function Feedback() {
                             handleSubmitReply(item.id);
                           }
                         }}
-                        className="flex-1 bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-lg px-3 py-2 text-sm text-white outline-none transition-colors disabled:opacity-50"
+                        className="flex-1 bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-lg px-3 py-2 text-sm text-white outline-none transition-colors disabled:opacity-50"
                       />
                       <button
                         onClick={() => handleSubmitReply(item.id)}
@@ -317,7 +317,7 @@ export function Feedback() {
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder="e.g. Add Instagram Reel format"
-                  className="w-full bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors"
+                  className="w-full bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors"
                 />
               </div>
               <div>
@@ -328,7 +328,7 @@ export function Feedback() {
                   value={newDesc}
                   onChange={e => setNewDesc(e.target.value)}
                   placeholder="Explain why this feature would be useful..."
-                  className="w-full bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors resize-none"
+                  className="w-full bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors resize-none"
                 />
               </div>
               <div className="flex gap-3 pt-2">

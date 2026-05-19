@@ -54,7 +54,7 @@ export function ColorPicker({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 h-10 rounded-lg border border-[#2A2A2A] bg-[#0D0D0D] px-3 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors"
+          className="flex-1 h-10 rounded-lg border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-3 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors"
         />
       </div>
 
@@ -75,7 +75,7 @@ export function ColorPicker({
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="flex-1 h-8 rounded-md border border-[#2A2A2A] bg-[#0D0D0D] px-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#E05A1E]/70"
+              className="flex-1 h-8 rounded-md border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#E05A1E]/70"
               placeholder="#E05A1E"
             />
             <button

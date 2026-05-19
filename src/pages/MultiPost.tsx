@@ -8,8 +8,9 @@ import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
 
 interface MultiPostOutput {
   x?: string[];
@@ -229,7 +230,7 @@ const MultiPost: React.FC = () => {
                   }}
                   placeholder="Enter video title or YouTube title"
                   disabled={loading}
-                  className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-neutral-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               {pastResults.length > 0 && (
@@ -240,7 +241,7 @@ const MultiPost: React.FC = () => {
                     setTitle('');
                   }}
                   disabled={loading}
-                  className="bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-neutral-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Or pick a past result...</option>
                   {pastResults.map((result) => (
@@ -261,7 +262,7 @@ const MultiPost: React.FC = () => {
               placeholder="Add any additional context or key points..."
               rows={2}
               disabled={loading || !!selectedResult}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-neutral-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -270,25 +271,18 @@ const MultiPost: React.FC = () => {
             <p className="text-xs text-gray-500 mb-3">
               All posts will be written in the selected language using its native script.
             </p>
-            <select
+            <LanguagePicker
               value={language}
-              onChange={(e) => {
-                const next = e.target.value as OutputLanguage;
+              variant="input"
+              disabled={loading}
+              onChange={(next) => {
                 const prev = language;
                 setLanguage(next);
                 if (next !== 'English' && next !== prev) {
                   toast(`Output will be in ${toastNativeName(next)}`, 'info');
                 }
               }}
-              disabled={loading}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {OUTPUT_LANGUAGES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {formatLanguageOption(opt)}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="mb-6">
