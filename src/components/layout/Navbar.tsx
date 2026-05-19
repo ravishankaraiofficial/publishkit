@@ -36,7 +36,8 @@ export function Navbar() {
   };
 
   const navLinkClass = (to: string) => cn(
-    "transition-all duration-150 active:scale-95",
+    "px-3 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95",
+    "hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10",
     location.pathname === to
       ? "text-white"
       : "text-[#888888] hover:text-white"
@@ -45,7 +46,7 @@ export function Navbar() {
   return (
     <>
       {/* ── Desktop top bar ── */}
-      <nav className="hidden sm:flex border-b border-[#2A2A2A] bg-[#0D0D0D]/90 backdrop-blur-md sticky top-0 z-50">
+      <nav className="hidden sm:flex bg-[#0D0D0D]/90 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 w-full flex justify-between h-16 items-center">
           <Link to="/" onClick={reset} className="flex items-center gap-2 group transition-all active:scale-95">
             <Zap className="w-5 h-5 text-[#E05A1E]" />
@@ -81,7 +82,7 @@ export function Navbar() {
 
             <button
               onClick={handleAuthAction}
-              className="text-[#888888] hover:text-white transition-all flex items-center gap-1.5 active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-[#888888] hover:text-white hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10 transition-all duration-200 ease-out flex items-center gap-1.5 active:scale-95"
             >
               {isGuest ? (
                 <>
@@ -98,7 +99,7 @@ export function Navbar() {
       </nav>
 
       {/* ── Mobile top bar ── */}
-      <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-[#0D0D0D]/95 backdrop-blur-md border-b border-[#2A2A2A] sticky top-0 z-50">
+      <header className="sm:hidden flex items-center justify-between px-5 py-3 bg-[#0D0D0D]/95 backdrop-blur-md sticky top-0 z-50">
         <Link to="/" onClick={reset} className="flex items-center gap-2 active:scale-95 transition-all">
           <Zap className="w-4 h-4 text-[#E05A1E]" />
           <span className="text-[#E05A1E] font-bold text-lg tracking-tight">PublishKit</span>
