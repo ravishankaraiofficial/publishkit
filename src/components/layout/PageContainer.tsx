@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navbar } from './Navbar';
+import { LanguageBar } from './LanguageBar';
 
 // Selectors treated as "interactive content" — when the cursor enters these,
 // the ambient orange glow dims so card/button content stays readable.
@@ -66,6 +67,7 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
+        <LanguageBar />
         <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 pb-28 sm:pb-8 animate-fade-in">
           {children}
         </main>

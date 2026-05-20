@@ -6,10 +6,9 @@ import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { toastNativeName } from '../lib/languages';
+import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
-import { Picker } from '../components/ui/Picker';
-import { LanguagePicker } from '../components/ui/LanguagePicker';
+import { useT } from '../i18n';
 
 interface ScriptOutput {
   hook: string;
@@ -18,13 +17,14 @@ interface ScriptOutput {
   cta: string;
 }
 
-const PLAN_LIMITS: Record<string, number> = { free: 10, pro: 100, ultra: 1000 };
+const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 300 };
 const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
 
 const ScriptWriter: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const t = useT();
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState<'Casual' | 'Educational' | 'Storytelling'>('Casual');
   const [duration, setDuration] = useState<'5' | '10' | '15'>('10');
@@ -76,15 +76,19 @@ ${output.cta}
 
     try {
       const generateScript = httpsCallable<
-        { topic: string; tone: string; duration: string; language: string },
+        { topic: string; tone: string; duration: string; language: string; visitorId?: string },
         ScriptOutput
       >(functions, 'generateScript');
+
+      const { getVisitorId } = await import('../lib/fingerprint');
+      const visitorId = await getVisitorId().catch(() => undefined);
 
       const result = await generateScript({
         topic: topic.trim(),
         tone,
         duration,
         language,
+        visitorId,
       });
 
       setOutput(result.data);
@@ -104,19 +108,20 @@ ${output.cta}
 
   // Locked screen — monthly quota exhausted
   if (limitReached) {
-    const headline = 'Monthly limit reached';
-    const body =
-      plan === 'ultra'
-        ? `You've used your ${monthlyLimit} scripts for this month. Resets on the 1st.`
-        : plan === 'pro'
-        ? `You've used your ${monthlyLimit} scripts this month. Upgrade to Max Plan for 1000/month.`
-        : `You've used your ${monthlyLimit} scripts this month. Upgrade to Pro Plan or Max Plan for more.`;
-    const ctaLabel =
-      plan === 'ultra'
-        ? 'See plans'
-        : plan === 'pro'
-        ? 'Upgrade to Max Plan →'
-        : 'Upgrade to Pro Plan or Max Plan →';
+    const headline = t('script.monthlyLimitReached');
+    let body = '';
+    let ctaLabel = '';
+
+    if (plan === 'ultra') {
+      body = t('script.limitUltra', { limit: monthlyLimit });
+      ctaLabel = t('script.upgradeUltra');
+    } else if (plan === 'pro') {
+      body = t('script.limitPro', { limit: monthlyLimit, nextLimit: 1000 });
+      ctaLabel = t('script.upgradePro');
+    } else {
+      body = t('script.limitFree', { limit: monthlyLimit });
+      ctaLabel = t('script.upgradeFree');
+    }
 
     return (
       <PageContainer>
@@ -140,7 +145,7 @@ ${output.cta}
   const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
     if (isFree) {
       return (
-        <span className="text-xs text-[#888888] italic">Copy not available on Free Plan</span>
+        <span className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</span>
       );
     }
     return (
@@ -149,7 +154,7 @@ ${output.cta}
         className={`flex items-center gap-2 ${sizeClass} rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-all`}
       >
         <Copy className="w-4 h-4" />
-        {copied ? 'Copied!' : 'Copy'}
+        {copied ? t('common.copied') : t('common.copy')}
       </button>
     );
   };
@@ -159,19 +164,19 @@ ${output.cta}
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">YouTube Script Writer</h1>
-          <p className="text-gray-400">Generate engaging video scripts tailored to your niche</p>
+          <h1 className="text-4xl font-bold text-white mb-2">{t('script.title')}</h1>
+          <p className="text-gray-400">{t('script.subtitle')}</p>
         </div>
 
         {/* Usage counter — visible on every plan */}
         <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
-              <span className="text-white font-semibold">{usage}</span> / {monthlyLimit} used this month
+              {t('script.usageCounter', { used: usage, limit: monthlyLimit })}
               <span className="text-[#888888] ml-2">({planLabel})</span>
             </p>
             {isFree && (
-              <p className="text-xs text-[#888888] italic">Copy not available on Free Plan</p>
+              <p className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
             )}
           </div>
         </div>
@@ -180,62 +185,69 @@ ${output.cta}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
           {/* Topic */}
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2">Video Topic</label>
+            <label className="block text-white font-semibold mb-2">{t('script.topicLabel')}</label>
             <textarea
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="What is your video about? E.g., 'How to create viral content on TikTok'"
+              placeholder={t('script.topicPlaceholder')}
               rows={3}
               disabled={loading}
-              className="w-full bg-neutral-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           </div>
 
           {/* Grid: Tone, Duration, Language */}
-          <div className="grid md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label className="block text-white font-semibold mb-2">Tone</label>
-              <Picker<'Casual' | 'Educational' | 'Storytelling'>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="min-w-0">
+              <label className="block text-white font-semibold mb-2">{t('script.toneLabel')}</label>
+              <select
                 value={tone}
-                options={[
-                  { value: 'Casual', label: 'Casual' },
-                  { value: 'Educational', label: 'Educational' },
-                  { value: 'Storytelling', label: 'Storytelling' },
-                ]}
-                onChange={(v) => setTone(v)}
+                onChange={(e) => setTone(e.target.value as any)}
                 disabled={loading}
-              />
+                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
+              >
+                <option value="Casual">{t('script.toneCasual')}</option>
+                <option value="Educational">{t('script.toneEducational')}</option>
+                <option value="Storytelling">{t('script.toneStorytelling')}</option>
+              </select>
             </div>
 
-            <div>
-              <label className="block text-white font-semibold mb-2">Duration</label>
-              <Picker<'5' | '10' | '15'>
+            <div className="min-w-0">
+              <label className="block text-white font-semibold mb-2">{t('script.durationLabel')}</label>
+              <select
                 value={duration}
-                options={[
-                  { value: '5', label: '5 minutes' },
-                  { value: '10', label: '10 minutes' },
-                  { value: '15', label: '15 minutes' },
-                ]}
-                onChange={(v) => setDuration(v)}
+                onChange={(e) => setDuration(e.target.value as any)}
                 disabled={loading}
-              />
+                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
+              >
+                <option value="5">{t('script.durationMinutes', { count: 5 })}</option>
+                <option value="10">{t('script.durationMinutes', { count: 10 })}</option>
+                <option value="15">{t('script.durationMinutes', { count: 15 })}</option>
+              </select>
             </div>
 
-            <div>
-              <label className="block text-white font-semibold mb-2">Language</label>
-              <LanguagePicker
+            <div className="min-w-0">
+              <label className="block text-white font-semibold mb-2">{t('script.languageLabel')}</label>
+              <select
                 value={language}
-                variant="input"
-                disabled={loading}
-                onChange={(next) => {
+                onChange={(e) => {
+                  const next = e.target.value as OutputLanguage;
                   const prev = language;
                   setLanguage(next);
                   if (next !== 'English' && next !== prev) {
                     toast(`Output will be in ${toastNativeName(next)}`, 'info');
                   }
                 }}
-              />
+                disabled={loading}
+                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
+              >
+                {OUTPUT_LANGUAGES.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {formatLanguageOption(opt)}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -244,7 +256,7 @@ ${output.cta}
             disabled={loading}
             className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {loading ? 'Generating Script...' : 'Generate Script'}
+            {loading ? t('script.generatingBtn') : t('script.generateBtn')}
           </button>
         </div>
 
@@ -254,7 +266,7 @@ ${output.cta}
             {/* Hook */}
             <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Hook (First 30 seconds)</h3>
+                <h3 className="text-xl font-bold text-white">{t('script.hookTitle')}</h3>
                 {renderCopyAction(output.hook)}
               </div>
               <p className="text-gray-100 leading-relaxed">{output.hook}</p>
@@ -263,7 +275,7 @@ ${output.cta}
             {/* Intro */}
             <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Introduction</h3>
+                <h3 className="text-xl font-bold text-white">{t('script.introTitle')}</h3>
                 {renderCopyAction(output.intro)}
               </div>
               <p className="text-gray-100 leading-relaxed">{output.intro}</p>
@@ -283,7 +295,7 @@ ${output.cta}
             {/* CTA */}
             <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Call to Action</h3>
+                <h3 className="text-xl font-bold text-white">{t('script.ctaTitle')}</h3>
                 {renderCopyAction(output.cta)}
               </div>
               <p className="text-gray-100 leading-relaxed">{output.cta}</p>

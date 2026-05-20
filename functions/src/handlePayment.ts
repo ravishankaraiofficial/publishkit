@@ -116,6 +116,209 @@ export const createSubscription = functions
     }
   });
 
+// ────────────────────────────────────────────────────────────────────────────
+// One-time order flow (no autopay/mandate)
+// ────────────────────────────────────────────────────────────────────────────
+//
+// Indian users routinely abandon checkout when Razorpay forces an e-mandate
+// setup before charging. The createOrder + verifyOrderPayment pair below
+// gives them a "pay once for 30 days" path that works with plain UPI/QR/cards
+// and does not enrol them in autopay.
+//
+// Prices live server-side — never trust client input on amount.
+const ONE_TIME_PRICE_PAISE: Record<string, number> = {
+  pro: 29900,    // ₹299
+  ultra: 100000, // ₹1,000
+};
+
+const ONE_TIME_DAYS = 30;
+
+export const createOrder = functions
+  .runWith({ secrets: [razorpayKeyId, razorpayKeySecret] })
+  .https.onCall(async (data, context) => {
+    try {
+      if (!context.app) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'The function must be called from an App Check verified app.'
+        );
+      }
+      if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+      }
+
+      const { plan } = data;
+      if (!['pro', 'ultra'].includes(plan)) {
+        throw new functions.https.HttpsError('invalid-argument', 'Invalid plan: must be "pro" or "ultra"');
+      }
+
+      // Block stacking one-time payments on top of an active subscription —
+      // mirrors the createSubscription guard.
+      const existingDoc = await db.doc(`users/${context.auth.uid}`).get();
+      const existingSubId = existingDoc.data()?.razorpaySubscriptionId;
+      if (existingSubId) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'You already have an active subscription. Cancel it before paying separately.'
+        );
+      }
+
+      const keyId = razorpayKeyId.value();
+      const keySecret = razorpayKeySecret.value();
+      const amount = ONE_TIME_PRICE_PAISE[plan];
+
+      const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+      // Receipt is a free-form short string Razorpay echoes back; cap to 40 chars.
+      const receipt = `pk_${context.auth.uid.slice(0, 16)}_${Date.now()}`.slice(0, 40);
+      const postData = JSON.stringify({
+        amount,
+        currency: 'INR',
+        receipt,
+        notes: {
+          uid: context.auth.uid,
+          plan,
+          type: 'one_time',
+        },
+      });
+
+      const options = {
+        hostname: 'api.razorpay.com',
+        path: '/v1/orders',
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
+        },
+      };
+
+      const order: any = await new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+          let chunks = '';
+          res.on('data', (c) => (chunks += c));
+          res.on('end', () => {
+            if (res.statusCode === 200 || res.statusCode === 201) resolve(JSON.parse(chunks));
+            else reject(new Error(`Razorpay /orders returned ${res.statusCode}: ${chunks}`));
+          });
+        });
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
+      });
+
+      return {
+        orderId: order.id,
+        keyId,
+        amount,
+        currency: 'INR',
+      };
+    } catch (error: any) {
+      console.error('[createOrder] error:', error?.message || String(error));
+      if (error instanceof functions.https.HttpsError) throw error;
+      throw new functions.https.HttpsError('internal', 'Failed to create order. Please try again.');
+    }
+  });
+
+// Verify a Razorpay checkout payment signature, then grant 30 days of access.
+// Razorpay's docs: the signature is HMAC-SHA256(order_id + "|" + payment_id,
+// key_secret). We verify here (not just in the webhook) so the client can
+// confirm success synchronously and route the user without waiting.
+export const verifyOrderPayment = functions
+  .runWith({ secrets: [razorpayKeyId, razorpayKeySecret] })
+  .https.onCall(async (data, context) => {
+    try {
+      if (!context.app) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'The function must be called from an App Check verified app.'
+        );
+      }
+      if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+      }
+
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = data || {};
+      if (
+        typeof razorpay_order_id !== 'string' ||
+        typeof razorpay_payment_id !== 'string' ||
+        typeof razorpay_signature !== 'string' ||
+        typeof plan !== 'string' ||
+        !['pro', 'ultra'].includes(plan)
+      ) {
+        throw new functions.https.HttpsError('invalid-argument', 'Missing or invalid fields');
+      }
+
+      const expected = crypto
+        .createHmac('sha256', razorpayKeySecret.value())
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest('hex');
+
+      // Constant-time compare — never use !== on signatures.
+      const sigBuf = Buffer.from(razorpay_signature, 'hex');
+      const expBuf = Buffer.from(expected, 'hex');
+      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+        throw new functions.https.HttpsError('permission-denied', 'Invalid payment signature');
+      }
+
+      const expiresAt = new Date(Date.now() + ONE_TIME_DAYS * 24 * 60 * 60 * 1000);
+      const userRef = db.doc(`users/${context.auth.uid}`);
+      await userRef.set(
+        {
+          plan,
+          planType: 'one_time',
+          planExpiresAt: expiresAt.toISOString(),
+          razorpayLastOrderId: razorpay_order_id,
+          razorpayLastPaymentId: razorpay_payment_id,
+          // Defensive: clear any stale subscription ID — this user is on the
+          // one-time track now.
+          razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+        },
+        { merge: true }
+      );
+
+      return { ok: true, plan, expiresAt: expiresAt.toISOString() };
+    } catch (error: any) {
+      console.error('[verifyOrderPayment] error:', error?.message || String(error));
+      if (error instanceof functions.https.HttpsError) throw error;
+      throw new functions.https.HttpsError('internal', 'Failed to verify payment.');
+    }
+  });
+
+// Daily sweep — downgrade users whose one-time plan has expired.
+// Subscription users are not touched; they're managed by the webhook.
+export const expireOneTimePlans = functions.pubsub
+  .schedule('every 24 hours')
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const now = new Date().toISOString();
+    const snap = await db
+      .collection('users')
+      .where('planType', '==', 'one_time')
+      .where('planExpiresAt', '<=', now)
+      .get();
+
+    if (snap.empty) {
+      console.log('[expireOneTimePlans] No expired one-time plans');
+      return null;
+    }
+
+    const batch = db.batch();
+    snap.forEach((doc) => {
+      batch.set(
+        doc.ref,
+        {
+          plan: 'free',
+          planType: admin.firestore.FieldValue.delete(),
+          planExpiresAt: admin.firestore.FieldValue.delete(),
+        },
+        { merge: true }
+      );
+    });
+    await batch.commit();
+    console.log(`[expireOneTimePlans] Downgraded ${snap.size} users`);
+    return null;
+  });
+
 // Plan values the webhook is allowed to set on a user doc. Anything else is
 // dropped before the Firestore write. Defense-in-depth: if Razorpay's
 // notes.plan ever returned something unexpected (or were tampered with),
@@ -191,6 +394,39 @@ export const razorpayWebhook = functions
       // existing subId-match check on cancel events catches stale replays anyway.
 
       const event = req.body.event;
+
+      // ─── One-time order path: payment.captured for orders we created via
+      // createOrder. Defense-in-depth: verifyOrderPayment is the primary grant
+      // path (synchronous, client-confirmed). This is the safety net in case
+      // the client never calls verifyOrderPayment (network drop, tab close).
+      if (event === 'payment.captured') {
+        const payment = req.body.payload?.payment?.entity;
+        const oUid = payment?.notes?.uid;
+        const oPlan = payment?.notes?.plan;
+        const oType = payment?.notes?.type;
+        if (
+          oType === 'one_time' &&
+          typeof oUid === 'string' &&
+          FIREBASE_UID_REGEX.test(oUid) &&
+          typeof oPlan === 'string' &&
+          ALLOWED_PLANS.has(oPlan)
+        ) {
+          const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+          await db.doc(`users/${oUid}`).set(
+            {
+              plan: oPlan,
+              planType: 'one_time',
+              planExpiresAt: expiresAt.toISOString(),
+              razorpayLastPaymentId: payment.id,
+              razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+            },
+            { merge: true }
+          );
+        }
+        res.status(200).send('OK');
+        return;
+      }
+
       const subscription = req.body.payload?.subscription?.entity;
       const uid = subscription?.notes?.uid;
       const plan = subscription?.notes?.plan;

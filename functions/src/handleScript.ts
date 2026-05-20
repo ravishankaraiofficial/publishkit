@@ -4,6 +4,8 @@ import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';
 import { enforceScriptTrial, enforceBurstLimit } from './middleware/rateLimit';
 import { coerceLanguage, languageHint } from './lib/languages';
+import { pickModel } from './lib/pickModel';
+import { enforceFreeTierGuard } from './lib/freeTierGuard';
 
 interface ScriptOutput {
   hook: string;
@@ -49,13 +51,25 @@ export const generateScript = functions
       // with a "Slow down" message. Tier limits: Free 2/min, Pro 8/min, Max 20/min.
       await enforceBurstLimit(context.auth.uid, plan);
 
+      // Anti-abuse: free-tier device/IP guard. Blocks a fresh UID from reusing
+      // the free tier on a device that already burned through one free account.
+      // No-op for paid users.
+      const rawIp =
+        (context.rawRequest?.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+        (context.rawRequest as any)?.ip ||
+        '';
+      const visitorId = typeof data.visitorId === 'string' ? data.visitorId : undefined;
+      await enforceFreeTierGuard({ uid: context.auth.uid, rawIp, visitorId, plan });
+
       // Monthly usage enforcement (atomic; throws resource-exhausted when blocked)
       await enforceScriptTrial(context.auth.uid, plan);
 
       // Initialize Gemini
       const apiKey = geminiApiKey.value();
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      // Max-plan users get Gemini 2.5 Pro for script generation; everyone else
+      // stays on Flash. See functions/src/lib/pickModel.ts for the policy.
+      const model = genAI.getGenerativeModel({ model: pickModel(plan, 'script') });
 
       // Sanitize: strip null bytes + control chars (keep newlines/tabs). Caps
       // prevent prompt-injection cost burn — user-controlled text is bounded.

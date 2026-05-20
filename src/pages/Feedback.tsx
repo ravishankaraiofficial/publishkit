@@ -14,6 +14,7 @@ import { useToast } from '../components/ui/Toast';
 import { ArrowBigUp, MessageSquare, Plus, Send } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from '../components/ui/Button';
+import { useT } from '../i18n';
 
 interface FeedbackReply {
   id: string;
@@ -38,6 +39,7 @@ interface FeedbackItem {
 export function Feedback() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const t = useT();
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [replies, setReplies] = useState<Record<string, FeedbackReply[]>>({});
   const [loading, setLoading] = useState(true);
@@ -102,9 +104,9 @@ export function Feedback() {
       setNewTitle('');
       setNewDesc('');
       setShowAddModal(false);
-      toast('Feedback submitted!', 'success');
+      toast(t('feedback.submittedToast'), 'success');
     } catch (err) {
-      toast('Failed to submit', 'error');
+      toast(t('feedback.failedSubmitToast'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -114,7 +116,7 @@ export function Feedback() {
     const text = replyText[feedbackId]?.trim();
     if (!user || user.isAnonymous || !text) {
       if (!user || user.isAnonymous) {
-        toast('Please sign in to reply', 'error');
+        toast(t('feedback.signInToReplyToast'), 'error');
       }
       return;
     }
@@ -128,9 +130,9 @@ export function Feedback() {
         createdAt: serverTimestamp(),
       });
       setReplyText(prev => ({ ...prev, [feedbackId]: '' }));
-      toast('Reply posted!', 'success');
+      toast(t('feedback.replyPosted'), 'success');
     } catch (err) {
-      toast('Failed to post reply', 'error');
+      toast(t('feedback.failedReply'), 'error');
     } finally {
       setSubmittingReply(prev => ({ ...prev, [feedbackId]: false }));
     }
@@ -138,7 +140,7 @@ export function Feedback() {
 
   const handleVote = async (itemId: string, hasVoted: boolean) => {
     if (!user || user.isAnonymous) {
-      toast('Please sign in to vote', 'error');
+      toast(t('feedback.signInToVote'), 'error');
       return;
     }
 
@@ -172,14 +174,14 @@ export function Feedback() {
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Feedback Board</h1>
-            <p className="text-[#888888] text-sm">Vote for existing features or request new ones.</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t('feedback.title')}</h1>
+            <p className="text-[#888888] text-sm">{t('feedback.subtitle')}</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 bg-[#E05A1E] hover:bg-[#FF7A3D] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(224,90,30,0.2)]"
           >
-            <Plus className="w-4 h-4" /> New Request
+            <Plus className="w-4 h-4" /> {t('feedback.newRequest')}
           </button>
         </div>
 
@@ -190,7 +192,7 @@ export function Feedback() {
         ) : items.length === 0 ? (
           <div className="text-center py-20 bg-[#1A1A1A] border border-[#2A2A2A] rounded-3xl">
             <MessageSquare className="w-12 h-12 text-[#2A2A2A] mx-auto mb-4" />
-            <p className="text-[#888888]">No requests yet. Be the first!</p>
+            <p className="text-[#888888]">{t('feedback.empty')}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -238,7 +240,7 @@ export function Feedback() {
                         <div className="w-5 h-5 rounded-full bg-[#2A2A2A] flex items-center justify-center text-[10px] text-white font-bold">
                           {item.userName?.[0]}
                         </div>
-                        <span className="text-[11px] text-[#555555]">Requested by <span className="text-[#888888]">{item.userName}</span></span>
+                        <span className="text-[11px] text-[#555555]">{t('feedback.requestedBy')} <span className="text-[#888888]">{item.userName}</span></span>
                       </div>
                     </div>
                   </div>
@@ -250,7 +252,7 @@ export function Feedback() {
                       className="flex items-center gap-2 text-xs text-[#888888] hover:text-white transition-colors mb-3"
                     >
                       <MessageSquare className="w-4 h-4" />
-                      {itemReplies.length} {itemReplies.length === 1 ? 'Reply' : 'Replies'}
+                      {itemReplies.length} {itemReplies.length === 1 ? t('feedback.repliesOne') : t('feedback.repliesMany')}
                     </button>
 
                     {isReplyExpanded && (
@@ -276,7 +278,7 @@ export function Feedback() {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder={user && !user.isAnonymous ? "Write a reply..." : "Sign in to reply"}
+                        placeholder={user && !user.isAnonymous ? t('feedback.writeReply') : t('feedback.signInToReply')}
                         value={replyText[item.id] || ''}
                         onChange={e => setReplyText(prev => ({ ...prev, [item.id]: e.target.value }))}
                         disabled={!user || user.isAnonymous}
@@ -285,7 +287,7 @@ export function Feedback() {
                             handleSubmitReply(item.id);
                           }
                         }}
-                        className="flex-1 bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-lg px-3 py-2 text-sm text-white outline-none transition-colors disabled:opacity-50"
+                        className="flex-1 bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-lg px-3 py-2 text-sm text-white outline-none transition-colors disabled:opacity-50"
                       />
                       <button
                         onClick={() => handleSubmitReply(item.id)}
@@ -307,28 +309,28 @@ export function Feedback() {
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl relative animate-scale-in">
-            <h2 className="text-2xl font-bold text-white mb-6">New Feature Request</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">{t('feedback.modalTitle')}</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-[#888888] uppercase tracking-widest mb-2">Title</label>
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-widest mb-2">{t('feedback.modalTitleLabel')}</label>
                 <input
                   autoFocus
                   required
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
-                  placeholder="e.g. Add Instagram Reel format"
-                  className="w-full bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors"
+                  placeholder={t('feedback.modalTitlePlaceholder')}
+                  className="w-full bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#888888] uppercase tracking-widest mb-2">Description</label>
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-widest mb-2">{t('feedback.modalDescLabel')}</label>
                 <textarea
                   required
                   rows={4}
                   value={newDesc}
                   onChange={e => setNewDesc(e.target.value)}
-                  placeholder="Explain why this feature would be useful..."
-                  className="w-full bg-[#0D0D0D]/50 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors resize-none"
+                  placeholder={t('feedback.modalDescPlaceholder')}
+                  className="w-full bg-[#0D0D0D] border border-[#2A2A2A] focus:border-[#E05A1E] rounded-xl px-4 py-3 text-white outline-none transition-colors resize-none"
                 />
               </div>
               <div className="flex gap-3 pt-2">
@@ -337,14 +339,14 @@ export function Feedback() {
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-3 rounded-xl border border-[#2A2A2A] text-[#888888] font-bold hover:text-white transition-colors active:scale-95"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <Button
                   type="submit"
                   isLoading={submitting}
                   className="flex-1 py-3 rounded-xl"
                 >
-                  Submit Request
+                  {t('feedback.submitRequest')}
                 </Button>
               </div>
             </form>

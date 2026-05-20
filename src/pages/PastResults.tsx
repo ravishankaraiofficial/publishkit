@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../components/ui/Toast';
+import { useT } from '../i18n';
 
 function fileIcon(fileType?: string) {
   if (!fileType) return <FileAudio className="w-4 h-4 text-[#E05A1E] flex-shrink-0" />;
@@ -53,6 +54,7 @@ async function deleteResultItem(uid: string, result: Result) {
 export function PastResults() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const t = useT();
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -115,11 +117,11 @@ export function PastResults() {
       }
 
       await Promise.all(toDelete.map(r => deleteResultItem(user.uid, r)));
-      toast('History deleted', 'success');
+      toast(t('history.deletedToast'), 'success');
       setSelectedIds(new Set());
     } catch (err) {
       console.error('Delete failed', err);
-      toast('Delete failed. Please try again.', 'error');
+      toast(t('history.deleteFailedToast'), 'error');
     } finally {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
@@ -134,7 +136,7 @@ export function PastResults() {
     setRemovingIds(prev => new Set(prev).add(trashConfirmId));
     setTrashConfirmId(null);
     await deleteResultItem(user.uid, target);
-    toast('Item deleted', 'success');
+    toast(t('history.itemDeletedToast'), 'success');
     // onSnapshot removes the item from results automatically
     setRemovingIds(prev => { const s = new Set(prev); s.delete(target.id!); return s; });
   };
@@ -150,7 +152,7 @@ export function PastResults() {
     // onSnapshot removes deleted items from results automatically
     setRemovingIds(new Set());
     setSelectedIds(new Set());
-    toast('History deleted', 'success');
+    toast(t('history.deletedToast'), 'success');
   };
 
   const toggleSelect = (id: string) => {
@@ -161,35 +163,35 @@ export function PastResults() {
     });
   };
 
-  const rangeLabel = deleteRange === 'lastHour' ? 'Last Hour' : 'All Time';
+  const rangeLabel = deleteRange === 'lastHour' ? t('history.lastHour') : t('history.allTime');
 
   return (
     <PageContainer>
       <div className="max-w-4xl mx-auto">
         {/* ── Heading ── */}
         <h1 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-wide mb-2">
-          HISTORY
+          {t('history.title')}
         </h1>
 
         {/* ── Static info text ── */}
         <div className="flex flex-col items-center gap-1 mb-6 text-center">
           <p className="text-xs text-[#888888] flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#E05A1E]" />
-            All uploads are automatically deleted 3 hours after processing.
+            {t('history.autoDelete')}
           </p>
           <p className="text-xs text-[#888888]">
-            You can also manually delete your data using the options below.
+            {t('history.manualDelete')}
           </p>
         </div>
 
         {/* ── DELETE BROWSING DATA section ── */}
         <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-5 mb-6">
-          <p className="text-white text-lg font-bold mb-4">Delete</p>
+          <p className="text-white text-lg font-bold mb-4">{t('history.deleteSectionTitle')}</p>
 
           {/* Pill buttons */}
           <div className="flex gap-3 mb-4">
             {(['lastHour', 'allTime'] as const).map((range) => {
-              const label = range === 'lastHour' ? 'Last Hour' : 'All Time';
+              const label = range === 'lastHour' ? t('history.lastHour') : t('history.allTime');
               const active = deleteRange === range;
               return (
                 <button
@@ -213,7 +215,7 @@ export function PastResults() {
             disabled={deleteLoading}
             className="w-full py-2.5 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors disabled:opacity-60"
           >
-            {deleteLoading ? 'Deleting…' : 'Delete'}
+            {deleteLoading ? t('history.deleting') : t('history.deleteBtn')}
           </button>
         </div>
 
@@ -221,22 +223,22 @@ export function PastResults() {
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
-              <p className="text-white font-semibold mb-2">Delete {rangeLabel} history?</p>
+              <p className="text-white font-semibold mb-2">{t('history.confirmRangeTitle', { range: rangeLabel })}</p>
               <p className="text-sm text-[#888888] mb-6">
-                This will permanently delete {rangeLabel.toLowerCase()} history. This cannot be undone.
+                {t('history.confirmRangeDesc', { range: rangeLabel })}
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteRange}
                   className="flex-1 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors"
                 >
-                  Confirm
+                  {t('common.confirm')}
                 </button>
               </div>
             </div>
@@ -247,20 +249,20 @@ export function PastResults() {
         {trashConfirmId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
-              <p className="text-white font-semibold mb-2">Delete this item?</p>
-              <p className="text-sm text-[#888888] mb-6">This cannot be undone.</p>
+              <p className="text-white font-semibold mb-2">{t('history.confirmItemTitle')}</p>
+              <p className="text-sm text-[#888888] mb-6">{t('history.confirmItemDesc')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setTrashConfirmId(null)}
                   className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleTrashConfirm}
                   className="flex-1 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -271,20 +273,20 @@ export function PastResults() {
         {showSelectionConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
-              <p className="text-white font-semibold mb-2">Delete {selectedIds.size} item{selectedIds.size !== 1 ? 's' : ''}?</p>
-              <p className="text-sm text-[#888888] mb-6">Cannot be undone.</p>
+              <p className="text-white font-semibold mb-2">{t('history.confirmSelectedTitle', { count: selectedIds.size })}</p>
+              <p className="text-sm text-[#888888] mb-6">{t('history.confirmSelectedDesc')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowSelectionConfirm(false)}
                   className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteSelected}
                   className="flex-1 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -294,11 +296,11 @@ export function PastResults() {
         {/* ── Results list ── */}
         {loading ? (
           <div className="py-20 text-center">
-            <Spinner text="Loading history…" />
+            <Spinner text={t('history.loadingHistory')} />
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-20 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl">
-            <p className="text-[#888888]">No history yet.</p>
+            <p className="text-[#888888]">{t('history.empty')}</p>
           </div>
         ) : (
           <>
@@ -309,13 +311,13 @@ export function PastResults() {
                   onClick={() => setShowSelectionConfirm(true)}
                   className="px-4 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] transition-colors"
                 >
-                  Delete Selected ({selectedIds.size})
+                  {t('history.deleteSelected', { count: selectedIds.size })}
                 </button>
                 <button
                   onClick={() => setSelectedIds(new Set())}
                   className="px-4 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
                 >
-                  Clear Selection
+                  {t('history.clearSelection')}
                 </button>
               </div>
             )}
@@ -338,7 +340,7 @@ export function PastResults() {
                       hour: '2-digit',
                       minute: '2-digit',
                     })
-                  : 'Just now';
+                  : t('history.justNow');
 
                 return (
                   <div
@@ -402,9 +404,9 @@ export function PastResults() {
                         {result.status === 'complete' ? (
                           <ResultTabs result={result} />
                         ) : result.status === 'failed' ? (
-                          <p className="text-[#EF4444] text-sm">{result.errorMessage || 'Processing failed.'}</p>
+                          <p className="text-[#EF4444] text-sm">{result.errorMessage || t('history.processingFailed')}</p>
                         ) : (
-                          <p className="text-[#888888] text-sm">Processing is still in progress…</p>
+                          <p className="text-[#888888] text-sm">{t('history.processingInProgress')}</p>
                         )}
                       </div>
                     )}

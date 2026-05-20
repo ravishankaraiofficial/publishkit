@@ -14,6 +14,8 @@ function sanitizeUserText(s: string): string {
 const MAX_TITLE_CHARS = 500;
 const MAX_DESCRIPTION_CHARS = 2000;
 import { coerceLanguage, languageHint } from './lib/languages';
+import { pickModel } from './lib/pickModel';
+import { enforceFreeTierGuard } from './lib/freeTierGuard';
 
 interface RepurposingOutput {
   x?: string[];
@@ -91,13 +93,22 @@ export const generateRepurposing = functions
       // Free 2/min, Pro 8/min, Max 20/min. Sliding 60s window.
       await enforceBurstLimit(context.auth.uid, plan);
 
+      // Anti-abuse: free-tier device/IP guard. No-op for paid users.
+      const rawIp =
+        (context.rawRequest?.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+        (context.rawRequest as any)?.ip ||
+        '';
+      const visitorId = typeof data.visitorId === 'string' ? data.visitorId : undefined;
+      await enforceFreeTierGuard({ uid: context.auth.uid, rawIp, visitorId, plan });
+
       // Monthly usage — charges once per selected platform (3 platforms = 3).
       await enforceRepurposingTrial(context.auth.uid, plan, selectedPlatforms.length);
 
       // Initialize Gemini
       const apiKey = geminiApiKey.value();
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      // MultiPost stays on Flash for all plans (pickModel enforces this).
+      const model = genAI.getGenerativeModel({ model: pickModel(plan, 'multipost') });
 
       const output: RepurposingOutput = {};
 

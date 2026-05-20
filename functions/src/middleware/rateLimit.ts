@@ -4,11 +4,14 @@ import * as crypto from 'crypto';
 import { db } from '../lib/firestore';
 
 const PLAN_MONTHLY_LIMITS: Record<string, number> = {
-  free: 10,
+  free: 3,
   pro: 100,
-  ultra: 1000,
+  ultra: 300,
 };
-const MAX_PER_IP_PER_MONTH = 150;
+// IP cap kept generous enough that a legit Max user (300 uploads + 300 scripts +
+// 300 multiposts on the same home wifi) doesn't get blocked. 1000 leaves
+// headroom while still throttling obvious script-kiddie abuse from one IP.
+const MAX_PER_IP_PER_MONTH = 1000;
 
 /**
  * Atomically enforces both UID-based and IP-based monthly rate limits.
@@ -79,9 +82,9 @@ export async function getMonthlyUsage(uid: string): Promise<number> {
 type TrialFeature = 'script' | 'repurposing';
 
 const FEATURE_MONTHLY_LIMITS: Record<string, number> = {
-  free: 10,
+  free: 3,
   pro: 100,
-  ultra: 1000,
+  ultra: 300,
 };
 
 /**
