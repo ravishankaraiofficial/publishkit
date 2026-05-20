@@ -7,67 +7,76 @@ import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
+import { useT } from '../i18n';
 
 const Pricing: React.FC = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const t = useT();
   const [usage, setUsage] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
+  // Default to one-time: many Indian users abandon checkout when an autopay
+  // mandate prompt appears. Recurring stays available as an opt-in.
+  const [billingMode, setBillingMode] = useState<'one_time' | 'subscription'>('one_time');
 
   const currentPlan = profile?.plan || 'free';
 
+  // Plan structure uses i18n keys for any user-visible string. Numeric values
+  // (price, limit) stay literal because they're language-independent.
+  // Feature keys ending in "N" are parameterized — Pricing.tsx passes {count}
+  // so we have one translation string per locale that handles all 3 plans.
   const plans: Record<string, {
-    name: string;
+    nameKey: string;
     price: string;
-    period: string;
+    periodKey: string;
     limit: number;
-    features: Array<{ label: string; included: boolean }>;
-    badge?: string;
+    features: Array<{ key: string; params?: Record<string, number>; included: boolean }>;
+    badgeKey?: string;
   }> = {
     free: {
-      name: 'Free Plan',
+      nameKey: 'pricing.freeName',
       price: '₹0',
-      period: '',
+      periodKey: '',
       limit: 10,
       features: [
-        { label: 'YouTube metadata generation (10/month)', included: true },
-        { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
-        { label: 'English + Hindi support', included: true },
-        { label: 'Script Writer (10/month)', included: true },
-        { label: 'MultiPost (10/month)', included: true },
-        { label: 'Copy buttons on metadata results', included: true },
+        { key: 'pricing.feat.metadataN', params: { count: 10 }, included: true },
+        { key: 'pricing.feat.allOutputs', included: true },
+        { key: 'pricing.feat.languageSupport', included: true },
+        { key: 'pricing.feat.scriptN', params: { count: 10 }, included: true },
+        { key: 'pricing.feat.multipostN', params: { count: 10 }, included: true },
+        { key: 'pricing.feat.copyMetadata', included: true },
       ],
     },
     pro: {
-      name: 'Pro Plan',
+      nameKey: 'pricing.proName',
       price: '₹299',
-      period: '/month',
+      periodKey: 'pricing.perMonth',
       limit: 100,
       features: [
-        { label: 'YouTube metadata generation (100/month)', included: true },
-        { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
-        { label: 'English + Hindi support', included: true },
-        { label: 'Script Writer (100/month)', included: true },
-        { label: 'MultiPost (100/month)', included: true },
-        { label: 'Copy buttons enabled everywhere', included: true },
+        { key: 'pricing.feat.metadataN', params: { count: 100 }, included: true },
+        { key: 'pricing.feat.allOutputs', included: true },
+        { key: 'pricing.feat.languageSupport', included: true },
+        { key: 'pricing.feat.scriptN', params: { count: 100 }, included: true },
+        { key: 'pricing.feat.multipostN', params: { count: 100 }, included: true },
+        { key: 'pricing.feat.copyEverywhere', included: true },
       ],
     },
     ultra: {
-      name: 'Max Plan',
+      nameKey: 'pricing.maxName',
       price: '₹1,000',
-      period: '/month',
+      periodKey: 'pricing.perMonth',
       limit: 1000,
       features: [
-        { label: 'YouTube metadata generation (1000/month)', included: true },
-        { label: 'All 4 outputs (Title, Description, Tags, Hashtags)', included: true },
-        { label: 'English + Hindi support', included: true },
-        { label: 'Script Writer (1000/month)', included: true },
-        { label: 'MultiPost (1000/month)', included: true },
-        { label: 'Copy buttons everywhere', included: true },
+        { key: 'pricing.feat.metadataN', params: { count: 1000 }, included: true },
+        { key: 'pricing.feat.allOutputs', included: true },
+        { key: 'pricing.feat.languageSupport', included: true },
+        { key: 'pricing.feat.scriptN', params: { count: 1000 }, included: true },
+        { key: 'pricing.feat.multipostN', params: { count: 1000 }, included: true },
+        { key: 'pricing.feat.copyMax', included: true },
       ],
-      badge: 'Script Writer + MultiPost',
+      badgeKey: 'pricing.maxBadge',
     },
   };
 
@@ -102,27 +111,63 @@ const Pricing: React.FC = () => {
 
     setUpgrading(planKey);
     try {
-      const createSubscription = httpsCallable(functions, 'createSubscription');
-      const result = await createSubscription({ plan: planKey }) as any;
-      const { subscriptionId, keyId } = result.data;
+      if (billingMode === 'one_time') {
+        // One-time order flow: creates a Razorpay Order, opens checkout with
+        // order_id (no autopay/mandate), then verifies signature server-side
+        // to grant 30 days of access.
+        const createOrder = httpsCallable(functions, 'createOrder');
+        const result = (await createOrder({ plan: planKey })) as any;
+        const { orderId, keyId, amount, currency } = result.data;
 
-      const options = {
-        key: keyId,
-        subscription_id: subscriptionId,
-        name: 'PublishKit',
-        description: planKey === 'ultra' ? 'PublishKit Max' : 'PublishKit Pro',
-        handler: () => {
-          toast('Payment successful! Your plan will activate shortly.', 'success');
-          setTimeout(() => window.location.reload(), 3000);
-        },
-        prefill: {
-          email: user.email || '',
-        },
-        theme: { color: '#E05A1E' },
-      };
+        const options = {
+          key: keyId,
+          order_id: orderId,
+          amount,
+          currency,
+          name: 'PublishKit',
+          description: (planKey === 'ultra' ? 'PublishKit Max' : 'PublishKit Pro') + ' — 30 days',
+          handler: async (response: any) => {
+            try {
+              const verify = httpsCallable(functions, 'verifyOrderPayment');
+              await verify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan: planKey,
+              });
+              toast('Payment verified! Your plan is active for 30 days.', 'success');
+              setTimeout(() => window.location.reload(), 1500);
+            } catch (verr: any) {
+              console.error('[verifyOrderPayment] Error:', verr);
+              toast('Payment received — verifying. Refresh in a moment.', 'info');
+            }
+          },
+          prefill: { email: user.email || '' },
+          theme: { color: '#E05A1E' },
+        };
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } else {
+        // Subscription / autopay flow (recurring).
+        const createSubscription = httpsCallable(functions, 'createSubscription');
+        const result = (await createSubscription({ plan: planKey })) as any;
+        const { subscriptionId, keyId } = result.data;
 
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+        const options = {
+          key: keyId,
+          subscription_id: subscriptionId,
+          name: 'PublishKit',
+          description: planKey === 'ultra' ? 'PublishKit Max' : 'PublishKit Pro',
+          handler: () => {
+            toast('Payment successful! Your plan will activate shortly.', 'success');
+            setTimeout(() => window.location.reload(), 3000);
+          },
+          prefill: { email: user.email || '' },
+          theme: { color: '#E05A1E' },
+        };
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      }
     } catch (err: any) {
       const errorMsg = err?.message || err?.toString?.() || 'Payment failed. Try again.';
       console.error('[handleUpgrade] Error:', err);
@@ -142,7 +187,7 @@ const Pricing: React.FC = () => {
           <div className="w-5 h-5 border-2 border-gray-600 rounded mt-0.5"></div>
         )}
         <span className={feature.included ? 'text-gray-100' : 'text-gray-400'}>
-          {feature.label}
+          {t(feature.key, feature.params)}
         </span>
       </div>
     ));
@@ -154,9 +199,9 @@ const Pricing: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Simple, Transparent Pricing
+            {t('pricing.title')}
           </h1>
-          <p className="text-gray-400 text-lg">Choose the plan that fits your content creation needs</p>
+          <p className="text-gray-400 text-lg">{t('pricing.subtitle')}</p>
         </div>
 
         {/* Usage Counter */}
@@ -167,10 +212,10 @@ const Pricing: React.FC = () => {
         ) : (
           <div className="bg-neutral-900 border border-orange-600/30 rounded-2xl p-8 mb-12">
             <div className="max-w-2xl mx-auto">
-              <p className="text-gray-400 text-sm mb-2">Current Usage — {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
+              <p className="text-gray-400 text-sm mb-2">{t('pricing.currentUsage')} — {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-2xl font-semibold text-white">
-                  {usage} of {plans[currentPlan as keyof typeof plans].limit} used
+                  {t('pricing.usedOf', { used: usage, limit: plans[currentPlan as keyof typeof plans].limit })}
                 </p>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -184,6 +229,37 @@ const Pricing: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Billing-mode toggle: one-time (no autopay) vs subscription */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex rounded-full border border-gray-700 bg-neutral-900 p-1">
+            <button
+              type="button"
+              onClick={() => setBillingMode('one_time')}
+              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all ${
+                billingMode === 'one_time'
+                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {t('pricing.toggleOneTime')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingMode('subscription')}
+              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all ${
+                billingMode === 'subscription'
+                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {t('pricing.toggleSubscription')}
+            </button>
+          </div>
+        </div>
+        <p className="text-center text-xs text-gray-500 mb-8">
+          {billingMode === 'one_time' ? t('pricing.toggleOneTimeHelp') : t('pricing.toggleSubscriptionHelp')}
+        </p>
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -203,26 +279,26 @@ const Pricing: React.FC = () => {
                 {/* Current plan badge */}
                 {isCurrent && (
                   <div className="absolute top-0 right-0 bg-orange-600 text-white px-4 py-2 text-sm font-semibold">
-                    Your Plan
+                    {t('pricing.currentPlan')}
                   </div>
                 )}
 
                 {/* Max badge — top banner, top corners rounded to match card */}
-                {plan.badge && (
+                {plan.badgeKey && (
                   <div className="absolute top-0 left-0 right-0 rounded-t-2xl bg-gradient-to-r from-orange-600 to-orange-500 text-white text-center py-2 text-xs font-bold tracking-wide">
-                    {plan.badge}
+                    {t(plan.badgeKey)}
                   </div>
                 )}
 
-                <div className={`p-8 ${plan.badge ? 'pt-14' : ''}`}>
+                <div className={`p-8 ${plan.badgeKey ? 'pt-14' : ''}`}>
                   {/* Plan name and price */}
-                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">{t(plan.nameKey)}</h3>
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold text-white">{plan.price}</span>
-                      <span className="text-gray-400">{plan.period}</span>
+                      <span className="text-gray-400">{plan.periodKey ? t(plan.periodKey) : ''}</span>
                     </div>
-                    <p className="text-sm text-gray-400 mt-3 mb-4">{plan.limit} uploads per month</p>
+                    <p className="text-sm text-gray-400 mt-3 mb-4">{t('pricing.uploadsPerMonth', { count: plan.limit })}</p>
                   </div>
 
                   {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free.
@@ -231,14 +307,14 @@ const Pricing: React.FC = () => {
                   {planKey === 'free' ? (
                     <>
                       {[
-                        "Get unique Titles tuned to YouTube's algorithm",
-                        "Get Description tuned to YouTube's algorithm",
-                        'Get Timestamps with headings',
-                        'Get Hashtags that help rank your video and get more views',
-                      ].map((line) => (
-                        <div key={line} className="flex items-start gap-3 py-2">
+                        'pricing.feat.uniqueTitles',
+                        'pricing.feat.tunedDescription',
+                        'pricing.feat.timestamps',
+                        'pricing.feat.hashtags',
+                      ].map((key) => (
+                        <div key={key} className="flex items-start gap-3 py-2">
                           <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-100">{line}</span>
+                          <span className="text-gray-100">{t(key)}</span>
                         </div>
                       ))}
                     </>
@@ -256,7 +332,7 @@ const Pricing: React.FC = () => {
                           : 'bg-gray-800 text-white hover:bg-gray-700'
                       }`}
                     >
-                      {isCurrent ? '✓ Current Plan' : upgrading === planKey ? 'Opening...' : 'Upgrade'}
+                      {isCurrent ? '✓ ' + t('pricing.currentPlan') : upgrading === planKey ? t('common.loading') : t('pricing.upgrade')}
                     </button>
                   )}
 
@@ -270,17 +346,11 @@ const Pricing: React.FC = () => {
 
         {/* FAQ / Info */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 max-w-2xl mx-auto">
-          <h3 className="text-xl font-semibold text-white mb-4">Need help choosing?</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">{t('pricing.helpTitle')}</h3>
           <ul className="space-y-3 text-gray-300 text-sm">
-            <li>
-              <strong className="text-white">Free Plan:</strong> Perfect for testing — 10 of each per month, copy enabled on metadata
-            </li>
-            <li>
-              <strong className="text-white">Pro Plan:</strong> Consistent creators — 100 of each per month, copy enabled everywhere
-            </li>
-            <li>
-              <strong className="text-white">Max Plan:</strong> Professional creators — 1000 of each per month, copy enabled everywhere
-            </li>
+            <li>{t('pricing.helpFree')}</li>
+            <li>{t('pricing.helpPro')}</li>
+            <li>{t('pricing.helpMax')}</li>
           </ul>
         </div>
       </div>

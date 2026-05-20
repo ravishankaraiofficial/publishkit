@@ -10,6 +10,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
 import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
+import { useT } from '../i18n';
 
 interface MultiPostOutput {
   x?: string[];
@@ -17,12 +18,13 @@ interface MultiPostOutput {
   linkedin?: string;
 }
 
-const PLAN_LIMITS: Record<string, number> = { free: 10, pro: 100, ultra: 1000 };
+const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 300 };
 const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
 
 const MultiPost: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
   const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -116,15 +118,19 @@ const MultiPost: React.FC = () => {
       }
 
       const generateRepurposing = httpsCallable<
-        { title: string; description: string; platforms: string[]; language: OutputLanguage },
+        { title: string; description: string; platforms: string[]; language: OutputLanguage; visitorId?: string },
         MultiPostOutput
       >(functions, 'generateRepurposing');
+
+      const { getVisitorId } = await import('../lib/fingerprint');
+      const visitorId = await getVisitorId().catch(() => undefined);
 
       const result = await generateRepurposing({
         title: contentTitle.trim(),
         description: contentDescription.trim(),
         platforms: selectedPlatforms,
         language,
+        visitorId,
       });
 
       setOutput(result.data);
@@ -147,7 +153,7 @@ const MultiPost: React.FC = () => {
       plan === 'ultra'
         ? `You've used your ${monthlyLimit} MultiPost runs for this month. Resets on the 1st.`
         : plan === 'pro'
-        ? `You've used your ${monthlyLimit} MultiPost runs this month. Upgrade to Max Plan for 1000/month.`
+        ? `You've used your ${monthlyLimit} MultiPost runs this month. Upgrade to Max Plan for 300/month.`
         : `You've used your ${monthlyLimit} MultiPost runs this month. Upgrade to Pro Plan or Max Plan for more.`;
     const ctaLabel =
       plan === 'ultra'
@@ -197,19 +203,19 @@ const MultiPost: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">MultiPost</h1>
-          <p className="text-gray-400">Turn your content into tailored posts for X, Instagram, and LinkedIn</p>
+          <h1 className="text-4xl font-bold text-white mb-2">{t('nav.multipost')}</h1>
+          <p className="text-gray-400">{t('multipost.subtitle')}</p>
         </div>
 
         {/* Usage counter — visible on every plan */}
         <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
-              <span className="text-white font-semibold">{usage}</span> / {monthlyLimit} used this month
+              {t('multipost.usageCounter', { used: usage, limit: monthlyLimit })}
               <span className="text-[#888888] ml-2">({planLabel})</span>
             </p>
             {isFree && (
-              <p className="text-xs text-[#888888] italic">Copy not available on Free Plan</p>
+              <p className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
             )}
           </div>
         </div>
@@ -217,7 +223,7 @@ const MultiPost: React.FC = () => {
         {/* Input Section */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2">Content Source</label>
+            <label className="block text-white font-semibold mb-2">{t('multipost.contentSource')}</label>
             <div className="flex gap-4 mb-4">
               <div className="flex-1">
                 <input
@@ -227,7 +233,7 @@ const MultiPost: React.FC = () => {
                     setTitle(e.target.value);
                     setSelectedResult('');
                   }}
-                  placeholder="Enter video title or YouTube title"
+                  placeholder={t('multipost.contentSourcePlaceholder')}
                   disabled={loading}
                   className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
@@ -242,7 +248,7 @@ const MultiPost: React.FC = () => {
                   disabled={loading}
                   className="bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Or pick a past result...</option>
+                  <option value="">{t('multipost.pickPastResult')}</option>
                   {pastResults.map((result) => (
                     <option key={result.id} value={result.id}>
                       {result.title}
@@ -254,11 +260,11 @@ const MultiPost: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2">Description (Optional)</label>
+            <label className="block text-white font-semibold mb-2">{t('multipost.descriptionOptional')}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add any additional context or key points..."
+              placeholder={t('multipost.descriptionPlaceholder')}
               rows={2}
               disabled={loading || !!selectedResult}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -266,9 +272,9 @@ const MultiPost: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2">Output Language</label>
+            <label className="block text-white font-semibold mb-2">{t('multipost.outputLanguage')}</label>
             <p className="text-xs text-gray-500 mb-3">
-              All posts will be written in the selected language using its native script.
+              {t('multipost.outputLanguageHelp')}
             </p>
             <select
               value={language}
@@ -292,7 +298,7 @@ const MultiPost: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-3">Select Platforms</label>
+            <label className="block text-white font-semibold mb-3">{t('multipost.selectPlatforms')}</label>
             <div className="flex flex-wrap gap-3">
               {['x', 'instagram', 'linkedin'].map((platform) => (
                 <label

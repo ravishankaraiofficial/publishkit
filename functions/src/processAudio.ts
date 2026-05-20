@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { db, storage } from './lib/firestore';
 import { verifyWhitelist } from './middleware/auth';
 import { enforceRateLimit, enforceBurstLimit } from './middleware/rateLimit';
+import { enforceFreeTierGuard } from './lib/freeTierGuard';
 import { transcribeAudio } from './transcribe';
 import { generateOutputs, analyzeDocument } from './generate';
 import { geminiApiKey } from './lib/gemini';
@@ -111,6 +112,15 @@ export const processAudio = functions
       // Enforce atomic monthly rate limits (UID + IP based)
       const rawIp = context.rawRequest.ip || 'unknown';
       await enforceRateLimit(uid, rawIp, plan);
+
+      // Anti-abuse: block fresh UIDs from reusing the free tier on the same
+      // device/IP as a previous free-tier account. No-op for paid users.
+      // Accept either `visitorId` (new convention) or `fingerprint` (existing
+      // field already sent by useUpload.tsx).
+      const visitorId =
+        (typeof (data as any)?.visitorId === 'string' ? (data as any).visitorId : undefined) ||
+        (typeof (data as any)?.fingerprint === 'string' ? (data as any).fingerprint : undefined);
+      await enforceFreeTierGuard({ uid, rawIp, visitorId, plan });
 
       const resultRef = db.collection(`users/${uid}/results`).doc();
       const resultId = resultRef.id;

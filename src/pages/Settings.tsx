@@ -14,7 +14,28 @@ import { cn } from '../lib/utils';
 import { colorNameToHex } from '../lib/colors';
 import { ColorPicker } from '../components/ui/ColorPicker';
 import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_VALUES, formatLanguageOption } from '../lib/languages';
+import { isMeaningfulText, MEANINGFUL_ERROR } from '../lib/validateMeaningful';
+import { useT } from '../i18n';
 import { ChevronDown } from 'lucide-react';
+
+// Zod refinement helpers — reject gibberish on free-text profile fields.
+// Required field: must be present AND meaningful.
+const meaningful = (max: number, minWords = 1) =>
+  z
+    .string()
+    .max(max)
+    .refine((v) => isMeaningfulText(v, { minWords }), { message: MEANINGFUL_ERROR });
+
+// Optional field: empty string is OK (gets stripped on save); any non-empty
+// value must be meaningful.
+const meaningfulOptional = (max: number, minWords = 1) =>
+  z
+    .string()
+    .max(max)
+    .refine((v) => v.trim().length === 0 || isMeaningfulText(v, { minWords }), {
+      message: MEANINGFUL_ERROR,
+    })
+    .optional();
 
 // ────────────────────────────────────────────────────────────────────────────
 // Schema
@@ -29,66 +50,55 @@ import { ChevronDown } from 'lucide-react';
 //
 const profileSchema = z.object({
   // ── Required basics ──
-  name: z.string().min(1, 'Name is required'),
+  name: meaningful(120),
+  // Handle stays loose — users can pick any handle they want.
   handle: z
     .string()
     .min(1, 'Handle is required')
     .regex(/^@?[\w.]+$/, 'Handle should be like @yourchannel'),
-  niche: z
-    .string()
-    .min(1, 'Niche is required')
-    .max(120, 'Niche should be a short phrase (max 120 chars)'),
+  niche: meaningful(120),
   language: z.enum(OUTPUT_LANGUAGE_VALUES),
-  positioning: z
-    .string()
-    .min(1, 'One-line positioning is required')
-    .max(200, 'Keep this to one short line (max 200 chars)'),
+  positioning: meaningful(200, 2),
   tone: z.string().min(1, 'Tone is required'),
 
   // ── Required for thumbnails ──
-  appearance: z.string().min(10, 'Appearance must be at least 10 characters'),
+  appearance: meaningful(500, 2).refine((v) => v.trim().length >= 10, {
+    message: 'Appearance must be at least 10 characters',
+  }),
   brandColor1Raw: z.string().min(1, 'Brand color 1 is required'),
   brandColor2Raw: z.string().min(1, 'Brand color 2 is required'),
 
   // ── Required for audience-aware scripts ──
-  targetAudience: z
-    .string()
-    .min(1, 'Target audience is required')
-    .max(300, 'Keep this concise (max 300 chars)'),
+  targetAudience: meaningful(300, 2),
 
   // ── Recommended optionals ──
-  audiencePainPoint: z.string().max(500).optional(),
+  audiencePainPoint: meaningfulOptional(500, 2),
   audienceLevel: z.enum(['beginner', 'intermediate', 'advanced', 'mixed', '']).optional(),
-  audienceTransformation: z.string().max(500).optional(),
-  catchphrases: z.string().max(500).optional(),
-  avoidWords: z.string().max(500).optional(),
-  hookStyle: z.string().max(500).optional(),
-  ctaStyle: z.string().max(500).optional(),
-  contentPillars: z.string().max(500).optional(),
+  audienceTransformation: meaningfulOptional(500, 2),
+  catchphrases: meaningfulOptional(500),
+  avoidWords: meaningfulOptional(500),
+  hookStyle: meaningfulOptional(500),
+  ctaStyle: meaningfulOptional(500),
+  contentPillars: meaningfulOptional(500),
   preferredVideoLength: z.enum(['15', '30', '45', '60', '90', 'long', '']).optional(),
 
   // ── Advanced optionals ──
   age: z
     .union([z.string().length(0), z.coerce.number().int().min(10).max(120)])
     .optional(),
-  whatMakesDifferent: z.string().max(500).optional(),
-  personalStory: z.string().max(1000).optional(),
-  credentials: z.string().max(500).optional(),
+  whatMakesDifferent: meaningfulOptional(500, 2),
+  personalStory: meaningfulOptional(1000, 3),
+  credentials: meaningfulOptional(500),
   addressForm: z.enum(['tum', 'aap', 'mixed', 'na', '']).optional(),
   usesSlang: z.boolean().optional(),
   usesMemes: z.boolean().optional(),
   usesCursing: z.boolean().optional(),
-  bestVideoHooks: z.string().max(1500).optional(),
-  hookFormulas: z.string().max(800).optional(),
+  bestVideoHooks: meaningfulOptional(1500, 3),
+  hookFormulas: meaningfulOptional(800, 2),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-const TONE_PRESETS = ['Casual', 'Educational', 'Professional', 'Storytelling', 'Comedy / Witty'];
-
-// Strip an optional field that came back as empty / undefined / whitespace.
-// Returns deleteField() so Firestore removes the key entirely instead of
-// storing an empty string.
 function blankToDelete(v: unknown): unknown {
   if (v === undefined || v === null) return deleteField();
   if (typeof v === 'string' && v.trim().length === 0) return deleteField();
@@ -141,6 +151,7 @@ function CollapsibleSection({
 export function Settings() {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -194,11 +205,11 @@ export function Settings() {
     const brandColor2 = colorNameToHex(data.brandColor2Raw);
 
     if (!brandColor1) {
-      toast('Brand Color 1 is not a valid color name or hex code.', 'error');
+      toast(t('settings.brandColorError1'), 'error');
       return;
     }
     if (!brandColor2) {
-      toast('Brand Color 2 is not a valid color name or hex code.', 'error');
+      toast(t('settings.brandColorError2'), 'error');
       return;
     }
 
@@ -253,7 +264,7 @@ export function Settings() {
 
       await updateDoc(doc(db, 'users', user.uid), payload as Record<string, never>);
       await refreshProfile();
-      toast('Settings saved successfully', 'success');
+      toast(t('settings.saved'), 'success');
     } catch (error: any) {
       console.error(error);
       toast(error.message || 'Failed to save settings', 'error');
@@ -327,16 +338,15 @@ export function Settings() {
         {/* Page heading */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
-            Creator Profile
+            {t('settings.title')}
             {watchedName && (
               <span className="text-[#E05A1E] ml-2 text-xl font-semibold">({watchedName})</span>
             )}
           </h1>
           <p className="mt-2 text-sm text-[#888888] leading-relaxed max-w-xl">
-            Fill this in so PublishKit's AI generates titles, descriptions, thumbnails,{' '}
-            scripts, and social posts that sound like <span className="text-[#CFCFCF] font-medium">you</span>,
-            not generic AI. Fields marked <span className="text-[#E05A1E]">*</span> are required.
-            The rest are optional but each one sharpens your results.
+            {watchedName
+              ? t('settings.subtitle', { name: watchedName })
+              : t('settings.subtitleNoName')}
           </p>
         </div>
 
@@ -346,45 +356,47 @@ export function Settings() {
               {/* Mobile save button — sticky at top so it's always reachable */}
               <div className="sm:hidden flex justify-end">
                 <Button type="submit" isLoading={isLoading}>
-                  Save Changes
+                  {t('settings.saveChanges')}
                 </Button>
               </div>
 
               {/* ═══ Section 1 ═══ Required basics ═══ */}
               <div>
-                <h3 className="text-base sm:text-lg font-semibold text-white">The basics</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white">
+                  {t('settings.section1.title')}
+                </h3>
                 <p className="mt-1 text-xs text-[#888888] leading-relaxed">
-                  Required. Without these the AI can't even start.
+                  {t('settings.section1.subtitle')}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
-                  label="Your name / channel name *"
-                  placeholder="e.g. Tech With Rahul"
+                  label={t('settings.name.label') + ' *'}
+                  placeholder={t('settings.name.placeholder')}
                   {...register('name')}
                   error={errors.name?.message}
                 />
                 <Input
-                  label="YouTube handle *"
-                  placeholder="e.g. @techwithrahul"
+                  label={t('settings.handle.label') + ' *'}
+                  placeholder={t('settings.handle.placeholder')}
                   {...register('handle')}
                   error={errors.handle?.message}
                 />
               </div>
 
               <Input
-                label="Your niche / topic — be specific *"
-                placeholder="e.g. AI tools for content creators (NOT just 'tech')"
+                label={t('settings.niche.label') + ' *'}
+                placeholder={t('settings.niche.placeholder')}
                 {...register('niche')}
                 error={errors.niche?.message}
               />
 
               <Textarea
-                label="One-line positioning"
+                label={t('settings.positioning.label')}
                 required
-                hint='Who you are in 10 words. Example: "18 y/o building a 6-figure AI agency" or "Ex-doctor teaching evidence-based fitness".'
-                placeholder="One short sentence that sums you up"
+                hint={t('settings.positioning.hint')}
+                placeholder={t('settings.positioning.placeholder')}
                 rows={2}
                 register={register('positioning')}
                 error={errors.positioning?.message}
@@ -396,10 +408,10 @@ export function Settings() {
                 render={({ field }) => (
                   <div>
                     <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">
-                      Default output language *
+                      {t('settings.language.label')} *
                     </label>
                     <p className="text-xs text-[#555555] mb-2">
-                      Used for titles, descriptions, timestamps, scripts, and MultiPost.
+                      {t('settings.language.hint')}
                     </p>
                     <select
                       value={field.value}
@@ -425,11 +437,17 @@ export function Settings() {
                 control={control}
                 render={({ field }) => (
                   <PillGroup
-                    label="Default tone *"
-                    hint="How you talk in your videos. You can override this per-script in Script Writer."
+                    label={t('settings.tone.label') + ' *'}
+                    hint={t('settings.tone.hint')}
                     value={field.value}
                     onChange={field.onChange}
-                    options={TONE_PRESETS.map((t) => ({ value: t, label: t }))}
+                    options={[
+                      { value: 'Casual', label: t('settings.tone.casual') },
+                      { value: 'Educational', label: t('settings.tone.educational') },
+                      { value: 'Professional', label: t('settings.tone.professional') },
+                      { value: 'Storytelling', label: t('settings.tone.storytelling') },
+                      { value: 'Comedy / Witty', label: t('settings.tone.comedy') },
+                    ]}
                   />
                 )}
               />
@@ -437,26 +455,28 @@ export function Settings() {
 
               {/* ═══ Section 2 ═══ Audience ═══ */}
               <div className="border-t border-[#2A2A2A] pt-5">
-                <h3 className="text-base sm:text-lg font-semibold text-white">Your audience</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white">
+                  {t('settings.section2.title')}
+                </h3>
                 <p className="mt-1 text-xs text-[#888888] leading-relaxed">
-                  Telling the AI who you're talking TO is half the battle.
+                  {t('settings.section2.subtitle')}
                 </p>
               </div>
 
               <Textarea
-                label="Who exactly watches your content"
+                label={t('settings.targetAudience.label')}
                 required
-                hint='Age, profession, goals. Example: "20-25 year old Indian college students learning AI/coding"'
-                placeholder="Be specific — age, what they do, what they want"
+                hint={t('settings.targetAudience.hint')}
+                placeholder={t('settings.targetAudience.placeholder')}
                 rows={2}
                 register={register('targetAudience')}
                 error={errors.targetAudience?.message}
               />
 
               <Textarea
-                label="Their biggest pain point you solve"
-                hint="The single problem they wake up thinking about, that you address."
-                placeholder='e.g. "They feel left behind by AI but every tutorial is for engineers"'
+                label={t('settings.audiencePainPoint.label')}
+                hint={t('settings.audiencePainPoint.hint')}
+                placeholder={t('settings.audiencePainPoint.placeholder')}
                 rows={2}
                 register={register('audiencePainPoint')}
                 error={errors.audiencePainPoint?.message}
@@ -467,24 +487,24 @@ export function Settings() {
                 control={control}
                 render={({ field }) => (
                   <PillGroup
-                    label="Their skill level in your niche"
+                    label={t('settings.audienceLevel.label')}
                     value={field.value || ''}
                     onChange={field.onChange}
                     options={[
-                      { value: '', label: 'Skip' },
-                      { value: 'beginner', label: 'Beginner' },
-                      { value: 'intermediate', label: 'Intermediate' },
-                      { value: 'advanced', label: 'Advanced' },
-                      { value: 'mixed', label: 'Mixed' },
+                      { value: '', label: t('settings.audienceLevel.skip') },
+                      { value: 'beginner', label: t('settings.audienceLevel.beginner') },
+                      { value: 'intermediate', label: t('settings.audienceLevel.intermediate') },
+                      { value: 'advanced', label: t('settings.audienceLevel.advanced') },
+                      { value: 'mixed', label: t('settings.audienceLevel.mixed') },
                     ]}
                   />
                 )}
               />
 
               <Textarea
-                label="What they want to become after watching"
-                hint="The transformation. Example: 'A confident creator who ships content weekly without burnout.'"
-                placeholder="The version of themselves they aspire to"
+                label={t('settings.audienceTransformation.label')}
+                hint={t('settings.audienceTransformation.hint')}
+                placeholder={t('settings.audienceTransformation.placeholder')}
                 rows={2}
                 register={register('audienceTransformation')}
                 error={errors.audienceTransformation?.message}
@@ -492,17 +512,19 @@ export function Settings() {
 
               {/* ═══ Section 3 ═══ Visual identity ═══ */}
               <div className="border-t border-[#2A2A2A] pt-5">
-                <h3 className="text-base sm:text-lg font-semibold text-white">Visual identity</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white">
+                  {t('settings.section3.title')}
+                </h3>
                 <p className="mt-1 text-xs text-[#888888] leading-relaxed">
-                  Required so thumbnail prompts feature YOU and your brand colors, not stock imagery.
+                  {t('settings.section3.subtitle')}
                 </p>
               </div>
 
               <Textarea
-                label="Your on-camera appearance"
+                label={t('settings.appearance.label')}
                 required
-                hint="Face, hair, what you usually wear. Helps thumbnails actually look like you."
-                placeholder="e.g. Indian male in his 20s, short hair, usually wearing a black hoodie or casual t-shirt"
+                hint={t('settings.appearance.hint')}
+                placeholder={t('settings.appearance.placeholder')}
                 rows={3}
                 register={register('appearance')}
                 error={errors.appearance?.message}
@@ -510,8 +532,7 @@ export function Settings() {
 
               <div>
                 <p className="text-xs text-[#555555] mb-3">
-                  Brand colors — type a name like <code className="text-[#E05A1E]">orange</code> or a
-                  hex code like <code className="text-[#E05A1E]">#FF5733</code>, or click the swatch.
+                  {t('settings.brandColors.hint', { color1: 'orange', hex1: '#FF5733' })}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <Controller
@@ -519,7 +540,7 @@ export function Settings() {
                     control={control}
                     render={({ field }) => (
                       <ColorPicker
-                        label="Brand color 1 (primary) *"
+                        label={t('settings.brandColor1.label')}
                         value={field.value}
                         onChange={field.onChange}
                         error={errors.brandColor1Raw?.message}
@@ -531,7 +552,7 @@ export function Settings() {
                     control={control}
                     render={({ field }) => (
                       <ColorPicker
-                        label="Brand color 2 (accent) *"
+                        label={t('settings.brandColor2.label')}
                         value={field.value}
                         onChange={field.onChange}
                         error={errors.brandColor2Raw?.message}
@@ -543,43 +564,43 @@ export function Settings() {
 
               {/* ═══ Section 4 ═══ Voice & tone (collapsible) ═══ */}
               <CollapsibleSection
-                title="Voice & tone — sharper scripts"
-                subtitle="Optional, but every field here makes your scripts sound less generic."
+                title={t('settings.section4.title')}
+                subtitle={t('settings.section4.subtitle')}
               >
                 <Textarea
-                  label="Catchphrases you use often"
-                  hint='Words/phrases your audience associates with you. Example: "Let me explain", "Big idea is this", "Pause the video right here".'
-                  placeholder="Your signature lines, comma-separated"
+                  label={t('settings.catchphrases.label')}
+                  hint={t('settings.catchphrases.hint')}
+                  placeholder={t('settings.catchphrases.placeholder')}
                   rows={2}
                   register={register('catchphrases')}
                 />
 
                 <Textarea
-                  label="Words / topics you NEVER use"
-                  hint='Stuff that breaks your brand. Example: "Avoid corporate jargon, no swearing, never the word synergy"'
-                  placeholder="Comma-separated"
+                  label={t('settings.avoidWords.label')}
+                  hint={t('settings.avoidWords.hint')}
+                  placeholder={t('settings.avoidWords.placeholder')}
                   rows={2}
                   register={register('avoidWords')}
                 />
 
                 <Textarea
-                  label="How you usually START videos (hook style)"
-                  hint='Examples: "I always open with a question", "Cold-open with the most shocking part", "Stat first, name second"'
+                  label={t('settings.hookStyle.label')}
+                  hint={t('settings.hookStyle.hint')}
                   rows={2}
                   register={register('hookStyle')}
                 />
 
                 <Textarea
-                  label="How you usually END videos (CTA style)"
-                  hint='Examples: "Follow for more AI tools", "Save this for later", "Comment your biggest takeaway"'
+                  label={t('settings.ctaStyle.label')}
+                  hint={t('settings.ctaStyle.hint')}
                   rows={2}
                   register={register('ctaStyle')}
                 />
 
                 <Textarea
-                  label="Your content pillars (3-5 topics)"
-                  hint="The main themes you post about. Helps AI stay on-brand across scripts."
-                  placeholder='e.g. "AI tools, freelancing income, creator burnout, productivity"'
+                  label={t('settings.contentPillars.label')}
+                  hint={t('settings.contentPillars.hint')}
+                  placeholder={t('settings.contentPillars.placeholder')}
                   rows={2}
                   register={register('contentPillars')}
                 />
@@ -589,18 +610,18 @@ export function Settings() {
                   control={control}
                   render={({ field }) => (
                     <PillGroup
-                      label="Preferred video length"
-                      hint="What duration works best for your audience? Script Writer will optimize pacing for this."
+                      label={t('settings.preferredVideoLength.label')}
+                      hint={t('settings.preferredVideoLength.hint')}
                       value={field.value || ''}
                       onChange={field.onChange}
                       options={[
-                        { value: '', label: 'Skip' },
-                        { value: '15', label: '15 sec' },
-                        { value: '30', label: '30 sec' },
-                        { value: '45', label: '45 sec' },
-                        { value: '60', label: '60 sec' },
-                        { value: '90', label: '90 sec' },
-                        { value: 'long', label: '> 90 sec' },
+                        { value: '', label: t('settings.length.skip') },
+                        { value: '15', label: t('settings.length.15') },
+                        { value: '30', label: t('settings.length.30') },
+                        { value: '45', label: t('settings.length.45') },
+                        { value: '60', label: t('settings.length.60') },
+                        { value: '90', label: t('settings.length.90') },
+                        { value: 'long', label: t('settings.length.long') },
                       ]}
                     />
                   )}
@@ -609,35 +630,35 @@ export function Settings() {
 
               {/* ═══ Section 5 ═══ Advanced (collapsible) ═══ */}
               <CollapsibleSection
-                title="Advanced — fine-tune your voice"
-                subtitle="Power-user fields. Only fill what's relevant to you."
+                title={t('settings.section5.title')}
+                subtitle={t('settings.section5.subtitle')}
               >
                 <Input
-                  label="Your age (optional)"
+                  label={t('settings.age.label')}
                   type="number"
                   min={10}
                   max={120}
-                  placeholder="e.g. 24"
+                  placeholder={t('settings.age.placeholder')}
                   {...register('age')}
                 />
 
                 <Textarea
-                  label="What makes you different from others in your niche"
-                  hint="Why someone should follow YOU vs the 100 others doing the same thing."
+                  label={t('settings.whatMakesDifferent.label')}
+                  hint={t('settings.whatMakesDifferent.hint')}
                   rows={2}
                   register={register('whatMakesDifferent')}
                 />
 
                 <Textarea
-                  label="Your personal story (background, journey)"
-                  hint="Journey, struggles, wins. This is what creates relatability in scripts."
+                  label={t('settings.personalStory.label')}
+                  hint={t('settings.personalStory.hint')}
                   rows={4}
                   register={register('personalStory')}
                 />
 
                 <Textarea
-                  label="Credentials / proof you can mention"
-                  hint="Followers, revenue, results, experience. Use only if it's genuinely yours."
+                  label={t('settings.credentials.label')}
+                  hint={t('settings.credentials.hint')}
                   rows={2}
                   register={register('credentials')}
                 />
@@ -647,16 +668,16 @@ export function Settings() {
                   control={control}
                   render={({ field }) => (
                     <PillGroup
-                      label="Hindi/Hinglish address-form (तुम / आप)"
-                      hint='How you address your audience in Hindi videos. "Skip" if you only output English.'
+                      label={t('settings.addressForm.label')}
+                      hint={t('settings.addressForm.hint')}
                       value={field.value || ''}
                       onChange={field.onChange}
                       options={[
-                        { value: '', label: 'Skip' },
-                        { value: 'tum', label: 'तुम (tum)' },
-                        { value: 'aap', label: 'आप (aap)' },
-                        { value: 'mixed', label: 'Mixed' },
-                        { value: 'na', label: 'English only' },
+                        { value: '', label: t('settings.addressForm.skip') },
+                        { value: 'tum', label: t('settings.addressForm.tum') },
+                        { value: 'aap', label: t('settings.addressForm.aap') },
+                        { value: 'mixed', label: t('settings.addressForm.mixed') },
+                        { value: 'na', label: t('settings.addressForm.na') },
                       ]}
                     />
                   )}
@@ -681,7 +702,7 @@ export function Settings() {
                           onChange={(e) => field.onChange(e.target.checked)}
                           className="w-4 h-4 accent-[#E05A1E]"
                         />
-                        <span className="text-sm font-medium">I use slang</span>
+                        <span className="text-sm font-medium">{t('settings.usesSlang.label')}</span>
                       </label>
                     )}
                   />
@@ -703,7 +724,7 @@ export function Settings() {
                           onChange={(e) => field.onChange(e.target.checked)}
                           className="w-4 h-4 accent-[#E05A1E]"
                         />
-                        <span className="text-sm font-medium">I reference memes</span>
+                        <span className="text-sm font-medium">{t('settings.usesMemes.label')}</span>
                       </label>
                     )}
                   />
@@ -725,23 +746,23 @@ export function Settings() {
                           onChange={(e) => field.onChange(e.target.checked)}
                           className="w-4 h-4 accent-[#E05A1E]"
                         />
-                        <span className="text-sm font-medium">I curse / swear</span>
+                        <span className="text-sm font-medium">{t('settings.usesCursing.label')}</span>
                       </label>
                     )}
                   />
                 </div>
 
                 <Textarea
-                  label="Your 3 best-performing video hooks (copy-paste the openings)"
-                  hint="If you have past hits, paste the first 2-3 lines here. AI will study what worked."
-                  placeholder={`1. "I tried 5 AI tools so you don't have to..."\n2. "Stop scrolling — this Notion template just saved me ₹20,000..."\n3. ...`}
+                  label={t('settings.bestVideoHooks.label')}
+                  hint={t('settings.bestVideoHooks.hint')}
+                  placeholder={t('settings.bestVideoHooks.placeholder')}
                   rows={5}
                   register={register('bestVideoHooks')}
                 />
 
                 <Textarea
-                  label="Hook formulas that work for you"
-                  hint='Examples: "money saved", "before vs after", "the one thing nobody tells you about X", "I was wrong about Y".'
+                  label={t('settings.hookFormulas.label')}
+                  hint={t('settings.hookFormulas.hint')}
                   rows={3}
                   register={register('hookFormulas')}
                 />
@@ -750,7 +771,7 @@ export function Settings() {
               {/* Save */}
               <div className="flex justify-end pt-2">
                 <Button type="submit" isLoading={isLoading}>
-                  Save Changes
+                  {t('settings.saveChanges')}
                 </Button>
               </div>
             </form>

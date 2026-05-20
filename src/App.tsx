@@ -15,6 +15,7 @@ import Pricing from './pages/Pricing';
 import ScriptWriter from './pages/ScriptWriter';
 import MultiPost from './pages/MultiPost';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UiLanguageSync } from './i18n/UiLanguageSync';
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <AuthProvider>
+          <UiLanguageSync />
           <UploadProvider>
             <AuthGatedRoutes />
           </UploadProvider>

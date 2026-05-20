@@ -4,15 +4,18 @@ import { useUpload } from '../../hooks/useUpload';
 import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles, FileText, Share2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
+import { useT } from '../../i18n';
 
+// Nav item config — labels are i18n keys, looked up at render time so the
+// nav re-translates instantly when the user picks a new language.
 const navItems = [
-  { to: '/', icon: Home, label: 'New' },
-  { to: '/script-writer', icon: FileText, label: 'Script' },
-  { to: '/multipost', icon: Share2, label: 'MultiPost' },
-  { to: '/results', icon: Clock, label: 'History' },
-  { to: '/pricing', icon: Sparkles, label: 'Pricing' },
-  { to: '/feedback', icon: MessageSquare, label: 'Feedback' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/', icon: Home, key: 'nav.new' },
+  { to: '/script-writer', icon: FileText, key: 'nav.script' },
+  { to: '/multipost', icon: Share2, key: 'nav.multipost' },
+  { to: '/results', icon: Clock, key: 'nav.history' },
+  { to: '/pricing', icon: Sparkles, key: 'nav.pricing' },
+  { to: '/feedback', icon: MessageSquare, key: 'nav.feedback' },
+  { to: '/settings', icon: Settings, key: 'nav.settings' },
 ];
 
 export function Navbar() {
@@ -24,6 +27,7 @@ export function Navbar() {
 
   const isGuest = !user || user.isAnonymous;
   const currentPlan = profile?.plan || 'free';
+  const t = useT();
 
   const handleAuthAction = async () => {
     if (isGuest) {
@@ -55,14 +59,14 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-5 text-sm font-medium">
-            {navItems.map(({ to, label }) => (
+            {navItems.map(({ to, key }) => (
               <Link
                 key={to}
                 to={to}
                 onClick={to === '/' ? reset : undefined}
                 className={navLinkClass(to)}
               >
-                {label}
+                {t(key)}
               </Link>
             ))}
 
@@ -85,11 +89,11 @@ export function Navbar() {
             >
               {isGuest ? (
                 <>
-                  <LogIn className="w-4 h-4" /> Sign In
+                  <LogIn className="w-4 h-4" /> {t('nav.signIn')}
                 </>
               ) : (
                 <>
-                  <LogOut className="w-4 h-4" /> Sign Out
+                  <LogOut className="w-4 h-4" /> {t('nav.signOut')}
                 </>
               )}
             </button>
@@ -109,11 +113,11 @@ export function Navbar() {
         >
           {isGuest ? (
             <>
-              <LogIn className="w-3.5 h-3.5" /> Sign In
+              <LogIn className="w-3.5 h-3.5" /> {t('nav.signIn')}
             </>
           ) : (
             <>
-              <LogOut className="w-3.5 h-3.5" /> Sign Out
+              <LogOut className="w-3.5 h-3.5" /> {t('nav.signOut')}
             </>
           )}
         </button>
@@ -122,7 +126,7 @@ export function Navbar() {
       {/* ── Mobile bottom nav bar ── */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-md border-t border-[#2A2A2A]">
         <div className="flex items-stretch py-1.5 px-0.5">
-          {navItems.map(({ to, icon: Icon, label }) => {
+          {navItems.map(({ to, icon: Icon, key }) => {
             const active = location.pathname === to;
             return (
               <Link
@@ -137,7 +141,7 @@ export function Navbar() {
                 )}
               >
                 <Icon className={cn("w-5 h-5", active && "drop-shadow-[0_0_6px_rgba(224,90,30,0.8)]")} />
-                <span className="text-[9px] font-medium leading-tight">{label}</span>
+                <span className="text-[9px] font-medium leading-tight">{t(key)}</span>
                 {active && (
                   <div className="absolute -bottom-px w-6 h-0.5 bg-[#E05A1E] rounded-full" />
                 )}

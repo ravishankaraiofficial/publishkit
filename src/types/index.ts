@@ -18,6 +18,11 @@ export interface CreatorProfile {
   handle?: string;
   niche: string;
   language: OutputLanguage;
+  // UI display language for the entire web app. Independent of `language`
+  // (which controls generation output). Set via the LanguageBar component;
+  // synced to localStorage + this field so the choice follows the user
+  // across devices.
+  uiLanguage?: OutputLanguage;
 
   // Required for thumbnails (existing)
   appearance: string;
