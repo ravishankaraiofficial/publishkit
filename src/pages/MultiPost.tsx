@@ -8,7 +8,9 @@ import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import { Picker } from '../components/ui/Picker';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
+import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
 import { useT } from '../i18n';
 
@@ -239,22 +241,19 @@ const MultiPost: React.FC = () => {
                 />
               </div>
               {pastResults.length > 0 && (
-                <select
+                <Picker
                   value={selectedResult}
-                  onChange={(e) => {
-                    setSelectedResult(e.target.value);
+                  options={[
+                    { value: '', label: t('multipost.pickPastResult') },
+                    ...pastResults.map((r) => ({ value: r.id, label: r.title })),
+                  ]}
+                  onChange={(next) => {
+                    setSelectedResult(next);
                     setTitle('');
                   }}
                   disabled={loading}
-                  className="bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">{t('multipost.pickPastResult')}</option>
-                  {pastResults.map((result) => (
-                    <option key={result.id} value={result.id}>
-                      {result.title}
-                    </option>
-                  ))}
-                </select>
+                  className="min-w-[200px]"
+                />
               )}
             </div>
           </div>
@@ -276,10 +275,9 @@ const MultiPost: React.FC = () => {
             <p className="text-xs text-gray-500 mb-3">
               {t('multipost.outputLanguageHelp')}
             </p>
-            <select
+            <LanguagePicker
               value={language}
-              onChange={(e) => {
-                const next = e.target.value as OutputLanguage;
+              onChange={(next) => {
                 const prev = language;
                 setLanguage(next);
                 if (next !== 'English' && next !== prev) {
@@ -287,14 +285,8 @@ const MultiPost: React.FC = () => {
                 }
               }}
               disabled={loading}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {OUTPUT_LANGUAGES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {formatLanguageOption(opt)}
-                </option>
-              ))}
-            </select>
+              variant="input"
+            />
           </div>
 
           <div className="mb-6">

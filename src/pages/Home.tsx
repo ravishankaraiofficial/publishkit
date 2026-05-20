@@ -4,11 +4,11 @@ import { useUpload } from '../hooks/useUpload';
 import { PageContainer } from '../components/layout/PageContainer';
 import { DropZone } from '../components/upload/DropZone';
 import { ResultTabs } from '../components/results/ResultTabs';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
 import { cn } from '../lib/utils';
 import { MessageSquare } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
-import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
-import type { OutputLanguage } from '../lib/languages';
+import { toastNativeName } from '../lib/languages';
 import { useT } from '../i18n';
 
 export function Home() {
@@ -61,10 +61,9 @@ export function Home() {
         {/* Output language dropdown — 13 options */}
         <div className="flex flex-col items-center gap-1">
           <label className="text-xs text-[#888888]">{t('home.outputLanguage')}</label>
-          <select
+          <LanguagePicker
             value={outputLanguage}
-            onChange={(e) => {
-              const next = e.target.value as OutputLanguage;
+            onChange={(next) => {
               const prev = outputLanguage;
               setOutputLanguage(next);
               if (next !== 'English' && next !== prev) {
@@ -72,17 +71,8 @@ export function Home() {
               }
             }}
             disabled={isUploading || showResults}
-            className={cn(
-              "bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-5 py-2 text-sm font-medium text-white focus:outline-none focus:border-[#E05A1E]/60 transition-all min-w-[180px] text-center cursor-pointer",
-              (isUploading || showResults) && "opacity-60 cursor-not-allowed"
-            )}
-          >
-            {OUTPUT_LANGUAGES.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {formatLanguageOption(opt)}
-              </option>
-            ))}
-          </select>
+            variant="pill"
+          />
         </div>
 
         {/* Thumbnail Toggle — compact on mobile, full width like free-session box on desktop */}

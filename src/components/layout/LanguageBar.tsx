@@ -31,10 +31,10 @@ export const LanguageBar: React.FC = () => {
                   onClick={() => setLang(opt.value)}
                   title={translated ? '' : 'UI translation coming soon — falls back to English'}
                   className={[
-                    'px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
+                    'px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200',
                     active
-                      ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow'
-                      : 'bg-neutral-800 text-gray-300 hover:text-white hover:bg-neutral-700',
+                      ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow scale-105'
+                      : 'bg-neutral-800 text-gray-300 hover:text-white hover:bg-[#E05A1E] hover:font-bold hover:scale-110 hover:shadow-[0_0_15px_rgba(224,90,30,0.4)] hover:backdrop-blur-md',
                     translated ? '' : 'opacity-60',
                   ].join(' ')}
                 >

@@ -134,20 +134,20 @@ export function Picker<T extends string>({
                   }}
                   className={cn(
                     'flex items-center justify-between gap-3',
-                    'px-4 py-3 sm:py-2.5 min-h-[44px] rounded-xl cursor-pointer',
-                    'text-sm text-[#CFCFCF]',
-                    'transition-all duration-150 ease-out',
-                    'hover:bg-[#E05A1E] hover:text-white hover:font-semibold',
-                    'hover:backdrop-blur-sm hover:ring-1 hover:ring-[#E05A1E]/40',
-                    'hover:shadow-[0_4px_20px_-4px_rgba(224,90,30,0.5)]',
+                    'px-4 py-3 sm:py-2.5 min-h-[48px] sm:min-h-[44px] rounded-xl cursor-pointer',
+                    'text-base sm:text-sm text-[#CFCFCF]',
+                    'transition-all duration-200 ease-out',
+                    'hover:bg-[#E05A1E] hover:text-white hover:font-semibold hover:scale-[1.02]',
+                    'hover:backdrop-blur-md hover:ring-1 hover:ring-white/20',
+                    'hover:shadow-[0_8px_32px_-4px_rgba(224,90,30,0.4)]',
                     'focus:outline-none focus:bg-[#E05A1E] focus:text-white focus:font-semibold',
-                    isSel && 'text-white',
+                    isSel && 'bg-[#E05A1E]/10 text-white font-medium border border-[#E05A1E]/30',
                   )}
                 >
                   <span className="truncate">
                     {renderItem ? renderItem(opt) : opt.label}
                   </span>
-                  {isSel && <Check className="w-4 h-4 flex-shrink-0" />}
+                  {isSel && <Check className="w-4 h-4 text-[#E05A1E] flex-shrink-0" />}
                 </li>
               );
             })}

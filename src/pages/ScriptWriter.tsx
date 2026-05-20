@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Zap, Copy, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { httpsCallable } from 'firebase/functions';
@@ -6,7 +6,9 @@ import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
-import { OUTPUT_LANGUAGES, toastNativeName, formatLanguageOption } from '../lib/languages';
+import { Picker } from '../components/ui/Picker';
+import { LanguagePicker } from '../components/ui/LanguagePicker';
+import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
 import { useT } from '../i18n';
 
@@ -16,6 +18,18 @@ interface ScriptOutput {
   sections: Array<{ title: string; content: string }>;
   cta: string;
 }
+
+const TONE_OPTIONS = [
+  { value: 'Casual', label: 'Casual' },
+  { value: 'Educational', label: 'Educational' },
+  { value: 'Storytelling', label: 'Storytelling' },
+];
+
+const DURATION_OPTIONS = [
+  { value: '5', label: '5 Minutes' },
+  { value: '10', label: '10 Minutes' },
+  { value: '15', label: '15 Minutes' },
+];
 
 const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 300 };
 const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
@@ -33,6 +47,18 @@ const ScriptWriter: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+
+  const translatedToneOptions = TONE_OPTIONS.map(opt => ({
+    ...opt,
+    label: opt.value === 'Casual' ? t('script.toneCasual') : 
+           opt.value === 'Educational' ? t('script.toneEducational') : 
+           t('script.toneStorytelling')
+  }));
+
+  const translatedDurationOptions = DURATION_OPTIONS.map(opt => ({
+    ...opt,
+    label: t('script.durationMinutes', { count: parseInt(opt.value) })
+  }));
 
   const plan = profile?.plan ?? 'free';
   const isFree = plan === 'free';
@@ -106,7 +132,7 @@ ${output.cta}
     }
   };
 
-  // Locked screen — monthly quota exhausted
+  // Locked screen â€” monthly quota exhausted
   if (limitReached) {
     const headline = t('script.monthlyLimitReached');
     let body = '';
@@ -168,7 +194,7 @@ ${output.cta}
           <p className="text-gray-400">{t('script.subtitle')}</p>
         </div>
 
-        {/* Usage counter — visible on every plan */}
+        {/* Usage counter â€” visible on every plan */}
         <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
@@ -201,38 +227,31 @@ ${output.cta}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="min-w-0">
               <label className="block text-white font-semibold mb-2">{t('script.toneLabel')}</label>
-              <select
+              <Picker
                 value={tone}
-                onChange={(e) => setTone(e.target.value as any)}
+                options={translatedToneOptions}
+                onChange={(next) => setTone(next as any)}
                 disabled={loading}
-                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
-              >
-                <option value="Casual">{t('script.toneCasual')}</option>
-                <option value="Educational">{t('script.toneEducational')}</option>
-                <option value="Storytelling">{t('script.toneStorytelling')}</option>
-              </select>
+                variant="input"
+              />
             </div>
 
             <div className="min-w-0">
               <label className="block text-white font-semibold mb-2">{t('script.durationLabel')}</label>
-              <select
+              <Picker
                 value={duration}
-                onChange={(e) => setDuration(e.target.value as any)}
+                options={translatedDurationOptions}
+                onChange={(next) => setDuration(next as any)}
                 disabled={loading}
-                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
-              >
-                <option value="5">{t('script.durationMinutes', { count: 5 })}</option>
-                <option value="10">{t('script.durationMinutes', { count: 10 })}</option>
-                <option value="15">{t('script.durationMinutes', { count: 15 })}</option>
-              </select>
+                variant="input"
+              />
             </div>
 
             <div className="min-w-0">
               <label className="block text-white font-semibold mb-2">{t('script.languageLabel')}</label>
-              <select
+              <LanguagePicker
                 value={language}
-                onChange={(e) => {
-                  const next = e.target.value as OutputLanguage;
+                onChange={(next) => {
                   const prev = language;
                   setLanguage(next);
                   if (next !== 'English' && next !== prev) {
@@ -240,14 +259,8 @@ ${output.cta}
                   }
                 }}
                 disabled={loading}
-                className="w-full max-w-full block bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-600 disabled:opacity-50 disabled:cursor-not-allowed truncate"
-              >
-                {OUTPUT_LANGUAGES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {formatLanguageOption(opt)}
-                  </option>
-                ))}
-              </select>
+                variant="input"
+              />
             </div>
           </div>
 
@@ -304,14 +317,14 @@ ${output.cta}
             {/* Copy Full Script */}
             {isFree ? (
               <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
-                Copy not available on Free Plan — upgrade to Pro Plan or Max Plan
+                Copy not available on Free Plan â€” upgrade to Pro Plan or Max Plan
               </div>
             ) : (
               <button
                 onClick={copyFullScript}
                 className="w-full py-3 rounded-lg font-semibold transition-all bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600"
               >
-                📋 Copy Full Script
+                ðŸ“‹ Copy Full Script
               </button>
             )}
           </div>
