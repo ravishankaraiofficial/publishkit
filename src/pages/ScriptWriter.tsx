@@ -31,7 +31,7 @@ const DURATION_OPTIONS = [
   { value: '15', label: '15 Minutes' },
 ];
 
-const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 300 };
+const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 350 };
 const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
 
 const ScriptWriter: React.FC = () => {

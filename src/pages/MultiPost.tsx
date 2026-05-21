@@ -20,7 +20,7 @@ interface MultiPostOutput {
   linkedin?: string;
 }
 
-const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 300 };
+const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 350 };
 const PLAN_LABELS: Record<string, string> = { free: 'Free Plan', pro: 'Pro Plan', ultra: 'Max Plan' };
 
 const MultiPost: React.FC = () => {

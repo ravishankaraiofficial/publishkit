@@ -6,7 +6,7 @@ import { db } from '../lib/firestore';
 const PLAN_MONTHLY_LIMITS: Record<string, number> = {
   free: 3,
   pro: 100,
-  ultra: 300,
+  ultra: 350,
 };
 // IP cap kept generous enough that a legit Max user (300 uploads + 300 scripts +
 // 300 multiposts on the same home wifi) doesn't get blocked. 1000 leaves
@@ -84,7 +84,7 @@ type TrialFeature = 'script' | 'repurposing';
 const FEATURE_MONTHLY_LIMITS: Record<string, number> = {
   free: 3,
   pro: 100,
-  ultra: 300,
+  ultra: 350,
 };
 
 /**
