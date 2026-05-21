@@ -12,10 +12,61 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <title>PublishKit — YouTube Content Generator</title>
+
+    <!-- Legal links in <head> — some verification systems (Google OAuth,
+         some EU regulators) honor these link rel tags for machine-readable
+         discovery of privacy and terms pages. -->
+    <link rel="privacy-policy" href="https://publishkit.in/privacy" />
+    <link rel="terms-of-service" href="https://publishkit.in/terms" />
+    <link rel="canonical" href="https://publishkit.in/" />
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Google Analytics 4 (GA4) — tracks page views, signups, payments, generations.
+         Honors do-not-track and Brave/uBlock are expected to block this; we keep it
+         lean and never depend on it for app logic. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JPZ7157J7D"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JPZ7157J7D', {
+        // Don't send page_view on initial load — we'll fire it manually per route
+        // change in main.tsx so SPA navigations are tracked properly.
+        send_page_view: true,
+        // Anonymize IP for GDPR/DPDP friendliness
+        anonymize_ip: true,
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Hidden SEO-only legal links — invisible to users (display:none)
+         but present in the initial HTML response so crawlers and OAuth
+         verifiers that parse static HTML can still discover Privacy and
+         Terms. The visible footer rendered by React (PageContainer + Login)
+         is the user-facing one. -->
+    <div aria-hidden="true" style="display:none;">
+      <a href="https://publishkit.in/privacy">Privacy Policy</a>
+      <a href="https://publishkit.in/terms">Terms of Service</a>
+      <a href="https://publishkit.in/pricing">Pricing</a>
+      <a href="mailto:ravishankaraiofficial@gmail.com">Contact</a>
+    </div>
+
+    <!-- noscript fallback — visible only if JavaScript is disabled. -->
+    <noscript>
+      <div style="padding:20px;text-align:center;color:#fff;background:#0D0D0D;font-family:sans-serif;">
+        <h1>PublishKit</h1>
+        <p>PublishKit needs JavaScript enabled. Please enable JavaScript and reload.</p>
+        <p>
+          <a href="https://publishkit.in/privacy" style="color:#E05A1E;">Privacy Policy</a> ·
+          <a href="https://publishkit.in/terms" style="color:#E05A1E;">Terms of Service</a> ·
+          <a href="https://publishkit.in/pricing" style="color:#E05A1E;">Pricing</a>
+        </p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

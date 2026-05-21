@@ -1,0 +1,15 @@
+# PublishKit — robots.txt
+# Allow all well-behaved crawlers full access to the marketing/landing pages.
+# Authenticated routes (settings, pricing, results) are gated by the app
+# itself — crawlers will be redirected to /login anyway, so no extra block
+# is needed.
+
+User-agent: *
+Allow: /
+
+# Disallow API endpoints and internal Firebase paths (defense in depth)
+Disallow: /__/
+Disallow: /api/
+
+# Point crawlers to the sitemap
+Sitemap: https://publishkit.in/sitemap.xml
