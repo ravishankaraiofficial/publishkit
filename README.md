@@ -2,7 +2,7 @@
 
 > Turn your audio, PDFs, and images into YouTube-ready **Titles, Timestamps & Descriptions** in 90 seconds — plus full **Script Writer** and **MultiPost** social repurposing. Powered by Gemini AI.
 
-🔗 **Live Demo:** [publishkit.web.app](https://publishkit.web.app)
+🔗 **Live:** [publishkit.in](https://publishkit.in) (custom domain) · [publishkit.web.app](https://publishkit.web.app) (backup)
 
 ---
 
@@ -17,6 +17,7 @@ PublishKit is a web app built for YouTube creators. You upload a file — an aud
 - One-click **MultiPost** — turn the same content into X / Instagram / LinkedIn posts
 - Standalone **Script Writer** for new video ideas
 - **13 output languages** — English, Hindi, Hinglish, Telugu, Tamil, Gujarati, Marathi, Punjabi, Bengali, Malayalam, Kannada, Bhojpuri, Urdu
+- **13-language UI** — switch the entire interface, independently of output language
 
 No manual editing. No copy-pasting from ChatGPT. One upload → ready to publish.
 
@@ -26,11 +27,15 @@ No manual editing. No copy-pasting from ChatGPT. One upload → ready to publish
 
 | Plan | Price | Metadata / mo | Script Writer / mo | MultiPost / mo | Copy buttons |
 |---|---|---|---|---|---|
-| **Free Plan** | ₹0 | 10 | 10 | 10 | Metadata only |
+| **Free Plan** | ₹0 | 3 | 3 | 3 | Metadata only |
 | **Pro Plan** | ₹299/mo | 100 | 100 | 100 | Everywhere |
-| **Max Plan** | ₹1,000/mo | 1,000 | 1,000 | 1,000 | Everywhere |
+| **Max Plan** | ₹1,000/mo | 350 | 350 | 350 | Everywhere |
 
-Payments are processed by **Razorpay Subscriptions** (live mode). Plan state is enforced server-side via Firebase Secret Manager + admin-only Firestore fields.
+Payments are processed by **Razorpay** (live mode) with two flows:
+- **One-time order (default)** — pay once for 30 days of access, no autopay mandate
+- **Auto-pay subscription (opt-in)** — recurring monthly charge
+
+Max plan users get **Gemini 2.5 Pro** routing on Script Writer (premium quality on long content); everything else runs on Gemini 2.5 Flash. Plan state is enforced server-side via Firebase Secret Manager + admin-only Firestore fields.
 
 ---
 
@@ -44,12 +49,15 @@ Payments are processed by **Razorpay Subscriptions** (live mode). Plan state is 
 | Database | Cloud Firestore |
 | File Storage | Firebase Storage |
 | Backend | Firebase Cloud Functions (Node.js 20) |
-| AI | Google Gemini 2.5 Flash (multimodal — audio + PDF + image) |
+| AI | Google Gemini 2.5 Flash (default) + Gemini 2.5 Pro (Max plan scripts) |
 | App Check | Firebase App Check + reCAPTCHA Enterprise |
-| Billing | Razorpay Subscriptions (live) |
-| Deployment | Firebase Hosting |
-| Forms | React Hook Form + Zod |
+| Billing | Razorpay Orders (one-time) + Subscriptions (recurring), live mode |
+| Deployment | Firebase Hosting (custom domain: publishkit.in) |
+| Forms | React Hook Form + Zod (with meaningful-text validation) |
 | State | React Context API |
+| i18n | Homegrown — 13 locale JSON files, no external lib |
+| Analytics | Google Analytics 4 (G-JPZ7157J7D) — anonymized IP |
+| Anti-abuse | FingerprintJS visitor ID + SHA-256 hashed IP |
 
 ---
 
@@ -81,7 +89,7 @@ Payments are processed by **Razorpay Subscriptions** (live mode). Plan state is 
 | App Check | reCAPTCHA Enterprise — all unauthenticated backend calls rejected |
 | Data isolation | Firestore rules enforce `uid === auth.uid` on every read/write |
 | Plan fields | `plan`, `planExpiry`, `razorpaySubscriptionId`, usage counters all **admin-SDK only** — clients cannot write |
-| Rate limiting | Plan-aware: Free 10/mo, Pro 100/mo, Max 1000/mo — enforced inside Cloud Functions transactions |
+| Rate limiting | Plan-aware: Free 3/mo, Pro 100/mo, Max 350/mo — enforced inside Cloud Functions transactions |
 | Guest abuse | 1 free session per anonymous UID + FingerprintJS hardware fingerprint |
 | File access | Storage rules reject wrong MIME types and files > 200 MB |
 | Headers | CSP, X-Frame-Options, X-XSS-Protection, Referrer-Policy on hosting |

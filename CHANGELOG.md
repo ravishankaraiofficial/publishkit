@@ -1,5 +1,103 @@
 # PublishKit Changelog
 
+## [2026-05-21] Production Launch — publishkit.in Live, Razorpay Live Mode, SEO, Legal Pages
+
+This session shipped 6 fixes + custom domain + live payments + analytics + legal in one continuous push. Net result: PublishKit went from "feature-complete on web.app" to **production-grade SaaS at publishkit.in with real INR payments**.
+
+### Plans & limits
+- **Free Plan limit changed: 10 → 3** (per feature per month)
+- **Max Plan limit changed: 1000 → 350** (per feature per month) — protects margin on Gemini Pro cost
+- Pro stays at 100. Pricing unchanged (₹0 / ₹299 / ₹1,000).
+- Source of truth: `functions/src/middleware/rateLimit.ts`. Frontend cards + 13 locale `helpMax` strings synced.
+
+### Razorpay
+- **LIVE keys integrated** — `RAZORPAY_KEY_ID` (rzp_live_), `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` set in Firebase Secret Manager.
+- **One-time order flow added** — new `createOrder` + `verifyOrderPayment` Cloud Functions using Razorpay Orders API (no autopay mandate). HMAC signature verification. Grants 30 days access.
+- **`expireOneTimePlans` scheduled function** — daily downgrade of users whose `planExpiresAt` passed and `planType === 'one_time'`.
+- **Frontend toggle on Pricing page**: one-time (default) vs subscription. Defaults to one-time because Indian users abandon checkout at autopay mandate prompt.
+- **Real ₹299 test payment** verified end-to-end → captured → Firestore plan granted → refunded.
+- **Live webhook** created in Razorpay dashboard pointing to `https://us-central1-gen-lang-client-0079285803.cloudfunctions.net/razorpayWebhook` with events: `payment.captured`, `subscription.charged`, `subscription.cancelled`.
+
+### Custom domain (publishkit.in)
+- Domain bought from Hostinger.
+- Firebase Hosting connected, SSL certificate auto-minted.
+- `www.publishkit.in` redirects to `publishkit.in`.
+- Sitemap, robots.txt, Privacy, Terms all serve correctly under the custom domain.
+- 4 allowlists configured (often-overlooked): Firebase Auth authorized domains, Google Cloud API Key referrers, reCAPTCHA Enterprise key domains, OAuth consent screen domain.
+
+### Per-plan model routing (NEW)
+- New `functions/src/lib/pickModel.ts` — Max Plan → `gemini-2.5-pro` for Script Writer only; everything else → `gemini-2.5-flash`.
+- Wired into `handleScript.ts` and `handleRepurposing.ts`. No more hardcoded model strings.
+
+### Free-tier abuse guard (NEW)
+- New `functions/src/lib/freeTierGuard.ts` — SHA-256 hashed IP + FingerprintJS visitor ID stored in `freeTierUsage_ip/{hash}` and `freeTierUsage_fp/{hash}`. Blocks UID reuse on same device or IP.
+- Paid users exempt. Frontend sends `visitorId` with every callable.
+- New `src/lib/fingerprint.ts` — wraps `@fingerprintjs/fingerprintjs`, in-memory cache.
+
+### i18n (NEW — 13-language UI translation)
+- Homegrown React i18n (no `react-i18next` dependency to keep bundle small).
+- New `src/i18n/index.tsx` with `I18nProvider`, `useT()`, `t(key, {placeholder})` interpolation, localStorage `pk_ui_lang_v1`.
+- 13 locale JSON files in `src/i18n/locales/`: en, hi, hinglish, te, ta, gu, mr, pa, bn, ml, kn, bho, ur.
+- `LanguageBar` component below Navbar — horizontally scrollable language chips.
+- `UiLanguageSync` component bi-directionally syncs `profile.uiLanguage` ↔ localStorage so choice follows user across devices.
+- Added `uiLanguage?: OutputLanguage` to `CreatorProfile` type.
+- **Output language stays independent** — picked per-script on ScriptWriter, doesn't change UI language.
+
+### Settings validation (NEW)
+- New `src/lib/validateMeaningful.ts` — Zod refinement rejecting gibberish.
+- Rules: vowel presence check, no keyboard-mash patterns (`qwerty`, `asdf`, `zxcv`, `1234`), no single repeated chars, ≥2 distinct word tokens for long fields.
+- Applied to all free-text Settings fields EXCEPT `handle` (which can be `@anything.123`).
+- Error message: "Please write this properly so we can generate good scripts for you."
+
+### Mobile UX polish
+- `Picker` component switched to **bottom-sheet style on mobile** — `fixed bottom-24 left-4 right-4 max-h-[55vh]`, stronger glass effect (`backdrop-blur-2xl bg-[#0E0E0E]/90`), dimmed backdrop overlay.
+- Desktop behavior unchanged (inline popover below trigger).
+- Fixes earlier issue where dropdown options were hidden behind the bottom nav.
+- 48px minimum touch target heights.
+
+### Analytics (NEW)
+- **Google Analytics 4** — Measurement ID `G-JPZ7157J7D`, gtag inline in `index.html`. `anonymize_ip: true`.
+- CSP updated to allow `googletagmanager.com`, `google-analytics.com`, `analytics.google.com`.
+
+### SEO (NEW)
+- `public/sitemap.xml` — 8 URLs (home, login, pricing, script-writer, multipost, feedback, privacy, terms).
+- `public/robots.txt` — allow all crawlers, disallow `/__/` and `/api/`, sitemap reference.
+- **Google Search Console** — verified via DNS TXT (Domain property type, covers all subdomains). Sitemap submitted. URL inspection requested for `/` and `/pricing`.
+
+### Legal pages (NEW)
+- `src/pages/PrivacyPolicy.tsx` — public route `/privacy`. DPDP Act 2023 compliant. 10 sections including retention table (3h for media, 7 years for payment records), third-party services list, user rights, contact.
+- `src/pages/TermsOfService.tsx` — public route `/terms`. Refund policy (full refund within 7 days if 0 paid generations used), AI output disclaimer, IP rights, India jurisdiction (West Bengal).
+- Both routes added to `App.tsx` **outside `ProtectedRoute`** so Google's OAuth verifier + search crawlers can access them without auth.
+- Footer with Privacy/Terms/Pricing/Contact links added to `PageContainer` and `Login` page.
+
+### CSP updates (`firebase.json`)
+- `connect-src` now allows: `google.com`, `recaptcha.net` (App Check), `google-analytics.com`, `analytics.google.com`, `stats.g.doubleclick.net`
+- `script-src` now allows: `googletagmanager.com`
+- `img-src` now allows: `google-analytics.com`, `googletagmanager.com`
+
+### OAuth verification (paused — non-blocking)
+- App branding submitted with logo, privacy/terms URLs, authorized domain.
+- Google's verifier kept failing despite valid setup (likely stale cache or undocumented requirement).
+- Hidden `<div style="display:none">` in `index.html` with absolute-URL legal links — keeps DOM clean while satisfying HTML crawlers.
+- `<link rel="privacy-policy">` + `<link rel="terms-of-service">` meta tags in `<head>`.
+- **Decision: skip OAuth verification for now.** Users see one "Continue anyway" prompt on first sign-in — non-blocking for launch.
+
+### Commits pushed today
+- `28e533a` — fix(pricing): restore correct plan limits (free: 3, max: 300)
+- `080d619` — feat(plans): bump Max plan limit 300 → 350
+- `99bfb3d` — fix(picker): mobile dropdown bottom-sheet style
+- `bf5e036` — feat(legal): add Privacy Policy + Terms of Service pages
+- `13b359c` — feat(seo+analytics): GA4, sitemap, robots, OAuth verification scaffolding
+
+### Production state at end of session
+- ✅ publishkit.in live with SSL
+- ✅ Real Razorpay payments capturing INR
+- ✅ Razorpay verification submitted (24-48h pending approval for publishkit.in)
+- ✅ GA4 tracking
+- ✅ Search Console submitted
+- ⏸️ Google OAuth verification paused (non-blocking)
+- ⏸️ Throwaway test Gmail (`themreview082@gmail.com`) — keep until Razorpay approves publishkit.in, then delete
+
 ## [2026-05-19] Creator Profile Questionnaire + Profile-Aware Script Prompt
 - **Settings page rewrite** — 30-question Script System questionnaire in 4 sections (basics / audience / voice & tone / advanced). 10 required fields, 20+ optional behind 2 collapsibles. Empty optionals stripped via `deleteField()` so Firestore stays clean.
 - **`CreatorProfile` extended** — new fields: positioning, targetAudience, tone, audiencePainPoint, audienceLevel, audienceTransformation, catchphrases, avoidWords, hookStyle, ctaStyle, contentPillars, preferredVideoLength, age, whatMakesDifferent, personalStory, credentials, addressForm, usesSlang/usesMemes/usesCursing, bestVideoHooks, hookFormulas. Existing user docs unaffected (all new fields optional).
