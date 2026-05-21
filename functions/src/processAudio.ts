@@ -54,7 +54,8 @@ async function findCachedResult(
 
   for (const doc of snapshot.docs) {
     const data = doc.data();
-    if (data.status !== 'complete') continue;
+    // Match both completed results (cache hit) and ongoing ones (idempotency/recovery).
+    if (data.status !== 'complete' && data.status !== 'processing') continue;
     if (data.audioFileName !== audioFileName) continue;
     if (data.audioSizeBytes !== audioSizeBytes) continue;
     if (data.outputLanguage && data.outputLanguage !== outputLanguage) continue;
@@ -87,12 +88,21 @@ export const processAudio = functions
       const storagePath = sanitizeString(data.storagePath);
       const audioFileName = sanitizeFileName(data.audioFileName || '');
       const audioSizeBytes = typeof data.audioSizeBytes === 'number' ? data.audioSizeBytes : 0;
-      const fileType: string = typeof data.fileType === 'string' ? data.fileType : 'audio/mpeg';
+      const fileType = typeof data.fileType === 'string' ? data.fileType : 'audio/mpeg';
       const outputLanguage = normalizeLanguage(data.outputLanguage);
       const generateThumbnails = data.generateThumbnails === true;
-
+      
       if (!storagePath || !audioFileName) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required arguments');
+      }
+
+      // SECURITY: Path ownership check. Prevents an attacker from passing a 
+      // victim's storage path to have it analyzed and returned to the attacker.
+      if (!storagePath.startsWith(`users/${uid}/`)) {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'Access denied: storage path must belong to the caller.'
+        );
       }
 
       // Cache check (same filename + filesize + thumbnails flag within last 7 days)

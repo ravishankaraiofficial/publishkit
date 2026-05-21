@@ -260,11 +260,54 @@ export const verifyOrderPayment = functions
         throw new functions.https.HttpsError('permission-denied', 'Invalid payment signature');
       }
 
-      const expiresAt = new Date(Date.now() + ONE_TIME_DAYS * 24 * 60 * 60 * 1000);
+      // SECURITY: verify the plan from the actual order notes on Razorpay.
+      // Without this, a user could pay for 'pro' (299) and then spoof the 
+      // verify call with plan: 'ultra' to get the 1000 plan.
+      const auth = Buffer.from(`${razorpayKeyId.value()}:${razorpayKeySecret.value()}`).toString('base64');
+      const orderOptions = {
+        hostname: 'api.razorpay.com',
+        path: `/v1/orders/${razorpay_order_id}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+        },
+      };
+
+      const orderData: any = await new Promise((resolve, reject) => {
+        const req = https.request(orderOptions, (res) => {
+          let chunks = '';
+          res.on('data', (c) => (chunks += c));
+          res.on('end', () => {
+            if (res.statusCode === 200) resolve(JSON.parse(chunks));
+            else reject(new Error(`Razorpay /orders GET returned ${res.statusCode}`));
+          });
+        });
+        req.on('error', reject);
+        req.end();
+      });
+
+      const verifiedPlan = orderData?.notes?.plan;
+      if (!verifiedPlan || !['pro', 'ultra'].includes(verifiedPlan)) {
+        throw new functions.https.HttpsError('permission-denied', 'Invalid order metadata');
+      }
+
+      const orderUid = orderData?.notes?.uid;
+      if (orderUid !== context.auth.uid) {
+        throw new functions.https.HttpsError('permission-denied', 'Order does not belong to this user');
+      }
+
       const userRef = db.doc(`users/${context.auth.uid}`);
+      const userDoc = await userRef.get();
+      if (userDoc.exists && userDoc.data()?.razorpayLastOrderId === razorpay_order_id) {
+        throw new functions.https.HttpsError('already-exists', 'This order has already been applied.');
+      }
+
+      const orderCreatedAt = orderData?.created_at ? orderData.created_at * 1000 : Date.now();
+      const expiresAt = new Date(orderCreatedAt + ONE_TIME_DAYS * 24 * 60 * 60 * 1000);
+      
       await userRef.set(
         {
-          plan,
+          plan: verifiedPlan,
           planType: 'one_time',
           planExpiresAt: expiresAt.toISOString(),
           razorpayLastOrderId: razorpay_order_id,
@@ -376,18 +419,23 @@ export const razorpayWebhook = functions
       const eventId = typeof eventIdRaw === 'string' ? eventIdRaw : '';
       if (eventId && /^[A-Za-z0-9_-]{1,128}$/.test(eventId)) {
         const eventRef = db.doc(`webhookEvents/${eventId}`);
-        const eventDoc = await eventRef.get();
-        if (eventDoc.exists) {
-          // Already processed — return 200 so Razorpay doesn't retry. Do not
-          // re-write anything to the user doc.
+        
+        const alreadyProcessed = await db.runTransaction(async (tx) => {
+          const eventDoc = await tx.get(eventRef);
+          if (eventDoc.exists) return true;
+          
+          // Reserve the event ID before doing work.
+          tx.set(eventRef, {
+            processedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          return false;
+        });
+
+        if (alreadyProcessed) {
+          // Already processed — return 200 so Razorpay doesn't retry.
           res.status(200).send('OK');
           return;
         }
-        // Reserve the event ID before doing work. If two retries race here,
-        // one will succeed and the other will hit `exists` on its next read.
-        await eventRef.set({
-          processedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
       }
       // If the header is missing/malformed we still process the event — better
       // to risk a duplicate write than to drop a real Razorpay delivery. The

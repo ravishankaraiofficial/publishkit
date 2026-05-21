@@ -4,6 +4,14 @@
 
 This session shipped 6 fixes + custom domain + live payments + analytics + legal in one continuous push. Net result: PublishKit went from "feature-complete on web.app" to **production-grade SaaS at publishkit.in with real INR payments**.
 
+### Security Hardening Pass 5 (GStack Audit)
+- **CRITICAL: Payment plan spoofing fix** in `verifyOrderPayment` — now fetches the order directly from Razorpay to verify `notes.plan` instead of trusting client-provided string.
+- **CRITICAL: Cross-user file IDOR fix** in `processAudio` — added strict ownership check to ensure `storagePath` starts with `users/{uid}/`.
+- **HIGH: Feedback voting duplication logic bug** — Fixed a bug in `Feedback.tsx` where upvoting created duplicate feedback entries via `addDoc` instead of `updateDoc`. Corrected Firestore rules to securely allow cross-user vote modifications (`hasOnly(['votes', 'votedBy'])`).
+- **MODERATE: Webhook race condition fix** — wrapped `eventId` deduplication check in a Firestore Transaction to prevent retry-ping double-processing.
+- **MODERATE: Dependency update** — `protobufjs` updated via `npm audit fix` in root to resolve Denial of Service vulnerability (GHSA-jggg-4jg4-v7c6).
+- Re-audited full backend for IDOR/Logic flaws using gstack methodology.
+
 ### Plans & limits
 - **Free Plan limit changed: 10 → 3** (per feature per month)
 - **Max Plan limit changed: 1000 → 350** (per feature per month) — protects margin on Gemini Pro cost

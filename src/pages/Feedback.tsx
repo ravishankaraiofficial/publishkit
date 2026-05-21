@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   collection,
   addDoc,
+  updateDoc,
+  doc,
   onSnapshot,
   query,
   orderBy,

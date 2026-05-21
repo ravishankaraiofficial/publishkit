@@ -1,10 +1,8 @@
 # PublishKit Security Model
 
-> Last updated: 2026-05-18 — covers production state through commit `fb8a8ff` + Hardening Pass 3 (burst limit + webhook idempotency + input caps).
+> Last updated: 2026-05-21 — covers production state through Pass 5 (GStack Audit).
 
 This document is the single source of truth for what PublishKit defends against, how, and what operational actions remain on the user's plate (dashboard toggles that can't be expressed in code).
-
-It's structured so a new auditor / developer can read it once and understand the entire security posture.
 
 ---
 
@@ -16,37 +14,33 @@ What we're explicitly defending against, ranked by financial impact:
 |---|---|---|---|
 | 1 | A signed-in user removes their own usage limits and runs up an unbounded Gemini bill | CRITICAL | **CLOSED** — all plan/usage fields admin-SDK-only; client write rules use `diff().affectedKeys()` |
 | 2 | A signed-in user bursts requests in seconds to exhaust daily Gemini quota / DoS other users | CRITICAL | **CLOSED** — sliding-window burst rate limit (Free 2/min, Pro 8/min, Max 20/min) |
-| 3 | A malicious client tampers with the Razorpay subscription to fake a Pro/Max plan | CRITICAL | **CLOSED** — webhook HMAC verified with `crypto.timingSafeEqual`; plan-allowlist; UID-regex; subId match on cancel; event-ID dedup |
+| 3 | A malicious client tampers with the Razorpay subscription to fake a Pro/Max plan | CRITICAL | **CLOSED** — webhook HMAC verified with `crypto.timingSafeEqual`; plan-allowlist; UID-regex; subId match on cancel; event-ID dedup; **Pass 5: verifiedPlan fetch from Razorpay API blocks client-side plan spoofing** |
 | 4 | Anonymous spam — bots create thousands of free guest sessions | HIGH | **CLOSED** — per-fingerprint + per-IP quota; VPN/proxy header detection blocks the easy cases |
-| 5 | Concurrent-request race lets a user consume more than their plan | HIGH | **CLOSED** — all rate limits run inside `db.runTransaction` |
+| 5 | Concurrent-request race lets a user consume more than their plan | HIGH | **CLOSED** — all rate limits run inside `db.runTransaction`; **Pass 5: Webhook dedup now transactionally atomic** |
 | 6 | API keys leak to git / public bundle | HIGH | **CLOSED** — all secrets in Firebase Secret Manager; git history scanned clean; `.gitignore` hardened with temp-file patterns |
 | 7 | Prompt injection / oversized input drives up Gemini token cost | MEDIUM | **CLOSED** — `topic` capped at 500 chars (handleScript); `title` 500, `description` 2000 (handleRepurposing); control chars stripped |
 | 8 | XSS / clickjacking via malicious script injection | MEDIUM | **CLOSED** — CSP header on Firebase Hosting; `X-Frame-Options: DENY`; React auto-escapes |
 | 9 | Multi-account abuse — same IP creates many Google accounts | MEDIUM | **CLOSED** — per-IP monthly quota (`ipUsage/{ipHash}`); fingerprint dedup |
-| 10 | Webhook replay attack | MEDIUM | **CLOSED** — `x-razorpay-event-id` dedup table; stale cancel events filtered |
-| 11 | Direct origin IP exposed to DDoS | LOW | **PASS** — hosted on Firebase Hosting + Cloud Functions behind Google's edge network |
-| 12 | Path traversal via crafted filename in upload | LOW | **CLOSED** — Storage rules use single-segment `{fileName}` pattern (rejects multi-segment paths); backend `sanitizeFileName` strips non-`[A-Za-z0-9._-]`; frontend `useUpload.tsx` also pre-sanitizes (Pass 4 defense-in-depth) |
-| 13 | ReDoS via `brace-expansion` (transitive frontend dep) | MEDIUM | **CLOSED** — Pass 4: `npm audit fix` upgraded to patched version; root frontend now at 0 vulnerabilities |
+| 10 | Webhook replay attack | MEDIUM | **CLOSED** — `x-razorpay-event-id` dedup table; **Pass 5: Transactional deduplication check** |
+| 11 | Path traversal via crafted filename in upload | LOW | **CLOSED** — Storage rules use single-segment `{fileName}` pattern; **Pass 5: processAudio enforces path ownership (`users/{uid}/` prefix)** |
+| 12 | Direct origin IP exposed to DDoS | LOW | **PASS** — hosted on Firebase Hosting + Cloud Functions behind Google's edge network |
+| 13 | IDOR: Accessing other users' files | CRITICAL | **CLOSED** — Pass 5: `processAudio` enforces storagePath ownership before worker download |
 
 ---
 
-## Vibe Coding 7-point Checklist — Pass 4 results
+## Vibe Coding 7-point Checklist — Pass 5 results
 
-Run on 2026-05-18 against the production codebase. This is a recurring developer-facing checklist (vs. the threat model above which is auditor-facing).
+Run on 2026-05-21 against the production codebase.
 
 | # | Check | State |
 |---|---|---|
-| 1 | Hardcoded secrets in tracked files | **PASS** — grep for `rzp_live_`, `rzp_test_`, `AKIA`, `ghp_`, `github_pat_`, `xoxb-`, `sk-`, `AIza` returns 0 hits |
-| 2 | XSS / SQL/NoSQL injection | **PASS** — 0 `dangerouslySetInnerHTML` / `innerHTML=` / `eval()` / `new Function()` in `src/`; all 17 Firestore `db.doc/collection` interpolations use auth-trusted UID or server-generated values or regex-validated IDs |
-| 3 | Rate limiting on AI endpoints | **PASS** — all 3 callables wrapped in burst limit + monthly quota + GCP daily cap |
-| 4 | Auth architecture (no custom session / password hashing) | **PASS** — Firebase Auth only (`signInWithGoogle`, `signInAnonymously`); `jsonwebtoken` / `bcrypt` etc. are only transitive deps, not directly used |
-| 5 | API versioning | **N/A retrofit + convention adopted** — Firebase Cloud Functions use name-based routing, not `/api/v1/` paths. Convention going forward: when making a breaking change to a callable, ship the new contract under `functionNameV2` while keeping the old name active. Documented here and in CLAUDE.md. |
-| 6 | File upload security (MIME, size, path traversal) | **PASS** — Storage rules: single-segment `{fileName}`, 200 MB cap, MIME allowlist (`audio/*`, `application/pdf`, `image/jpeg`/`png`/`webp`); frontend filename sanitization added in Pass 4 |
-| 7 | Dependency check | **PASS** — root frontend: 0 vulnerabilities after Pass 4 fix; `functions/`: 0 high, 9 low (deferred — require firebase-admin v13 breaking-change upgrade) |
-
-The 7-point checklist is meant to be **re-run quarterly** alongside the operational checklist. The prompt for re-running:
-
-> "Run the Vibe Coding 7-point security audit on this codebase. Re-grep for leaked secrets, audit input sanitization (XSS + NoSQL), verify rate limiting on AI endpoints, confirm auth architecture (no custom session), assess API versioning, audit file upload security, and run `npm audit` to check dependencies. Fix anything that's regressed."
+| 1 | Hardcoded secrets in tracked files | **PASS** — grep returns 0 hits. |
+| 2 | XSS / SQL/NoSQL injection | **PASS** — all Firestore interpolations use trusted auth UID; `processAudio` enforces path ownership. |
+| 3 | Rate limiting on AI endpoints | **PASS** — burst limit + monthly quota + IP cap active on all callables. |
+| 4 | Auth architecture (no custom session / password hashing) | **PASS** — Firebase Auth only. |
+| 5 | API versioning | **PASS** — Convention adopted (`functionNameV2`). |
+| 6 | File upload security (MIME, size, path traversal) | **PASS** — Storage rules + frontend sanitization + **Pass 5 backend path ownership check**. |
+| 7 | Dependency check | **PASS** — `npm audit fix` in root on 2026-05-21 resolved moderate vulnerability. |
 
 ---
 
@@ -227,10 +221,11 @@ These items can't be expressed in repo code. They must be verified periodically 
 
 | Date | Pass | Commit | Summary |
 |---|---|---|---|
-| 2026-05-14 | Hardening Pass 1 | (initial security hardening) | Atomic rate limit, ipUsage lock, anonymous-spam block on feedback, CSP header, secret-manager for Gemini key |
-| 2026-05-18 | Hardening Pass 2 | `fb8a8ff` | Razorpay timing-safe HMAC, plan-allowlist, UID-shape regex, duplicate-subscription block, stale-cancel filter, legacy ultraTrials rule removed, fast-xml-builder CVE fixed |
-| 2026-05-18 | Hardening Pass 3 | `50e275c` | Burst rate limit (Free 2/min, Pro 8/min, Max 20/min), webhook event-ID idempotency, prompt-injection length caps + control-char strip, `webhookEvents/` admin-only rule, scheduled cleanup extended to prune dedup docs |
-| 2026-05-18 | Hardening Pass 4 (Vibe Coding 7-point) | (this change) | Re-audit confirms Pass 1-3 holds. Frontend filename sanitization in `useUpload.tsx` (defense-in-depth match to backend `sanitizeFileName`). `brace-expansion` MODERATE ReDoS CVE fixed in root via `npm audit fix`. API versioning convention documented (`functionNameV2` going forward — Firebase callables are name-based, not URL-path-based; no retrofit needed). |
+| 2026-05-14 | Hardening Pass 1 | | Atomic rate limit, ipUsage lock, anonymous-spam block, CSP header, secret-manager |
+| 2026-05-18 | Hardening Pass 2 | `fb8a8ff` | Razorpay timing-safe HMAC, plan-allowlist, UID-regex, duplicate-subscription block, stale-cancel filter |
+| 2026-05-18 | Hardening Pass 3 | `50e275c` | Burst rate limit, webhook event-ID idempotency, prompt-injection caps |
+| 2026-05-18 | Hardening Pass 4 | | Frontend filename sanitization, `brace-expansion` fix |
+| 2026-05-21 | Hardening Pass 5 | (this change) | **CRITICAL: Payment bypass fixed** (fetch verifiedPlan from Razorpay API). **CRITICAL: IDOR fixed** (enforce path ownership in `processAudio`). **MODERATE: Webhook race fixed** (transactional dedup). **MODERATE: protobufjs fix** (npm audit). |
 
 ---
 

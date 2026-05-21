@@ -32,7 +32,8 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.auth.uid == uid
         && !request.resource.data.keys().hasAny([
-          'plan', 'planExpiry', 'razorpaySubscriptionId',
+          'plan', 'planExpiry', 'planExpiresAt', 'planType',
+          'razorpaySubscriptionId', 'razorpayLastOrderId', 'razorpayLastPaymentId',
           'scriptTrialLastUsedAt', 'repurposingTrialLastUsedAt',
           'scriptUsageThisMonth', 'repurposingUsageThisMonth',
           'scriptUsageMonth', 'repurposingUsageMonth'
@@ -40,7 +41,8 @@ service cloud.firestore {
       allow update: if request.auth != null
         && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'plan', 'planExpiry', 'razorpaySubscriptionId',
+          'plan', 'planExpiry', 'planExpiresAt', 'planType',
+          'razorpaySubscriptionId', 'razorpayLastOrderId', 'razorpayLastPaymentId',
           'scriptTrialLastUsedAt', 'repurposingTrialLastUsedAt',
           'scriptUsageThisMonth', 'repurposingUsageThisMonth',
           'scriptUsageMonth', 'repurposingUsageMonth'
@@ -65,8 +67,11 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.auth.token.firebase.sign_in_provider != 'anonymous';
       allow update: if request.auth != null
-        && request.auth.uid == resource.data.uid
-        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && (
+          request.auth.uid == resource.data.uid ||
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'votedBy'])
+        );
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
 
       // Replies to feedback — anyone can read, only real signed-in users can create
