@@ -142,6 +142,21 @@ export function Login() {
         <p className="mt-5 text-xs text-[#555555]">
           Personal use only · Your data stays private
         </p>
+
+        {/* Legal footer — required by Google OAuth verification.
+            Visible link to Privacy Policy and Terms is mandatory on the
+            home page that the OAuth consent screen points to. */}
+        <footer className="mt-12 pt-6 border-t border-[#222] w-full max-w-sm flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-[#777]">
+          <a href="/privacy" className="hover:text-white transition-colors">
+            Privacy Policy
+          </a>
+          <a href="/terms" className="hover:text-white transition-colors">
+            Terms of Service
+          </a>
+          <a href="mailto:ravishankaraiofficial@gmail.com" className="hover:text-white transition-colors">
+            Contact
+          </a>
+        </footer>
       </div>
     </div>
   );

@@ -71,6 +71,31 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
         <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 pb-28 sm:pb-8 animate-fade-in">
           {children}
         </main>
+
+        {/* Site footer with legal links — required by Google OAuth verification.
+            Privacy + Terms must be reachable from the home page via a visible link. */}
+        <footer className="relative z-10 border-t border-[#1A1A1A] mt-8 py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#666]">
+            <p>© {new Date().getFullYear()} PublishKit · Made in India 🇮🇳</p>
+            <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+              <a href="/privacy" className="hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <a href="/terms" className="hover:text-white transition-colors">
+                Terms of Service
+              </a>
+              <a href="/pricing" className="hover:text-white transition-colors">
+                Pricing
+              </a>
+              <a
+                href="mailto:ravishankaraiofficial@gmail.com"
+                className="hover:text-white transition-colors"
+              >
+                Contact
+              </a>
+            </nav>
+          </div>
+        </footer>
       </div>
     </div>
   );

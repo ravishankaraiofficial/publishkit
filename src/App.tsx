@@ -14,6 +14,8 @@ import { Feedback } from './pages/Feedback';
 import Pricing from './pages/Pricing';
 import ScriptWriter from './pages/ScriptWriter';
 import MultiPost from './pages/MultiPost';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UiLanguageSync } from './i18n/UiLanguageSync';
 
@@ -33,6 +35,11 @@ function AuthGatedRoutes() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/pending" element={<AccessPending />} />
+        {/* Public legal pages — required for Google OAuth verification.
+            Must be reachable without authentication so Google's reviewers
+            (and search crawlers) can fetch them. */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
