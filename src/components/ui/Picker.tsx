@@ -96,20 +96,26 @@ export function Picker<T extends string>({
 
       {open && (
         <>
-          {/* mobile-only backdrop tap-to-close */}
+          {/* mobile-only dimmed backdrop tap-to-close. Stronger dim than before
+              so the bottom-sheet stands out against the page. */}
           <div
-            className="sm:hidden fixed inset-0 z-40"
+            className="sm:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in"
             onClick={() => setOpen(false)}
             aria-hidden
           />
           <ul
             role="listbox"
             className={cn(
-              'absolute z-50 mt-2 w-full min-w-[220px]',
-              variant === 'pill' && 'left-1/2 -translate-x-1/2 w-[260px] sm:w-[280px]',
-              'bg-[#121212]/95 backdrop-blur-xl border border-[#2A2A2A] rounded-2xl',
-              'shadow-2xl shadow-black/60 p-1.5',
-              'max-h-[60vh] overflow-y-auto',
+              'z-50 min-w-[220px]',
+              // Mobile: bottom-sheet anchored above the bottom-nav (~64px tall)
+              // with a generous max-height, strong glass effect for separation.
+              'fixed left-4 right-4 bottom-24 max-h-[55vh] overflow-y-auto',
+              'bg-[#0E0E0E]/90 backdrop-blur-2xl border border-white/10 rounded-2xl',
+              'shadow-2xl shadow-black/80 p-2',
+              // Desktop / tablet: revert to inline popover under the trigger.
+              'sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:mt-2 sm:w-full sm:max-h-[60vh] sm:p-1.5',
+              'sm:bg-[#121212]/95 sm:backdrop-blur-xl sm:border-[#2A2A2A]',
+              variant === 'pill' && 'sm:left-1/2 sm:-translate-x-1/2 sm:w-[280px]',
               'animate-fade-in',
             )}
           >
