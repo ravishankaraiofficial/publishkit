@@ -25,6 +25,10 @@ service cloud.firestore {
         && request.auth.uid == uid;
     }
 
+    match /users/{uid}/results/{resultId} {
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
     match /users/{uid} {
       // Server-managed fields — Admin SDK (Cloud Functions) only.
       // Use diff().affectedKeys() so users can still update OTHER profile fields
