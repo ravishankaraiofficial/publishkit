@@ -13,6 +13,7 @@ import { LanguagePicker } from '../components/ui/LanguagePicker';
 import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
 import { useT } from '../i18n';
+import { getRemainingMultiPostQuota } from '../lib/quota';
 
 interface MultiPostOutput {
   x?: string[];
@@ -371,12 +372,21 @@ const MultiPost: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={platforms[platform as keyof typeof platforms]}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      if (isChecked) {
+                        const checkedCount = Object.values(platforms).filter(Boolean).length;
+                        const quota = getRemainingMultiPostQuota(profile);
+                        if (checkedCount >= quota) {
+                          toast(`You only have ${quota} MultiPost generation${quota === 1 ? '' : 's'} remaining this month.`, 'error');
+                          return;
+                        }
+                      }
                       setPlatforms({
                         ...platforms,
-                        [platform]: e.target.checked,
-                      })
-                    }
+                        [platform]: isChecked,
+                      });
+                    }}
                     disabled={loading}
                     className="w-4 h-4 accent-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   />

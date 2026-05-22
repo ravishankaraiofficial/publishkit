@@ -10,9 +10,10 @@ import { MessageSquare } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { toastNativeName } from '../lib/languages';
 import { useT } from '../i18n';
+import { getRemainingMultiPostQuota } from '../lib/quota';
 
 export function Home() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const t = useT();
@@ -178,9 +179,26 @@ export function Home() {
                       checked={multiPostEnabled}
                       onChange={(e) => {
                         const on = e.target.checked;
-                        setMultiPostEnabled(on);
                         if (on) {
-                          setMultiPostPlatforms({ x: true, instagram: true, linkedin: true, youtube: true });
+                          const quota = getRemainingMultiPostQuota(profile);
+                          if (quota <= 0) {
+                            toast('You have completed your MultiPost generations for this month.', 'error');
+                            return;
+                          }
+                          setMultiPostEnabled(true);
+                          
+                          // Check as many as allowed
+                          const newPlatforms = { x: false, instagram: false, linkedin: false, youtube: false };
+                          const order = ['x', 'instagram', 'linkedin', 'youtube'] as const;
+                          for (let i = 0; i < Math.min(quota, 4); i++) {
+                            newPlatforms[order[i]] = true;
+                          }
+                          setMultiPostPlatforms(newPlatforms);
+                          if (quota < 4) {
+                            toast(`You only have ${quota} generation${quota === 1 ? '' : 's'} left. Selected ${quota} platform${quota===1?'':'s'}.`, 'error');
+                          }
+                        } else {
+                          setMultiPostEnabled(false);
                         }
                       }}
                       disabled={isUploading || showResults}
@@ -217,7 +235,8 @@ export function Home() {
                           checked
                             ? "border-[#E05A1E]/60 bg-[#E05A1E]/10 text-white"
                             : "border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#E05A1E]/40",
-                          (!multiPostEnabled || isUploading || showResults) && "opacity-60 cursor-not-allowed"
+                          !multiPostEnabled && "opacity-60",
+                          (!multiPostEnabled || isUploading || showResults) && "cursor-not-allowed"
                         )}
                       >
                         <input
@@ -225,12 +244,21 @@ export function Home() {
                           className="w-3.5 h-3.5 accent-[#E05A1E]"
                           checked={checked}
                           disabled={!multiPostEnabled || isUploading || showResults}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            if (isChecked) {
+                              const checkedCount = Object.values(multiPostPlatforms).filter(Boolean).length;
+                              const quota = getRemainingMultiPostQuota(profile);
+                              if (checkedCount >= quota) {
+                                toast(`You only have ${quota} MultiPost generation${quota === 1 ? '' : 's'} remaining this month.`, 'error');
+                                return;
+                              }
+                            }
                             setMultiPostPlatforms({
                               ...multiPostPlatforms,
-                              [platform]: e.target.checked,
-                            })
-                          }
+                              [platform]: isChecked,
+                            });
+                          }}
                         />
                         {label}
                       </label>
