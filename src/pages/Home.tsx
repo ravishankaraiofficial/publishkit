@@ -144,11 +144,31 @@ export function Home() {
         {!quotaExceeded && showUpload && (
           <div className="fade-in">
             <DropZone onFileSelect={handleFileSelect} />
+          </div>
+        )}
 
+        {showProcessing && (
+          <div className="flex flex-col gap-4">
+            <ProcessingCard
+              statusText={statusCycle[statusIndex]}
+              uploadProgress={uploadProgress}
+            />
+            {result?.status === 'failed' && (
+              <button
+                onClick={reset}
+                className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 transition-all text-sm font-medium"
+              >
+                {t('home.processingFailed')}
+              </button>
+            )}
+          </div>
+        )}
+
+        {!quotaExceeded && !isGuest && (
+          <div className="fade-in">
             {/* MultiPost — optional add-on that triggers automatically after
                 the audio result lands. Signed-in users only; guests don't
                 have a plan quota for MultiPost. */}
-            {!isGuest && (
               <div className="mt-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-3 sm:py-4 transition-all hover:border-[#E05A1E]/40">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative flex-shrink-0">
@@ -218,24 +238,6 @@ export function Home() {
                   })}
                 </div>
               </div>
-            )}
-          </div>
-        )}
-
-        {showProcessing && (
-          <div className="flex flex-col gap-4">
-            <ProcessingCard
-              statusText={statusCycle[statusIndex]}
-              uploadProgress={uploadProgress}
-            />
-            {result?.status === 'failed' && (
-              <button
-                onClick={reset}
-                className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 transition-all text-sm font-medium"
-              >
-                {t('home.processingFailed')}
-              </button>
-            )}
           </div>
         )}
       </div>
