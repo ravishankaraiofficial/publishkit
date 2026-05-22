@@ -397,7 +397,7 @@ ${output.cta}
                 onClick={copyFullScript}
                 className="w-full py-3 rounded-lg font-semibold transition-all bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600"
               >
-                Copy Full Script
+                {t('script.copyFullScript')}
               </button>
             )}
           </div>

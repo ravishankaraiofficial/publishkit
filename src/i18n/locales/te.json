@@ -259,8 +259,11 @@
   "feedback.modalDescLabel": "వివరణ",
   "feedback.modalDescPlaceholder": "ఈ ఫీచర్ ఎందుకు ఉపయోగకరంగా ఉంటుందో వివరించండి...",
   "feedback.submitRequest": "అభ్యర్థన సమర్పించండి",
-  "script.dropzoneHeadline": "Stop typing. Start dropping.",
-  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
-  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
-  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
+  "script.dropzoneHeadline": "టైపింగ్ ఆపండి. అప్‌లోడ్ చేయడం ప్రారంభించండి.",
+  "script.dropzoneSubtitle": "మీ వాయిస్ నోట్స్, రీసెర్చ్ డాక్యుమెంట్‌లు లేదా స్క్రీన్‌షాట్‌లను మీ ప్రత్యేక శైలి మరియు వాయిస్‌కి అనుగుణంగా అధిక-రిటెన్షన్ YouTube స్క్రిప్ట్‌లుగా మార్చండి.",
+  "script.dropzoneSupported": "సపోర్ట్ చేసే ఇన్‌పుట్‌లు: MP3/WAV ఆడియో · PDF డాక్యుమెంట్‌లు · JPG/PNG రీసెర్చ్ ఇమేజ్‌లు",
+  "script.dropzonePrivacy": "ప్రైవసీ షీల్డ్ యాక్టివ్: అప్‌లోడ్ చేసిన ఫైల్‌లు మరియు స్క్రిప్ట్‌లు అన్నీ 3 గంటల తర్వాత మా సిస్టమ్ నుండి పూర్తిగా తొలగించబడతాయి.",
+  "upload.dropzoneTitle": "మీ ఆడియోను ఇక్కడ అప్‌లోడ్ చేయండి (లేదా విశ్లేషణ కోసం PDF / ఇమేజ్)",
+  "upload.dropzoneSubtitle": "ఆడియో · PDF · ఇమేజ్ · గరిష్టంగా 200MB",
+  "script.copyFullScript": "పూర్తి స్క్రిప్ట్‌ను కాపీ చేయండి"
 }

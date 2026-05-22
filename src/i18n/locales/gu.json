@@ -259,8 +259,11 @@
   "feedback.modalDescLabel": "વર્ણન",
   "feedback.modalDescPlaceholder": "આ સુવિધા શા માટે ઉપયોગી હશે તે સમજાવો...",
   "feedback.submitRequest": "વિનંતી સબમિટ કરો",
-  "script.dropzoneHeadline": "Stop typing. Start dropping.",
-  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
-  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
-  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
+  "script.dropzoneHeadline": "ટાઇપિંગ છોડો. અપલોડ કરવાનું શરૂ કરો.",
+  "script.dropzoneSubtitle": "તમારી વૉઇસ નોટ્સ, રિસર્ચ ડૉક્યૂમેન્ટ્સ અથવા સ્ક્રીનશૉટ્સને તમારા અવાજ અને વિષય મુજબ હાઈ-રિટેન્શન YouTube સ્ક્રિપ્ટ્સમાં બદલો.",
+  "script.dropzoneSupported": "સપોર્ટેડ ઇનપુટ્સ: MP3/WAV ઑડિઓ · PDF ડૉક્યૂમેન્ટ્સ · JPG/PNG રિસર્ચ ઇમેજિસ",
+  "script.dropzonePrivacy": "પ્રાઇવસી શિલ્ડ એક્ટિવ: અપલોડ કરેલી ફાઇલો અને જનરેટ કરેલી સ્ક્રિપ્ટ્સ 3 કલાક પછી અમારી સિસ્ટમમાંથી આપમેળે ભૂંસી નાખવામાં આવે છે.",
+  "upload.dropzoneTitle": "તમારો ઑડિઓ અહીં અપલોડ કરો (અથવા વિશ્લેષણ માટે PDF / ઇમેજ)",
+  "upload.dropzoneSubtitle": "ઑડિઓ · PDF · ઇમેજ · મહત્તમ 200MB",
+  "script.copyFullScript": "આખી સ્ક્રિપ્ટ કૉપિ કરો"
 }

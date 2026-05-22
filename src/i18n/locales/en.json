@@ -273,5 +273,8 @@
   "script.dropzoneHeadline": "Stop typing. Start dropping.",
   "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
   "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
-  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours",
+  "upload.dropzoneTitle": "Upload your Audio here (or PDF / Image for analysis)",
+  "upload.dropzoneSubtitle": "Audio · PDF · Image · Max 200MB",
+  "script.copyFullScript": "Copy Full Script"
 }

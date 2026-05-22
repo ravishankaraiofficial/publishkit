@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { UploadCloud } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useT } from '../../i18n';
 
 
 interface DropZoneProps {
@@ -12,6 +13,7 @@ const MAX_SIZE_MB = 200;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
+  const t = useT();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -82,10 +84,10 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
           )}
         />
         <p className="text-white text-base font-medium">
-          Upload your Audio here (or PDF / Image for analysis)
+          {t('upload.dropzoneTitle')}
         </p>
         <p className="mt-2 text-xs text-[#555555] tracking-wide">
-          Audio · PDF · Image · Max {MAX_SIZE_MB}MB
+          {t('upload.dropzoneSubtitle')}
         </p>
 
         <input
