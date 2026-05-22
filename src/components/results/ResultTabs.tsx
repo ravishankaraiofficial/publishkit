@@ -4,6 +4,12 @@ import { type Result } from '../../types';
 import { cn } from '../../lib/utils';
 import { CopyButton } from './CopyButton';
 import { useAuth } from '../../hooks/useAuth';
+import { db, functions } from '../../lib/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import type { OutputLanguage } from '../../lib/languages';
+import { Zap } from 'lucide-react';
+import { useToast } from '../ui/Toast';
 
 interface ResultTabsProps {
   result: Result;
@@ -21,8 +27,66 @@ export function ResultTabs({ result }: ResultTabsProps) {
   const [chatGPTCopied, setChatGPTCopied] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [mpCopiedKey, setMpCopiedKey] = useState<string | null>(null);
-  const { user, profile, signInWithGoogle } = useAuth();
+  const [loadingMore, setLoadingMore] = useState<string | null>(null);
+  const { user, profile, signInWithGoogle, refreshProfile } = useAuth();
+  const { toast } = useToast();
   const isFreePlan = (profile?.plan ?? 'free') === 'free';
+
+  const handleGenerateMore = async (platform: 'x' | 'instagram' | 'linkedin' | 'youtube') => {
+    if (!user) return;
+    
+    setLoadingMore(platform);
+    
+    try {
+      const contentTitle = result.titles?.[0]?.title || result.summary?.slice(0, 200) || result.audioFileName || '';
+      const contentDescription = result.description || '';
+
+      const generateRepurposing = httpsCallable<
+        { title: string; description: string; platforms: string[]; language: OutputLanguage; visitorId?: string },
+        any
+      >(functions, 'generateRepurposing');
+
+      const { getVisitorId } = await import('../../lib/fingerprint');
+      const visitorId = await getVisitorId().catch(() => undefined);
+
+      const res = await generateRepurposing({
+        title: contentTitle.trim(),
+        description: contentDescription.trim(),
+        platforms: [platform],
+        language: profile?.language || 'English',
+        visitorId,
+      });
+
+      const newPostStr = res.data[platform]?.[0];
+      if (newPostStr) {
+        const resultRef = doc(db, `users/${user.uid}/results/${result.id}`);
+        const prevDoc = await getDoc(resultRef);
+        if (prevDoc.exists()) {
+          const currentData = prevDoc.data();
+          const currentArr = Array.isArray(currentData.multiPostOutput?.[platform]) 
+            ? currentData.multiPostOutput[platform] 
+            : currentData.multiPostOutput?.[platform] ? [currentData.multiPostOutput[platform]] : [];
+          
+          await updateDoc(resultRef, {
+            [`multiPostOutput.${platform}`]: [...currentArr, newPostStr]
+          });
+          // Mutate local state so UI updates immediately (ResultTabs receives 'result' as prop, but React state can force a re-render if we use a separate state or just mutate the prop since it's an object)
+          // Actually, mutability of props is bad but it's the easiest here unless we lift state. We can mutate it:
+          if (!result.multiPostOutput) result.multiPostOutput = {};
+          result.multiPostOutput[platform] = [...currentArr, newPostStr];
+        }
+      }
+      await refreshProfile();
+    } catch (err: any) {
+      console.error('Error generating more MultiPost content:', err);
+      toast(err?.message || 'Failed to generate content. Please try again.', 'error');
+      if (err?.code === 'functions/resource-exhausted' || err?.code === 'resource-exhausted') {
+        await refreshProfile();
+      }
+    } finally {
+      setLoadingMore(null);
+    }
+  };
 
   if (isDoc) {
     return (
@@ -379,6 +443,14 @@ export function ResultTabs({ result }: ResultTabsProps) {
                     </div>
                   ))}
                 </div>
+                <button
+                  onClick={() => handleGenerateMore('x')}
+                  disabled={loadingMore === 'x'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-[#E05A1E]" />
+                  {loadingMore === 'x' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -393,6 +465,14 @@ export function ResultTabs({ result }: ResultTabsProps) {
                     <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{caption}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('instagram')}
+                  disabled={loadingMore === 'instagram'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-[#E05A1E]" />
+                  {loadingMore === 'instagram' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -407,6 +487,14 @@ export function ResultTabs({ result }: ResultTabsProps) {
                     <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('linkedin')}
+                  disabled={loadingMore === 'linkedin'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-[#E05A1E]" />
+                  {loadingMore === 'linkedin' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -421,6 +509,14 @@ export function ResultTabs({ result }: ResultTabsProps) {
                     <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('youtube')}
+                  disabled={loadingMore === 'youtube'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-[#E05A1E]" />
+                  {loadingMore === 'youtube' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 

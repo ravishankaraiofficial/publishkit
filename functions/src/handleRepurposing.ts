@@ -120,21 +120,21 @@ export const generateRepurposing = functions
         const languageLine = `- Language: ${language}${languageHint(language)}`;
 
         if (platform === 'x') {
-          prompt = `Create 2 distinct, engaging tweet suggestions based on this content:
+          prompt = `Create exactly 1 distinct, engaging tweet based on this content:
 Title: ${title}
 Description: ${description}
 
 Requirements:
-- Each tweet should be a complete thought
+- The tweet should be a complete thought
 - Include a strong hook
 - Include emojis
 - Under 280 chars per tweet
 ${languageLine}
 
-Return ONLY a JSON array of 2 strings (one string per tweet suggestion), no markdown:
-["tweet option 1", "tweet option 2"]`;
+Return ONLY a JSON array of 1 string, no markdown:
+["tweet text"]`;
         } else if (platform === 'instagram') {
-          prompt = `Create 2 distinct, highly engaging Instagram caption suggestions based on this content:
+          prompt = `Create exactly 1 distinct, highly engaging Instagram caption based on this content:
 Title: ${title}
 Description: ${description}
 
@@ -145,10 +145,10 @@ Requirements:
 - 1-3 paragraphs per caption
 ${languageLine}
 
-Return ONLY a JSON array of 2 strings (one string per caption suggestion), no markdown:
-["caption option 1", "caption option 2"]`;
+Return ONLY a JSON array of 1 string, no markdown:
+["caption text"]`;
         } else if (platform === 'linkedin') {
-          prompt = `Create 2 distinct, highly formal and professional LinkedIn post suggestions based on this content:
+          prompt = `Create exactly 1 distinct, highly formal and professional LinkedIn post based on this content:
 Title: ${title}
 Description: ${description}
 
@@ -160,10 +160,10 @@ Requirements:
 - End with a call-to-action
 ${languageLine}
 
-Return ONLY a JSON array of 2 strings (one string per post suggestion), no markdown:
-["post option 1", "post option 2"]`;
+Return ONLY a JSON array of 1 string, no markdown:
+["post text"]`;
         } else if (platform === 'youtube') {
-          prompt = `Create 2 distinct YouTube community post suggestions based on this content:
+          prompt = `Create exactly 1 distinct YouTube community post based on this content:
 Title: ${title}
 Description: ${description}
 
@@ -175,8 +175,8 @@ Requirements:
 - 2-4 short paragraphs per post
 ${languageLine}
 
-Return ONLY a JSON array of 2 strings (one string per post suggestion), no markdown:
-["post option 1", "post option 2"]`;
+Return ONLY a JSON array of 1 string, no markdown:
+["post text"]`;
         }
 
         try {

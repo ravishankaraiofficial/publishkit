@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Zap, Copy, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +43,7 @@ const MultiPost: React.FC = () => {
   const [output, setOutput] = useState<MultiPostOutput | null>(null);
   const [activeTab, setActiveTab] = useState<'x' | 'instagram' | 'linkedin' | 'youtube'>('x');
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
@@ -142,6 +143,79 @@ const MultiPost: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateMore = async (platform: 'x' | 'instagram' | 'linkedin' | 'youtube') => {
+    if (!user || (!title.trim() && !selectedResult)) return;
+
+    setLoadingMore(platform);
+    setError('');
+
+    try {
+      let contentTitle = title;
+      let contentDescription = description;
+
+      if (selectedResult) {
+        const resultRef = doc(db, `users/${user.uid}/results/${selectedResult}`);
+        const resultDoc = await getDoc(resultRef);
+        if (resultDoc.exists()) {
+          contentTitle = resultDoc.data().audioFileName || '';
+          contentDescription = resultDoc.data().description || '';
+        }
+      }
+
+      const generateRepurposing = httpsCallable<
+        { title: string; description: string; platforms: string[]; language: OutputLanguage; visitorId?: string },
+        MultiPostOutput
+      >(functions, 'generateRepurposing');
+
+      const { getVisitorId } = await import('../lib/fingerprint');
+      const visitorId = await getVisitorId().catch(() => undefined);
+
+      const result = await generateRepurposing({
+        title: contentTitle.trim(),
+        description: contentDescription.trim(),
+        platforms: [platform],
+        language,
+        visitorId,
+      });
+
+      const newPostStr = result.data[platform]?.[0];
+      if (newPostStr) {
+        setOutput((prev) => {
+          if (!prev) return prev;
+          const currentArr = Array.isArray(prev[platform]) ? prev[platform] : prev[platform] ? [prev[platform] as string] : [];
+          return {
+            ...prev,
+            [platform]: [...currentArr, newPostStr],
+          };
+        });
+        
+        // If there is an active selected result, we should also save this new post to Firestore
+        if (selectedResult) {
+          const resultRef = doc(db, `users/${user.uid}/results/${selectedResult}`);
+          const prevDoc = await getDoc(resultRef);
+          if (prevDoc.exists()) {
+            const currentData = prevDoc.data();
+            const currentArr = Array.isArray(currentData.multiPostOutput?.[platform]) 
+              ? currentData.multiPostOutput[platform] 
+              : currentData.multiPostOutput?.[platform] ? [currentData.multiPostOutput[platform]] : [];
+            await updateDoc(resultRef, {
+              [`multiPostOutput.${platform}`]: [...currentArr, newPostStr]
+            });
+          }
+        }
+      }
+      await refreshProfile();
+    } catch (err: any) {
+      console.error('Error generating more MultiPost content:', err);
+      setError(err?.message || 'Failed to generate content. Please try again.');
+      if (err?.code === 'functions/resource-exhausted' || err?.code === 'resource-exhausted') {
+        await refreshProfile();
+      }
+    } finally {
+      setLoadingMore(null);
     }
   };
 
@@ -357,6 +431,14 @@ const MultiPost: React.FC = () => {
                     <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{tweet}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('x')}
+                  disabled={loadingMore === 'x'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-700 hover:border-gray-600 rounded-xl text-gray-300 hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  {loadingMore === 'x' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -372,6 +454,14 @@ const MultiPost: React.FC = () => {
                     <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{caption}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('instagram')}
+                  disabled={loadingMore === 'instagram'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-700 hover:border-gray-600 rounded-xl text-gray-300 hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  {loadingMore === 'instagram' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -387,6 +477,14 @@ const MultiPost: React.FC = () => {
                     <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('linkedin')}
+                  disabled={loadingMore === 'linkedin'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-700 hover:border-gray-600 rounded-xl text-gray-300 hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  {loadingMore === 'linkedin' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
 
@@ -402,6 +500,14 @@ const MultiPost: React.FC = () => {
                     <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => handleGenerateMore('youtube')}
+                  disabled={loadingMore === 'youtube'}
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-700 hover:border-gray-600 rounded-xl text-gray-300 hover:text-white transition-all disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  {loadingMore === 'youtube' ? 'Generating...' : 'Generate another option'}
+                </button>
               </div>
             )}
           </div>
