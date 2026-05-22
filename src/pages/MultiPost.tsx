@@ -18,6 +18,7 @@ interface MultiPostOutput {
   x?: string[];
   instagram?: string;
   linkedin?: string;
+  youtube?: string;
 }
 
 const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 350 };
@@ -37,9 +38,10 @@ const MultiPost: React.FC = () => {
     x: true,
     instagram: true,
     linkedin: true,
+    youtube: true,
   });
   const [output, setOutput] = useState<MultiPostOutput | null>(null);
-  const [activeTab, setActiveTab] = useState<'x' | 'instagram' | 'linkedin'>('x');
+  const [activeTab, setActiveTab] = useState<'x' | 'instagram' | 'linkedin' | 'youtube'>('x');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
@@ -292,7 +294,7 @@ const MultiPost: React.FC = () => {
           <div className="mb-6">
             <label className="block text-white font-semibold mb-3">{t('multipost.selectPlatforms')}</label>
             <div className="flex flex-wrap gap-3">
-              {['x', 'instagram', 'linkedin'].map((platform) => (
+              {['x', 'instagram', 'linkedin', 'youtube'].map((platform) => (
                 <label
                   key={platform}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-neutral-800 border-gray-700 cursor-pointer hover:border-orange-600/50 transition-all"
@@ -329,8 +331,8 @@ const MultiPost: React.FC = () => {
         {/* Output Section */}
         {output && (
           <div className="space-y-6">
-            <div className="flex gap-2 border-b border-gray-800">
-              {(['x', 'instagram', 'linkedin'] as const).map((tab) => (
+            <div className="flex gap-2 border-b border-gray-800 overflow-x-auto">
+              {(['x', 'instagram', 'linkedin', 'youtube'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -395,6 +397,17 @@ const MultiPost: React.FC = () => {
                   {renderCopyAction(output.linkedin)}
                 </div>
                 <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.linkedin}</p>
+              </div>
+            )}
+
+            {/* YouTube */}
+            {activeTab === 'youtube' && output.youtube && (
+              <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <h3 className="text-lg font-bold text-white">YouTube Post</h3>
+                  {renderCopyAction(output.youtube)}
+                </div>
+                <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.youtube}</p>
               </div>
             )}
           </div>

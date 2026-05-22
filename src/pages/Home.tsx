@@ -160,7 +160,7 @@ export function Home() {
                         const on = e.target.checked;
                         setMultiPostEnabled(on);
                         if (on) {
-                          setMultiPostPlatforms({ x: true, instagram: true, linkedin: true });
+                          setMultiPostPlatforms({ x: true, instagram: true, linkedin: true, youtube: true });
                         }
                       }}
                       disabled={isUploading || showResults}
@@ -186,9 +186,9 @@ export function Home() {
                 {/* Platform checkboxes — visible always so users see what they get,
                     but only actionable when the toggle is on. */}
                 <div className="mt-3 flex flex-wrap gap-2 pl-[52px]">
-                  {(['x', 'instagram', 'linkedin'] as const).map((platform) => {
+                  {(['x', 'instagram', 'linkedin', 'youtube'] as const).map((platform) => {
                     const checked = multiPostEnabled && multiPostPlatforms[platform];
-                    const label = platform === 'x' ? 'X' : platform === 'instagram' ? 'Instagram' : 'LinkedIn';
+                    const label = platform === 'x' ? 'X' : platform === 'instagram' ? 'Instagram' : platform === 'linkedin' ? 'LinkedIn' : 'YouTube';
                     return (
                       <label
                         key={platform}

@@ -21,6 +21,7 @@ interface RepurposingOutput {
   x?: string[];
   instagram?: string;
   linkedin?: string;
+  youtube?: string;
 }
 
 export const generateRepurposing = functions
@@ -78,7 +79,7 @@ export const generateRepurposing = functions
         throw new functions.https.HttpsError('invalid-argument', 'At least one platform must be selected');
       }
 
-      const validPlatforms = ['x', 'instagram', 'linkedin'];
+      const validPlatforms = ['x', 'instagram', 'linkedin', 'youtube'];
       const selectedPlatforms = platforms.filter((p: any) => validPlatforms.includes(p));
 
       if (selectedPlatforms.length === 0) {
@@ -161,6 +162,21 @@ ${languageLine}
 
 Return ONLY a JSON string, no markdown:
 "post text here"`;
+        } else if (platform === 'youtube') {
+          prompt = `Create a YouTube community post based on this content:
+Title: ${title}
+Description: ${description}
+
+Requirements:
+- Engaging, hook-driven opening
+- Conversational and community-focused tone
+- Ask a question to drive comments
+- Include relevant emojis
+- 2-4 short paragraphs
+${languageLine}
+
+Return ONLY a JSON string, no markdown:
+"post text here"`;
         }
 
         try {
@@ -191,6 +207,8 @@ Return ONLY a JSON string, no markdown:
             output.instagram = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
           } else if (platform === 'linkedin') {
             output.linkedin = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
+          } else if (platform === 'youtube') {
+            output.youtube = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
           }
         } catch (platformError) {
           console.error(`Error generating ${platform} content:`, platformError);

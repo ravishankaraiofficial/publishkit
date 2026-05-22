@@ -103,5 +103,6 @@ export interface Result {
     x?: string[];
     instagram?: string;
     linkedin?: string;
+    youtube?: string;
   };
 }

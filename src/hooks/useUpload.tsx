@@ -15,6 +15,7 @@ interface MultiPostPlatforms {
   x: boolean;
   instagram: boolean;
   linkedin: boolean;
+  youtube: boolean;
 }
 
 interface PendingUpload {
@@ -106,6 +107,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     x: true,
     instagram: true,
     linkedin: true,
+    youtube: true,
   });
   // Track whether MultiPost has been triggered for the current result so we
   // don't re-run it on every onSnapshot tick after the result completes.
@@ -292,7 +294,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             !data.multiPostOutput &&
             multiPostTriggeredRef.current !== resultId
           ) {
-            const platforms = (['x', 'instagram', 'linkedin'] as const).filter(
+            const platforms = (['x', 'instagram', 'linkedin', 'youtube'] as const).filter(
               (p) => multiPostPlatforms[p]
             );
             // Audio results have titles[0].title. PDF / image results have summary

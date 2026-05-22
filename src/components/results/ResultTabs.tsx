@@ -406,7 +406,17 @@ export function ResultTabs({ result }: ResultTabsProps) {
               </div>
             )}
 
-            {!mp.x?.length && !mp.instagram && !mp.linkedin && (
+            {mp.youtube && (
+              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-white">YouTube Post</h4>
+                  {copyChip(mp.youtube, 'youtube')}
+                </div>
+                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.youtube}</p>
+              </div>
+            )}
+
+            {!mp.x?.length && !mp.instagram && !mp.linkedin && !mp.youtube && (
               <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 text-center text-sm text-[#888888]">
                 MultiPost is generating in the background…
               </div>
