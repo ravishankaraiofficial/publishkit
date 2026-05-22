@@ -304,7 +304,7 @@ const MultiPost: React.FC = () => {
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
           <div className="mb-6">
             <label className="block text-white font-semibold mb-2">{t('multipost.contentSource')}</label>
-            <div className="flex gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <div className="flex-1">
                 <input
                   type="text"
