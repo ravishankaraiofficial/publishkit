@@ -105,4 +105,12 @@ export interface Result {
     linkedin?: string[];
     youtube?: string[];
   };
+  // Script Writer generated fields
+  generationMode?: 'metadata' | 'script';
+  scriptTone?: string;
+  scriptDuration?: string;
+  hook?: string;
+  intro?: string;
+  sections?: Array<{ title: string; content: string }>;
+  cta?: string;
 }

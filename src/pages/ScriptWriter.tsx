@@ -15,6 +15,7 @@ import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
 import { useT } from '../i18n';
 import { Shield } from 'lucide-react';
+import { ProcessingCard } from '../components/upload/ProcessingCard';
 
 interface ScriptOutput {
   hook: string;
@@ -254,12 +255,17 @@ ${output.cta}
             <h2 className="text-2xl font-bold text-white mb-2">{t('script.dropzoneHeadline')}</h2>
             <p className="text-gray-400 mb-6">{t('script.dropzoneSubtitle')}</p>
             
-            <DropZone
-              onFileSelect={handleFileSelect}
-              isUploading={isUploading}
-              progress={uploadProgress}
-              statusMessage={statusCycle[statusIndex] || "Processing..."}
-            />
+            {!isUploading ? (
+              <DropZone
+                onFileSelect={handleFileSelect}
+                isLoading={isUploading}
+              />
+            ) : (
+              <ProcessingCard
+                statusText={statusCycle[statusIndex] || "Processing..."}
+                uploadProgress={uploadProgress}
+              />
+            )}
             
             <div className="mt-4 flex flex-col items-center gap-2 text-sm text-gray-500">
               <p>{t('script.dropzoneSupported')}</p>

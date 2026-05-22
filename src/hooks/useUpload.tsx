@@ -487,6 +487,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       resultId, setResultId,
       result, setResult,
       quotaExceeded, setQuotaExceeded,
+      uploadMode, setUploadMode,
+      scriptTone, setScriptTone,
+      scriptDuration, setScriptDuration,
       handleFileSelect, reset
     }}>
       {children}
