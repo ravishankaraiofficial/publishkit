@@ -16,9 +16,9 @@ import { useT } from '../i18n';
 
 interface MultiPostOutput {
   x?: string[];
-  instagram?: string;
-  linkedin?: string;
-  youtube?: string;
+  instagram?: string[];
+  linkedin?: string[];
+  youtube?: string[];
 }
 
 const PLAN_LIMITS: Record<string, number> = { free: 3, pro: 100, ultra: 350 };
@@ -82,11 +82,6 @@ const MultiPost: React.FC = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const copyFullThread = () => {
-    if (!output?.x) return;
-    handleCopy(output.x.join('\n\n'));
   };
 
   const handleGenerate = async () => {
@@ -350,64 +345,63 @@ const MultiPost: React.FC = () => {
               ))}
             </div>
 
-            {/* X Thread */}
+            {/* X */}
             {activeTab === 'x' && output.x && (
               <div className="space-y-4">
                 {output.x.map((tweet, idx) => (
                   <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
                     <div className="flex items-start justify-between gap-4 mb-3">
-                      <span className="text-sm text-gray-400">Tweet {idx + 1}</span>
+                      <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
                       {renderCopyAction(tweet, 'px-3 py-1 text-sm')}
                     </div>
-                    <p className="text-gray-100 leading-relaxed">{tweet}</p>
+                    <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{tweet}</p>
                   </div>
                 ))}
-
-                {isFree ? (
-                  <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
-                    Copy not available on Free Plan — upgrade to Pro Plan or Max Plan
-                  </div>
-                ) : (
-                  <button
-                    onClick={copyFullThread}
-                    className="w-full py-3 rounded-lg font-semibold transition-all bg-gray-800 text-white hover:bg-gray-700"
-                  >
-                    📋 Copy Full Thread
-                  </button>
-                )}
               </div>
             )}
 
             {/* Instagram */}
             {activeTab === 'instagram' && output.instagram && (
-              <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-bold text-white">Instagram Caption</h3>
-                  {renderCopyAction(output.instagram)}
-                </div>
-                <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.instagram}</p>
+              <div className="space-y-4">
+                {output.instagram.map((caption, idx) => (
+                  <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
+                      {renderCopyAction(caption, 'px-3 py-1 text-sm')}
+                    </div>
+                    <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{caption}</p>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* LinkedIn */}
             {activeTab === 'linkedin' && output.linkedin && (
-              <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-bold text-white">LinkedIn Post</h3>
-                  {renderCopyAction(output.linkedin)}
-                </div>
-                <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.linkedin}</p>
+              <div className="space-y-4">
+                {output.linkedin.map((post, idx) => (
+                  <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
+                      {renderCopyAction(post, 'px-3 py-1 text-sm')}
+                    </div>
+                    <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{post}</p>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* YouTube */}
             {activeTab === 'youtube' && output.youtube && (
-              <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-bold text-white">YouTube Post</h3>
-                  {renderCopyAction(output.youtube)}
-                </div>
-                <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{output.youtube}</p>
+              <div className="space-y-4">
+                {output.youtube.map((post, idx) => (
+                  <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
+                      {renderCopyAction(post, 'px-3 py-1 text-sm')}
+                    </div>
+                    <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{post}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -367,16 +367,12 @@ export function ResultTabs({ result }: ResultTabsProps) {
         return (
           <div className="space-y-6">
             {mp.x && mp.x.length > 0 && (
-              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-white">X / Twitter Thread</h4>
-                  {copyChip(mp.x.join('\n\n'), 'x-thread')}
-                </div>
-                <div className="space-y-3">
+              <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                   {mp.x.map((tweet, i) => (
-                    <div key={i} className="bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl p-4">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <span className="text-xs text-[#888888]">Tweet {i + 1}</span>
+                    <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 relative">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-white">Tweet Option {i + 1}</h4>
                         {copyChip(tweet, `x-${i}`)}
                       </div>
                       <p className="text-[#CFCFCF] text-sm leading-relaxed">{tweet}</p>
@@ -386,37 +382,49 @@ export function ResultTabs({ result }: ResultTabsProps) {
               </div>
             )}
 
-            {mp.instagram && (
-              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-white">Instagram Caption</h4>
-                  {copyChip(mp.instagram, 'instagram')}
-                </div>
-                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.instagram}</p>
+            {mp.instagram && mp.instagram.length > 0 && (
+              <div className="space-y-4">
+                {mp.instagram.map((caption, i) => (
+                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-white">Instagram Caption {i + 1}</h4>
+                      {copyChip(caption, `instagram-${i}`)}
+                    </div>
+                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{caption}</p>
+                  </div>
+                ))}
               </div>
             )}
 
-            {mp.linkedin && (
-              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-white">LinkedIn Post</h4>
-                  {copyChip(mp.linkedin, 'linkedin')}
-                </div>
-                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.linkedin}</p>
+            {mp.linkedin && mp.linkedin.length > 0 && (
+              <div className="space-y-4">
+                {mp.linkedin.map((post, i) => (
+                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-white">LinkedIn Post {i + 1}</h4>
+                      {copyChip(post, `linkedin-${i}`)}
+                    </div>
+                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
+                  </div>
+                ))}
               </div>
             )}
 
-            {mp.youtube && (
-              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-white">YouTube Post</h4>
-                  {copyChip(mp.youtube, 'youtube')}
-                </div>
-                <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{mp.youtube}</p>
+            {mp.youtube && mp.youtube.length > 0 && (
+              <div className="space-y-4">
+                {mp.youtube.map((post, i) => (
+                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-white">YouTube Post {i + 1}</h4>
+                      {copyChip(post, `youtube-${i}`)}
+                    </div>
+                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
+                  </div>
+                ))}
               </div>
             )}
 
-            {!mp.x?.length && !mp.instagram && !mp.linkedin && !mp.youtube && (
+            {!mp.x?.length && !mp.instagram?.length && !mp.linkedin?.length && !mp.youtube?.length && (
               <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 text-center text-sm text-[#888888]">
                 MultiPost is generating in the background…
               </div>

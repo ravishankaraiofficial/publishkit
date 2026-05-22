@@ -101,8 +101,8 @@ export interface Result {
   // the result document via the deleteOldAudio scheduled job (3 hours).
   multiPostOutput?: {
     x?: string[];
-    instagram?: string;
-    linkedin?: string;
-    youtube?: string;
+    instagram?: string[];
+    linkedin?: string[];
+    youtube?: string[];
   };
 }

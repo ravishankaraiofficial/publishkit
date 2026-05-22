@@ -19,9 +19,9 @@ import { enforceFreeTierGuard } from './lib/freeTierGuard';
 
 interface RepurposingOutput {
   x?: string[];
-  instagram?: string;
-  linkedin?: string;
-  youtube?: string;
+  instagram?: string[];
+  linkedin?: string[];
+  youtube?: string[];
 }
 
 export const generateRepurposing = functions
@@ -120,21 +120,21 @@ export const generateRepurposing = functions
         const languageLine = `- Language: ${language}${languageHint(language)}`;
 
         if (platform === 'x') {
-          prompt = `Create a Twitter/X thread (5-7 tweets) based on this content:
+          prompt = `Create 2 distinct, engaging tweet suggestions based on this content:
 Title: ${title}
 Description: ${description}
 
 Requirements:
-- Each tweet max 280 characters
-- Engaging, shareable content
-- Natural thread flow
-- Professional tone
+- Each tweet should be a complete thought
+- Include a strong hook
+- Include emojis
+- Under 280 chars per tweet
 ${languageLine}
 
-Return ONLY a JSON array of tweet strings, no markdown:
-["tweet 1", "tweet 2", ...]`;
+Return ONLY a JSON array of 2 strings (one string per tweet suggestion), no markdown:
+["tweet option 1", "tweet option 2"]`;
         } else if (platform === 'instagram') {
-          prompt = `Create an Instagram caption based on this content:
+          prompt = `Create 2 distinct, highly engaging Instagram caption suggestions based on this content:
 Title: ${title}
 Description: ${description}
 
@@ -142,28 +142,28 @@ Requirements:
 - Engaging, personality-driven
 - Include relevant emojis
 - Add 20 relevant hashtags at the end
-- 1-3 paragraphs
+- 1-3 paragraphs per caption
 ${languageLine}
 
-Return ONLY a JSON string, no markdown:
-"caption text here"`;
+Return ONLY a JSON array of 2 strings (one string per caption suggestion), no markdown:
+["caption option 1", "caption option 2"]`;
         } else if (platform === 'linkedin') {
-          prompt = `Create a professional LinkedIn post based on this content:
+          prompt = `Create 2 distinct, highly formal and professional LinkedIn post suggestions based on this content:
 Title: ${title}
 Description: ${description}
 
 Requirements:
-- Professional but approachable tone
-- 3-5 paragraphs
-- Start with a hook
+- Professional, authoritative, and formal tone
+- 3-5 paragraphs per post
+- Start with a professional hook
 - Include insights and takeaways
 - End with a call-to-action
 ${languageLine}
 
-Return ONLY a JSON string, no markdown:
-"post text here"`;
+Return ONLY a JSON array of 2 strings (one string per post suggestion), no markdown:
+["post option 1", "post option 2"]`;
         } else if (platform === 'youtube') {
-          prompt = `Create a YouTube community post based on this content:
+          prompt = `Create 2 distinct YouTube community post suggestions based on this content:
 Title: ${title}
 Description: ${description}
 
@@ -172,11 +172,11 @@ Requirements:
 - Conversational and community-focused tone
 - Ask a question to drive comments
 - Include relevant emojis
-- 2-4 short paragraphs
+- 2-4 short paragraphs per post
 ${languageLine}
 
-Return ONLY a JSON string, no markdown:
-"post text here"`;
+Return ONLY a JSON array of 2 strings (one string per post suggestion), no markdown:
+["post option 1", "post option 2"]`;
         }
 
         try {
@@ -190,25 +190,21 @@ Return ONLY a JSON string, no markdown:
             jsonText = jsonMatch[1];
           } else {
             // Try to extract JSON directly
-            if (platform === 'x') {
-              const arrayMatch = responseText.match(/\[[\s\S]*\]/);
-              if (arrayMatch) jsonText = arrayMatch[0];
-            } else {
-              const stringMatch = responseText.match(/"[\s\S]*"/);
-              if (stringMatch) jsonText = stringMatch[0];
-            }
+            const arrayMatch = responseText.match(/\[[\s\S]*\]/);
+            if (arrayMatch) jsonText = arrayMatch[0];
           }
 
           const parsed = JSON.parse(jsonText);
+          const parsedArray = Array.isArray(parsed) ? parsed : [typeof parsed === 'string' ? parsed : JSON.stringify(parsed)];
 
           if (platform === 'x') {
-            output.x = Array.isArray(parsed) ? parsed : [parsed];
+            output.x = parsedArray;
           } else if (platform === 'instagram') {
-            output.instagram = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
+            output.instagram = parsedArray;
           } else if (platform === 'linkedin') {
-            output.linkedin = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
+            output.linkedin = parsedArray;
           } else if (platform === 'youtube') {
-            output.youtube = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
+            output.youtube = parsedArray;
           }
         } catch (platformError) {
           console.error(`Error generating ${platform} content:`, platformError);
