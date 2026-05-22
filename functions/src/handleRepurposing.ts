@@ -131,8 +131,7 @@ Requirements:
 - Under 280 chars per tweet
 ${languageLine}
 
-Return ONLY a JSON array of 1 string, no markdown:
-["tweet text"]`;
+Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code blocks, or wrappers.`;
         } else if (platform === 'instagram') {
           prompt = `Create exactly 1 distinct, highly engaging Instagram caption based on this content:
 Title: ${title}
@@ -145,8 +144,7 @@ Requirements:
 - 1-3 paragraphs per caption
 ${languageLine}
 
-Return ONLY a JSON array of 1 string, no markdown:
-["caption text"]`;
+Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code blocks, or wrappers.`;
         } else if (platform === 'linkedin') {
           prompt = `Create exactly 1 distinct, highly formal and professional LinkedIn post based on this content:
 Title: ${title}
@@ -160,8 +158,7 @@ Requirements:
 - End with a call-to-action
 ${languageLine}
 
-Return ONLY a JSON array of 1 string, no markdown:
-["post text"]`;
+Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code blocks, or wrappers.`;
         } else if (platform === 'youtube') {
           prompt = `Create exactly 1 distinct YouTube community post based on this content:
 Title: ${title}
@@ -175,27 +172,32 @@ Requirements:
 - 2-4 short paragraphs per post
 ${languageLine}
 
-Return ONLY a JSON array of 1 string, no markdown:
-["post text"]`;
+Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code blocks, or wrappers.`;
         }
 
         try {
           const result = await model.generateContent(prompt);
           const responseText = result.response.text();
 
-          // Parse JSON from response
-          let jsonText = responseText;
-          const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
-          if (jsonMatch) {
-            jsonText = jsonMatch[1];
-          } else {
-            // Try to extract JSON directly
-            const arrayMatch = responseText.match(/\[[\s\S]*\]/);
-            if (arrayMatch) jsonText = arrayMatch[0];
+          let cleanText = responseText.trim();
+          
+          // Strip markdown blocks if Gemini added them anyway
+          if (cleanText.startsWith('```')) {
+            cleanText = cleanText.replace(/^```[a-z]*\n/, '').replace(/\n```$/, '').trim();
+          }
+          
+          // If Gemini still returned a JSON array for some reason, attempt to extract the string
+          if (cleanText.startsWith('[') && cleanText.endsWith(']')) {
+            try {
+              const parsed = JSON.parse(cleanText);
+              cleanText = Array.isArray(parsed) ? parsed[0] : parsed;
+            } catch (e) {
+              // Strip brackets manually if JSON parse fails due to newlines
+              cleanText = cleanText.replace(/^\[\s*"?/, '').replace(/"?\s*\]$/, '');
+            }
           }
 
-          const parsed = JSON.parse(jsonText);
-          const parsedArray = Array.isArray(parsed) ? parsed : [typeof parsed === 'string' ? parsed : JSON.stringify(parsed)];
+          const parsedArray = [cleanText];
 
           if (platform === 'x') {
             output.x = parsedArray;
