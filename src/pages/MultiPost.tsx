@@ -363,7 +363,7 @@ const MultiPost: React.FC = () => {
             {/* Instagram */}
             {activeTab === 'instagram' && output.instagram && (
               <div className="space-y-4">
-                {output.instagram.map((caption, idx) => (
+                {(Array.isArray(output.instagram) ? output.instagram : [output.instagram]).map((caption, idx) => (
                   <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
@@ -378,7 +378,7 @@ const MultiPost: React.FC = () => {
             {/* LinkedIn */}
             {activeTab === 'linkedin' && output.linkedin && (
               <div className="space-y-4">
-                {output.linkedin.map((post, idx) => (
+                {(Array.isArray(output.linkedin) ? output.linkedin : [output.linkedin]).map((post, idx) => (
                   <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>
@@ -393,7 +393,7 @@ const MultiPost: React.FC = () => {
             {/* YouTube */}
             {activeTab === 'youtube' && output.youtube && (
               <div className="space-y-4">
-                {output.youtube.map((post, idx) => (
+                {(Array.isArray(output.youtube) ? output.youtube : [output.youtube]).map((post, idx) => (
                   <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-6">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <span className="text-sm font-semibold text-gray-400">Option {idx + 1}</span>

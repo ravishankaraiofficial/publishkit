@@ -384,7 +384,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
             {mp.instagram && mp.instagram.length > 0 && (
               <div className="space-y-4">
-                {mp.instagram.map((caption, i) => (
+                {(Array.isArray(mp.instagram) ? mp.instagram : [mp.instagram]).map((caption, i) => (
                   <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-white">Instagram Caption {i + 1}</h4>
@@ -398,7 +398,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
             {mp.linkedin && mp.linkedin.length > 0 && (
               <div className="space-y-4">
-                {mp.linkedin.map((post, i) => (
+                {(Array.isArray(mp.linkedin) ? mp.linkedin : [mp.linkedin]).map((post, i) => (
                   <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-white">LinkedIn Post {i + 1}</h4>
@@ -412,7 +412,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
             {mp.youtube && mp.youtube.length > 0 && (
               <div className="space-y-4">
-                {mp.youtube.map((post, i) => (
+                {(Array.isArray(mp.youtube) ? mp.youtube : [mp.youtube]).map((post, i) => (
                   <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-white">YouTube Post {i + 1}</h4>

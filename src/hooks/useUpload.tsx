@@ -93,7 +93,7 @@ interface UploadContextType {
 const UploadContext = createContext<UploadContextType | null>(null);
 
 export function UploadProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
 
   const [isUploading, setIsUploading] = useState(false);
@@ -323,7 +323,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
                 platforms: platforms as unknown as string[],
                 resultId,
                 language: outputLanguage,
-              }).catch((err: any) => {
+              })
+                .then(() => refreshProfile())
+                .catch((err: any) => {
                 console.error('MultiPost auto-generation failed:', err);
                 if (err?.code === 'functions/resource-exhausted') {
                   toast('MultiPost monthly limit reached — upgrade your plan to keep using it.', 'error');
