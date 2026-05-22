@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiApiKey } from './lib/gemini';
 import { db } from './lib/firestore';

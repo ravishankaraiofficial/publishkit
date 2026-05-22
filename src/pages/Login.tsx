@@ -1,13 +1,16 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth, isSilentAuthError } from '../hooks/useAuth';
 import { useState } from 'react';
 import { useToast } from '../components/ui/Toast';
 import { Loader2 } from 'lucide-react';
+import { useT } from '../i18n';
 
 export function Login() {
   const { user, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const t = useT();
   const location = useLocation();
   const explicitSignIn = location.state?.explicitSignIn;
 
@@ -49,6 +52,11 @@ export function Login() {
 
   return (
     <div className="relative min-h-screen bg-[#0D0D0D] text-[#F5F5F5] flex flex-col items-center justify-center p-6 overflow-hidden">
+      <Helmet>
+        <title>{t('seo.login.title')}</title>
+        <meta name="description" content={t('seo.login.description')} />
+        <link rel="canonical" href="https://publishkit.in/login" />
+      </Helmet>
       {/* Background glow blobs */}
       <div className="glow-bg" aria-hidden="true">
         <div className="blob b1" />

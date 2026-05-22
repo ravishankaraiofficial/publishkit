@@ -61,13 +61,12 @@
   "script.introTitle": "परिचय",
   "script.ctaTitle": "कॉल टू एक्शन",
   "script.monthlyLimitReached": "महीना के सीमा पूरा हो गइल",
-  "script.limitUltra": "रउआ एह महीना खातिर अपना {limit} स्क्रिप्ट के इस्तेमाल कर लिहले बानी। 1 तारीख के फेर से शुरू होखी।" ,
+  "script.limitUltra": "रउआ एह महीना खातिर अपना {limit} स्क्रिप्ट के इस्तेमाल कर लिहले बानी। 1 तारीख के फेर से शुरू होखी।",
   "script.limitPro": "रउआ एह महीना अपना {limit} स्क्रिप्ट के इस्तेमाल कर लिहले बानी। {nextLimit}/महीना खातिर मैक्स प्लान पर अपग्रेड करीं।",
   "script.limitFree": "रउआ एह महीना अपना {limit} स्क्रिप्ट के इस्तेमाल कर लिहले बानी। औरी खातिर प्रो प्लान या मैक्स प्लान पर अपग्रेड करीं।",
   "script.upgradeUltra": "प्लान देखीं",
   "script.upgradePro": "मैक्स प्लान पर अपग्रेड करीं →",
   "script.upgradeFree": "प्रो प्लान या मैक्स प्लान पर अपग्रेड करीं →",
-
   "multipost.subtitle": "आपन कंटेंट के X, Instagram आ LinkedIn खातिर अनुकूल पोस्ट में बदलीं",
   "multipost.usageCounter": "एह महीना में {used} / {limit} इस्तेमाल कइल गइल",
   "multipost.copyNotAvailable": "मुफ्त प्लान पर कॉपी उपलब्ध नइखे",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "अंग्रेजी + हिन्दी समर्थन",
   "pricing.feat.scriptN": "स्क्रिप्ट लेखक ({count}/महीना)",
   "pricing.feat.multipostN": "मल्टीपोस्ट ({count}/महीना)",
-  "pricing.feat.copyMetadata": "मेटाडेटा रिजल्ट पर कॉपी बटन",  "pricing.feat.copyEverywhere": "हर जगहा कॉपी बटन सक्षम",
+  "pricing.feat.copyMetadata": "मेटाडेटा रिजल्ट पर कॉपी बटन",
+  "pricing.feat.copyEverywhere": "हर जगहा कॉपी बटन सक्षम",
   "pricing.feat.copyMax": "हर जगहा कॉपी बटन",
   "settings.title": "क्रिएटर प्रोफाइल",
   "settings.subtitle": "एकरा के भरीं ताकि PublishKit के AI अइसन टाइटल, विवरण, थंबनेल, स्क्रिप्ट आ सोशल पोस्ट बनावे जवन {name} लेखा लागे, कवनो साधारण AI लेखा ना। जवना फील्ड पर * बा उ जरूरी बा। बाकी सब वैकल्पिक बा बाकिर हर एगो रउआ रिजल्ट के बेहतर बनाई।",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "जइसे, Instagram Reel फॉर्मेट जोड़ीं",
   "feedback.modalDescLabel": "विवरण",
   "feedback.modalDescPlaceholder": "बताईं कि ई सुविधा काहे उपयोगी होखी...",
-  "feedback.submitRequest": "अनुरोध जमा करीं"
+  "feedback.submitRequest": "अनुरोध जमा करीं",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

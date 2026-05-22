@@ -67,7 +67,6 @@
   "script.upgradeUltra": "ਪਲਾਨ ਵੇਖੋ",
   "script.upgradePro": "ਮੈਕਸ ਪਲਾਨ 'ਤੇ ਅਪਗ੍ਰੇਡ ਕਰੋ →",
   "script.upgradeFree": "ਪ੍ਰੋ ਪਲਾਨ ਜਾਂ ਮੈਕਸ ਪਲਾਨ 'ਤੇ ਅਪਗ੍ਰੇਡ ਕਰੋ →",
-
   "multipost.subtitle": "ਆਪਣੀ ਸਮੱਗਰੀ ਨੂੰ X, Instagram ਅਤੇ LinkedIn ਲਈ ਅਨੁਕੂਲਿਤ ਪੋਸਟਾਂ ਵਿੱਚ ਬਦਲੋ",
   "multipost.usageCounter": "ਇਸ ਮਹੀਨੇ {used} / {limit} ਵਰਤਿਆ",
   "multipost.copyNotAvailable": "ਮੁਫ਼ਤ ਪਲਾਨ 'ਤੇ ਕਾਪੀ ਉਪਲਬਧ ਨਹੀਂ",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ਅੰਗਰੇਜ਼ੀ + ਹਿੰਦੀ ਸਮਰਥਨ",
   "pricing.feat.scriptN": "ਸਕ੍ਰਿਪਟ ਲੇਖਕ ({count}/ਮਹੀਨਾ)",
   "pricing.feat.multipostN": "ਮਲਟੀਪੋਸਟ ({count}/ਮਹੀਨਾ)",
-  "pricing.feat.copyMetadata": "ਮੈਟਾਡੇਟਾ ਨਤੀਜਿਆਂ 'ਤੇ ਕਾਪੀ ਬਟਨ",  "pricing.feat.copyEverywhere": "ਹਰ ਥਾਂ ਕਾਪੀ ਬਟਨ ਯੋਗ",
+  "pricing.feat.copyMetadata": "ਮੈਟਾਡੇਟਾ ਨਤੀਜਿਆਂ 'ਤੇ ਕਾਪੀ ਬਟਨ",
+  "pricing.feat.copyEverywhere": "ਹਰ ਥਾਂ ਕਾਪੀ ਬਟਨ ਯੋਗ",
   "pricing.feat.copyMax": "ਹਰ ਥਾਂ ਕਾਪੀ ਬਟਨ",
   "settings.title": "ਕ੍ਰਿਏਟਰ ਪ੍ਰੋਫਾਈਲ",
   "settings.subtitle": "ਇਹ ਜਾਣਕਾਰੀ ਭਰੋ ਤਾਂ ਜੋ PublishKit ਦਾ AI ਅਜਿਹੇ ਸਿਰਲੇਖ, ਵਰਣਨ, ਥੰਬਨੇਲ, ਸਕ੍ਰਿਪਟਾਂ ਅਤੇ ਸੋਸ਼ਲ ਪੋਸਟਾਂ ਤਿਆਰ ਕਰੇ ਜੋ {name} ਵਾਂਗ ਲੱਗਣ, ਨਾ ਕਿ ਆਮ AI ਵਾਂਗ। * ਵਾਲੇ ਫੀਲਡ ਲਾਜ਼ਮੀ ਹਨ। ਬਾਕੀ ਵਿਕਲਪਿਕ ਹਨ ਪਰ ਹਰ ਜਾਣਕਾਰੀ ਤੁਹਾਡੇ ਨਤੀਜਿਆਂ ਨੂੰ ਹੋਰ ਸਹੀ ਬਣਾਉਂਦੀ ਹੈ।",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "ਉਦਾਹਰਣ ਲਈ, Instagram Reel ਫਾਰਮੈਟ ਜੋੜੋ",
   "feedback.modalDescLabel": "ਵਰਣਨ",
   "feedback.modalDescPlaceholder": "ਸਮਝਾਓ ਇਹ ਫੀਚਰ ਕਿਉਂ ਲਾਭਦਾਇਕ ਹੋਵੇਗਾ...",
-  "feedback.submitRequest": "ਬੇਨਤੀ ਸਬਮਿਟ ਕਰੋ"
+  "feedback.submitRequest": "ਬੇਨਤੀ ਸਬਮਿਟ ਕਰੋ",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

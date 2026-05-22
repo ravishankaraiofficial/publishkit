@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Zap, Copy, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../lib/firebase';
@@ -274,6 +275,11 @@ const MultiPost: React.FC = () => {
 
   return (
     <PageContainer>
+      <Helmet>
+        <title>{t('seo.multiPost.title')}</title>
+        <meta name="description" content={t('seo.multiPost.description')} />
+        <link rel="canonical" href="https://publishkit.in/multipost" />
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">

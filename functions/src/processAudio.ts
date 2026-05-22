@@ -1,6 +1,6 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as os from 'os';
-import * as admin from 'firebase-admin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import * as path from 'path';
 import * as fs from 'fs';
 import { db, storage } from './lib/firestore';
@@ -91,6 +91,9 @@ export const processAudio = functions
       const fileType = typeof data.fileType === 'string' ? data.fileType : 'audio/mpeg';
       const outputLanguage = normalizeLanguage(data.outputLanguage);
       const generateThumbnails = data.generateThumbnails === true;
+      const generationMode = data.generationMode === 'script' ? 'script' : 'metadata';
+      const scriptTone = data.scriptTone || 'Casual';
+      const scriptDuration = data.scriptDuration || '10';
       
       if (!storagePath || !audioFileName) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required arguments');
@@ -134,7 +137,7 @@ export const processAudio = functions
 
       const resultRef = db.collection(`users/${uid}/results`).doc();
       const resultId = resultRef.id;
-      const expiresAt = admin.firestore.Timestamp.fromMillis(Date.now() + THREE_HOURS_MS);
+      const expiresAt = Timestamp.fromMillis(Date.now() + THREE_HOURS_MS);
 
       await resultRef.set({
         uid,
@@ -144,8 +147,11 @@ export const processAudio = functions
         fileType,
         outputLanguage,
         generateThumbnails,
+        generationMode,
+        scriptTone,
+        scriptDuration,
         status: 'processing',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         expiresAt,
       });
 
@@ -169,6 +175,7 @@ export const processAudioWorker = functions
     const storagePath = data.audioStoragePath;
     const fileType: string = data.fileType || 'audio/mpeg';
     const outputLanguage: OutputLanguage = normalizeLanguage(data.outputLanguage);
+    const generationMode = data.generationMode || 'metadata';
     const resultRef = snap.ref;
     let localFilePath = '';
 
@@ -181,47 +188,81 @@ export const processAudioWorker = functions
       await file.download({ destination: localFilePath });
 
       const isDocument = fileType === 'application/pdf' || fileType.startsWith('image/');
+      
+      const profileDoc = await db.doc(`users/${uid}`).get();
+      let profile = profileDoc.data();
+      const plan = (profile?.plan as string) || 'free';
 
-      if (isDocument) {
-        // Document / image flow: pass file directly to Gemini for analysis
-        const outputs = await analyzeDocument(localFilePath, fileType, outputLanguage);
-        await resultRef.update({
-          ...outputs,
-          status: 'complete',
-        });
-      } else {
-        // Audio flow: transcribe then generate YouTube metadata
-        const [metadata] = await file.getMetadata();
-        const mimeType = metadata.contentType || fileType;
+      if (!profile) {
+        profile = {
+          name: 'Guest',
+          appearance: 'A generic avatar.',
+          brandColor1: '#E05A1E',
+          brandColor2: '#0D0D0D',
+          language: outputLanguage,
+          niche: 'General content',
+        };
+      }
 
-        const transcript = await transcribeAudio(localFilePath, mimeType);
+      if (generationMode === 'script') {
+        const { generateScriptFromContent } = require('./generate');
+        const scriptTone = data.scriptTone || 'Casual';
+        const scriptDuration = data.scriptDuration || '10';
+        let contentContext = '';
 
-        const profileDoc = await db.doc(`users/${uid}`).get();
-        let profile = profileDoc.data();
-
-        if (!profile) {
-          profile = {
-            name: 'Guest',
-            appearance: 'A generic avatar.',
-            brandColor1: '#E05A1E',
-            brandColor2: '#0D0D0D',
-            language: outputLanguage,
-            niche: 'General content',
-          };
+        if (isDocument) {
+          const { analyzeDocument } = require('./generate');
+          const docOutputs = await analyzeDocument(localFilePath, fileType, outputLanguage);
+          contentContext = `File Summary:\n${docOutputs.summary}\n\nDetailed Description:\n${docOutputs.description}`;
+        } else {
+          const [metadata] = await file.getMetadata();
+          const mimeType = metadata.contentType || fileType;
+          contentContext = await transcribeAudio(localFilePath, mimeType);
         }
 
-        const outputs = await generateOutputs(
-          transcript,
+        const scriptOutputs = await generateScriptFromContent(
+          contentContext,
           profile,
+          scriptTone,
+          scriptDuration,
           outputLanguage,
-          data.generateThumbnails === true
+          plan
         );
 
         await resultRef.update({
-          transcript,
-          ...outputs,
+          ...scriptOutputs,
           status: 'complete',
         });
+        
+      } else {
+        // Legacy/Metadata generation mode
+        if (isDocument) {
+          // Document / image flow: pass file directly to Gemini for analysis
+          const outputs = await analyzeDocument(localFilePath, fileType, outputLanguage);
+          await resultRef.update({
+            ...outputs,
+            status: 'complete',
+          });
+        } else {
+          // Audio flow: transcribe then generate YouTube metadata
+          const [metadata] = await file.getMetadata();
+          const mimeType = metadata.contentType || fileType;
+
+          const transcript = await transcribeAudio(localFilePath, mimeType);
+
+          const outputs = await generateOutputs(
+            transcript,
+            profile,
+            outputLanguage,
+            data.generateThumbnails === true
+          );
+
+          await resultRef.update({
+            transcript,
+            ...outputs,
+            status: 'complete',
+          });
+        }
       }
     } catch (error: any) {
       // Log full error internally, never expose to client

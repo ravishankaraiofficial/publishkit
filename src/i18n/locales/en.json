@@ -1,6 +1,15 @@
 {
   "languageBar.prompt": "Select language",
-
+  "seo.home.title": "PublishKit — AI YouTube Metadata & Script Generator",
+  "seo.home.description": "Turn your audio into YouTube-ready Titles, Timestamps & Descriptions in 90 seconds. Boost your CTR with algorithm-tuned metadata.",
+  "seo.pricing.title": "Pricing — PublishKit",
+  "seo.pricing.description": "Affordable plans for creators. Choose from Free, Pro, or Max plans. Pay once for 30 days of access with our one-time order option.",
+  "seo.scriptWriter.title": "AI YouTube Script Writer — PublishKit",
+  "seo.scriptWriter.description": "Generate engaging video scripts tailored to your niche and voice. From hook to CTA, we handle the writing so you can focus on creating.",
+  "seo.multiPost.title": "MultiPost Social Repurposing — PublishKit",
+  "seo.multiPost.description": "One click to turn your video content into viral posts for X (Twitter), Instagram, and LinkedIn. Maximize your reach across every platform.",
+  "seo.login.title": "Sign In — PublishKit",
+  "seo.login.description": "Sign in to PublishKit to start generating high-impact YouTube content with AI.",
   "nav.new": "New",
   "nav.script": "Script",
   "nav.multipost": "MultiPost",
@@ -10,7 +19,6 @@
   "nav.settings": "Settings",
   "nav.signIn": "Sign in",
   "nav.signOut": "Sign out",
-
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.confirm": "Confirm",
@@ -24,7 +32,6 @@
   "common.upgrade": "Upgrade",
   "common.submit": "Submit",
   "common.opening": "Opening...",
-
   "home.heroSubtitle": "Turn your audio into YouTube-ready Titles, Timestamps & Descriptions in 90 seconds.",
   "home.outputLanguage": "Output Language",
   "home.thumbnailPrompts": "Thumbnail Prompts",
@@ -47,7 +54,6 @@
   "home.signInToGenerateAgain": "Sign in with Google to generate again — it's completely free.",
   "home.viewHistoryGuest": "View uploaded files in History",
   "home.viewHistoryFooter": "View processing and uploaded files in History",
-
   "script.title": "YouTube Script Writer",
   "script.subtitle": "Generate engaging video scripts tailored to your niche",
   "script.usageCounter": "{used} / {limit} used this month",
@@ -72,7 +78,6 @@
   "script.upgradeUltra": "See plans",
   "script.upgradePro": "Upgrade to Max Plan →",
   "script.upgradeFree": "Upgrade to Pro Plan or Max Plan →",
-
   "multipost.subtitle": "Turn your content into tailored posts for X, Instagram, and LinkedIn",
   "multipost.usageCounter": "{used} / {limit} used this month",
   "multipost.copyNotAvailable": "Copy not available on Free Plan",
@@ -86,7 +91,6 @@
   "multipost.selectPlatforms": "Select Platforms",
   "multipost.generateBtn": "Generate Posts",
   "multipost.generatingBtn": "Generating…",
-
   "pricing.title": "Simple, Transparent Pricing",
   "pricing.subtitle": "Choose the plan that fits your content creation needs",
   "pricing.toggleOneTime": "One month only",
@@ -120,7 +124,6 @@
   "pricing.feat.copyMetadata": "Copy buttons on metadata results",
   "pricing.feat.copyEverywhere": "Copy buttons enabled everywhere",
   "pricing.feat.copyMax": "Copy buttons everywhere",
-
   "settings.title": "Creator Profile",
   "settings.subtitle": "Fill this in so PublishKit's AI generates titles, descriptions, thumbnails, scripts, and social posts that sound like {name}, not generic AI. Fields marked * are required. The rest are optional but each one sharpens your results.",
   "settings.subtitleNoName": "Fill this in so PublishKit's AI generates titles, descriptions, thumbnails, scripts, and social posts that sound like you, not generic AI. Fields marked * are required. The rest are optional but each one sharpens your results.",
@@ -222,7 +225,6 @@
   "settings.bestVideoHooks.placeholder": "1. \"I tried 5 AI tools so you don't have to...\"\n2. \"Stop scrolling — this Notion template just saved me ₹20,000...\"\n3. ...",
   "settings.hookFormulas.label": "Hook formulas that work for you",
   "settings.hookFormulas.hint": "Examples: \"money saved\", \"before vs after\", \"the one thing nobody tells you about X\", \"I was wrong about Y\".",
-
   "history.title": "HISTORY",
   "history.autoDelete": "All uploads are automatically deleted 3 hours after processing.",
   "history.manualDelete": "You can also manually delete your data using the options below.",
@@ -247,7 +249,6 @@
   "history.itemDeletedToast": "Item deleted",
   "history.deleteFailedToast": "Delete failed. Please try again.",
   "history.justNow": "Just now",
-
   "feedback.title": "Feedback Board",
   "feedback.subtitle": "Vote for existing features or request new ones.",
   "feedback.newRequest": "New Request",
@@ -268,5 +269,9 @@
   "feedback.modalTitlePlaceholder": "e.g. Add Instagram Reel format",
   "feedback.modalDescLabel": "Description",
   "feedback.modalDescPlaceholder": "Explain why this feature would be useful...",
-  "feedback.submitRequest": "Submit Request"
+  "feedback.submitRequest": "Submit Request",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

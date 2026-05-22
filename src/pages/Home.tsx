@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../hooks/useAuth';
 import { useUpload } from '../hooks/useUpload';
 import { PageContainer } from '../components/layout/PageContainer';
@@ -11,6 +12,7 @@ import { useToast } from '../components/ui/Toast';
 import { toastNativeName } from '../lib/languages';
 import { useT } from '../i18n';
 import { getRemainingMultiPostQuota } from '../lib/quota';
+import { getWebAppSchema } from '../lib/seo-schema';
 
 export function Home() {
   const { user, profile } = useAuth();
@@ -47,6 +49,15 @@ export function Home() {
 
   return (
     <PageContainer>
+      <Helmet>
+        <title>{t('seo.home.title')}</title>
+        <meta name="description" content={t('seo.home.description')} />
+        <link rel="canonical" href="https://publishkit.in/" />
+        <script type="application/ld+json">
+          {JSON.stringify(getWebAppSchema())}
+        </script>
+      </Helmet>
+
       {/* Hero */}
       <section className="text-center pt-6 sm:pt-10 pb-5 sm:pb-8">
         <h1 className="hero-glow text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">

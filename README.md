@@ -48,7 +48,7 @@ Max plan users get **Gemini 2.5 Pro** routing on Script Writer (premium quality 
 | Auth | Firebase Authentication (Google + Anonymous) |
 | Database | Cloud Firestore |
 | File Storage | Firebase Storage |
-| Backend | Firebase Cloud Functions (Node.js 20) |
+| Backend | Firebase Cloud Functions (Node.js 22) |
 | AI | Google Gemini 2.5 Flash (default) + Gemini 2.5 Pro (Max plan scripts) |
 | App Check | Firebase App Check + reCAPTCHA Enterprise |
 | Billing | Razorpay Orders (one-time) + Subscriptions (recurring), live mode |
@@ -101,7 +101,7 @@ Max plan users get **Gemini 2.5 Pro** routing on Script Writer (premium quality 
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - Firebase CLI: `npm install -g firebase-tools`
 - A Firebase project with Firestore, Storage, Authentication, App Check, and Cloud Functions enabled
 - (For billing) A Razorpay account in Live Mode with subscription plans created

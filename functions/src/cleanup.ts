@@ -1,5 +1,5 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions/v1';
+import { Timestamp } from 'firebase-admin/firestore';
 import { db, storage } from './lib/firestore';
 
 /**
@@ -82,7 +82,7 @@ export const deleteOldAudio = functions.pubsub
     // own retry window is much shorter than that, so anything older than a
     // week will never be re-delivered and the dedup record is no longer needed.
     try {
-      const sevenDaysAgo = admin.firestore.Timestamp.fromMillis(now - SEVEN_DAYS_MS);
+      const sevenDaysAgo = Timestamp.fromMillis(now - SEVEN_DAYS_MS);
       const oldEventsSnap = await db
         .collection('webhookEvents')
         .where('processedAt', '<', sevenDaysAgo)

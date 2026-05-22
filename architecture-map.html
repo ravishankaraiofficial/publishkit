@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PublishKit Architecture Map</title>
+  <style>
+    :root {
+      --bg: #0F0F0F; --panel: #161616; --panel-2: #1c1c1c; --border: #2a2a2a;
+      --text: #e8e8e8; --muted: #8a8a8a;
+      --client: #4ea1ff; --route: #7bd389; --service: #c792ea; --db: #ffb86b;
+      --external: #ff6b9d; --critical: #ff3860; --accent: #f5b942; --accent-2: #ff7a45;
+    }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+    #toolbar { position: absolute; top: 16px; left: 16px; display: flex; gap: 8px; z-index: 10; }
+    .chip { padding: 6px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; font-size: 13px; cursor: pointer; color: var(--muted); user-select: none; }
+    .chip:hover { border-color: var(--muted); }
+    .chip.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+    #map-container { flex: 1; position: relative; cursor: grab; }
+    #map-container:active { cursor: grabbing; }
+    svg { width: 100%; height: 100%; display: block; }
+    #sidebar { width: 340px; min-width: 340px; background: var(--panel); border-left: 1px solid var(--border); padding: 24px; overflow-y: auto; box-sizing: border-box; }
+    h2 { margin: 0 0 8px; font-size: 18px; }
+    .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+    .section { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .section-title { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 8px; }
+    ul { padding-left: 16px; margin: 0; font-size: 14px; color: var(--text); line-height: 1.5; }
+    li { margin-bottom: 6px; }
+    .node { cursor: pointer; }
+    .node rect { transition: fill 0.2s, stroke 0.2s; }
+    .node text { pointer-events: none; }
+    .node.dimmed { opacity: 0.2; }
+    .edge-group { transition: opacity 0.2s; }
+    .edge-group.dimmed { opacity: 0.1; }
+    .edge-label { font-size: 10px; fill: var(--muted); pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="toolbar"></div>
+  <div id="map-container">
+    <svg id="canvas">
+      <defs>
+        <marker id="arrow-normal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
+        </marker>
+        <marker id="arrow-critical" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--critical)" />
+        </marker>
+      </defs>
+      <g id="transform-group">
+        <g id="clusters-layer"></g>
+        <g id="edges-layer"></g>
+        <g id="nodes-layer"></g>
+      </g>
+    </svg>
+  </div>
+  <div id="sidebar"></div>
+  <script>
+    const clusters = [
+      { id: 'c-client', label: 'Client UI', x: 50, y: 100, w: 220, h: 500, color: 'var(--client)' },
+      { id: 'c-hooks', label: 'Frontend Logic', x: 350, y: 100, w: 220, h: 500, color: 'var(--client)' },
+      { id: 'c-routes', label: 'Backend Callables', x: 650, y: 100, w: 220, h: 650, color: 'var(--route)' },
+      { id: 'c-services', label: 'Backend Core', x: 950, y: 100, w: 220, h: 650, color: 'var(--service)' },
+      { id: 'c-middleware', label: 'Security & DB', x: 1250, y: 100, w: 220, h: 650, color: 'var(--db)' },
+      { id: 'c-external', label: 'External APIs', x: 1550, y: 100, w: 220, h: 400, color: 'var(--external)' }
+    ];
+
+    const N = (id, cluster, label, sub, x, y, w, h, color, opts = {}) => ({
+      id, cluster, label, sub, x, y, w, h, color, ...opts
+    });
+
+    const nodes = [
+      // UI
+      N('n-scriptwriter', 'c-client', 'ScriptWriter.tsx', 'Script generation UI', 60, 160, 200, 48, 'var(--client)', {
+        role: 'React page component for generating video scripts.',
+        plain: 'The main page where users type their topic and ask the AI to write a script.',
+        path: 'src/pages/ScriptWriter.tsx',
+        notes: ['Calls generateScript callable', 'Sends visitorId for fingerprinting'],
+        tag: ['all', 'scripts', 'overview'],
+        critical: true
+      }),
+      N('n-multipost', 'c-client', 'MultiPost.tsx', 'Repurposing UI', 60, 240, 200, 48, 'var(--client)', {
+        role: 'React page for repurposing content to social media.',
+        plain: 'The page where users convert a single video into LinkedIn, X, and Instagram posts.',
+        path: 'src/pages/MultiPost.tsx',
+        notes: ['Calls generateRepurposing callable'],
+        tag: ['all', 'multipost', 'overview']
+      }),
+      N('n-settings', 'c-client', 'Settings.tsx', 'Creator Profile', 60, 320, 200, 48, 'var(--client)', {
+        role: 'User configuration form saving to Firestore.',
+        plain: 'Where users set up their brand voice, niche, and target audience.',
+        path: 'src/pages/Settings.tsx',
+        notes: ['Uses isMeaningfulText Zod refinement', '10 required fields for script quality'],
+        tag: ['all', 'profile']
+      }),
+      N('n-pricing', 'c-client', 'Pricing.tsx', 'Subscriptions & Upgrades', 60, 400, 200, 48, 'var(--client)', {
+        role: 'Razorpay checkout initiation.',
+        plain: 'The plans page where users can buy Pro or Max plans.',
+        path: 'src/pages/Pricing.tsx',
+        notes: ['Toggles one-time vs recurring', 'Defaults to one-time'],
+        tag: ['all', 'billing']
+      }),
+
+      // Hooks
+      N('n-useupload', 'c-hooks', 'useUpload.tsx', 'Upload state machine', 360, 160, 200, 48, 'var(--client)', {
+        role: 'Manages Cloud Storage uploads and triggers backend processing.',
+        plain: 'The engine that uploads audio files to Google and waits for the AI to finish.',
+        path: 'src/hooks/useUpload.tsx',
+        notes: ['Filename sanitization', 'Sends visitorId'],
+        tag: ['all', 'audio', 'overview']
+      }),
+      N('n-useauth', 'c-hooks', 'useAuth.tsx', 'Auth Gateway', 360, 240, 200, 48, 'var(--client)', {
+        role: 'Google OAuth and Anonymous auth flow.',
+        plain: 'Handles logging users in via Google or keeping them anonymous.',
+        path: 'src/hooks/useAuth.tsx',
+        notes: ['8s fallback timeout if anon stalls', 'Mobile popup-first'],
+        tag: ['all', 'auth']
+      }),
+      N('n-fingerprint', 'c-hooks', 'fingerprint.ts', 'Visitor Tracking', 360, 320, 200, 48, 'var(--client)', {
+        role: 'FingerprintJS wrapper for abuse prevention.',
+        plain: 'Generates a unique device ID to stop users from exploiting the free tier.',
+        path: 'src/lib/fingerprint.ts',
+        notes: ['Returns visitorId'],
+        tag: ['all', 'auth', 'security']
+      }),
+
+      // Routes
+      N('n-genscript', 'c-routes', 'generateScript', 'Firebase Callable', 660, 160, 200, 48, 'var(--route)', {
+        role: 'Entry point for script generation.',
+        plain: 'The secure API endpoint the frontend calls to write a script.',
+        path: 'functions/src/handleScript.ts',
+        notes: ['Passes to handleScript logic'],
+        tag: ['all', 'scripts', 'overview'],
+        critical: true
+      }),
+      N('n-genmultipost', 'c-routes', 'generateRepurposing', 'Firebase Callable', 660, 240, 200, 48, 'var(--route)', {
+        role: 'Entry point for multi-post generation.',
+        plain: 'The API endpoint that turns one topic into multiple social posts.',
+        path: 'functions/src/handleRepurposing.ts',
+        notes: ['Always uses Gemini Flash'],
+        tag: ['all', 'multipost']
+      }),
+      N('n-procaudio', 'c-routes', 'processAudio', 'Callable & Worker', 660, 320, 200, 48, 'var(--route)', {
+        role: 'Handles audio uploads.',
+        plain: 'Takes uploaded audio, extracts transcripts, and writes SEO descriptions.',
+        path: 'functions/src/processAudio.ts',
+        notes: ['Has free-tier guard', 'Burst limit enforced'],
+        tag: ['all', 'audio', 'overview']
+      }),
+      N('n-payment-routes', 'c-routes', 'Payment Callables', 'Orders & Webhooks', 660, 400, 200, 48, 'var(--route)', {
+        role: 'Handles Razorpay order creation and webhook verification.',
+        plain: 'Creates checkouts and verifies when payments actually succeed.',
+        path: 'functions/src/handlePayment.ts',
+        notes: ['createOrder, verifyOrderPayment', 'razorpayWebhook (HMAC verified)'],
+        tag: ['all', 'billing']
+      }),
+      N('n-cleanup', 'c-routes', 'deleteOldAudio', 'Scheduled Cron', 660, 480, 200, 48, 'var(--route)', {
+        role: 'Scheduled cleanup for expired files and rate limits.',
+        plain: 'A daily janitor that deletes old files and resets counters.',
+        path: 'functions/src/cleanup.ts',
+        notes: ['Prunes 3h old results', 'Deletes 7-day old webhooks'],
+        tag: ['all', 'infrastructure']
+      }),
+
+      // Services
+      N('n-handlescript', 'c-services', 'handleScript.ts', 'Prompt Engine', 960, 160, 200, 48, 'var(--service)', {
+        role: 'Constructs the complex Gemini prompt with creator persona.',
+        plain: 'Injects the user\'s profile into a giant instruction set for the AI, ensuring it talks in their voice.',
+        path: 'functions/src/handleScript.ts',
+        notes: ['Anti-prompt-injection structural invariants', 'Merges up to 10 user profile fields'],
+        tag: ['all', 'scripts', 'overview'],
+        critical: true
+      }),
+      N('n-handlerep', 'c-services', 'handleRepurposing.ts', 'Platform Formatter', 960, 240, 200, 48, 'var(--service)', {
+        role: 'Constructs prompts tailored to specific social platforms.',
+        plain: 'Formats the AI instructions specifically for Twitter, LinkedIn, or Instagram.',
+        path: 'functions/src/handleRepurposing.ts',
+        notes: ['Requires PLAIN TEXT output', 'Strictly avoids JSON due to formatting issues'],
+        tag: ['all', 'multipost']
+      }),
+      N('n-pickmodel', 'c-services', 'pickModel.ts', 'Model Router', 960, 320, 200, 48, 'var(--service)', {
+        role: 'Routes requests to Flash or Pro based on subscription tier.',
+        plain: 'Ensures free users get the cheaper AI model, while Max users get the smartest one.',
+        path: 'functions/src/lib/pickModel.ts',
+        notes: ['Max Plan Script Writer -> gemini-2.5-pro', 'Everything else -> gemini-2.5-flash'],
+        tag: ['all', 'billing', 'scripts'],
+        critical: true
+      }),
+
+      // Middleware
+      N('n-auth', 'c-middleware', 'auth.ts', 'Validation', 1260, 160, 200, 48, 'var(--db)', {
+        role: 'Enforces AppCheck, VPN blocks, and authentication.',
+        plain: 'The bouncer that blocks bots, VPN abusers, and unauthenticated traffic.',
+        path: 'functions/src/middleware/auth.ts',
+        notes: ['Whitelist + proxy check', 'Fingerprint validation'],
+        tag: ['all', 'security'],
+        critical: true
+      }),
+      N('n-ratelimit', 'c-middleware', 'rateLimit.ts', 'Quotas', 1260, 240, 200, 48, 'var(--db)', {
+        role: 'Enforces per-plan burst limits and monthly quotas via Firestore.',
+        plain: 'Makes sure users don\'t exceed their monthly generation limits.',
+        path: 'functions/src/middleware/rateLimit.ts',
+        notes: ['60s sliding window burst limit', 'Free: 3, Pro: 100, Max: 350'],
+        tag: ['all', 'security', 'billing']
+      }),
+      N('n-freetier', 'c-middleware', 'freeTierGuard.ts', 'Abuse Guard', 1260, 320, 200, 48, 'var(--db)', {
+        role: 'Hashes IP + Fingerprint to block UID reuse.',
+        plain: 'Prevents users from creating infinite free accounts on the same device.',
+        path: 'functions/src/lib/freeTierGuard.ts',
+        notes: ['SHA-256 hashed IP', 'Paid users exempt'],
+        tag: ['all', 'security']
+      }),
+      N('n-firestore', 'c-middleware', 'firestore.ts', 'Database SDK', 1260, 400, 200, 48, 'var(--db)', {
+        role: 'Admin SDK initialization and transaction helpers.',
+        plain: 'The bridge to the database for reading profiles and updating limits.',
+        path: 'functions/src/lib/firestore.ts',
+        notes: ['db.runTransaction used for atomic counters'],
+        tag: ['all', 'infrastructure'],
+        critical: true
+      }),
+
+      // External
+      N('n-ext-gemini', 'c-external', 'Google Gemini', 'gemini-2.5-pro/flash', 1560, 160, 200, 48, 'var(--external)', {
+        role: 'GCP Gemini API integration.',
+        plain: 'The actual Artificial Intelligence generating the content.',
+        path: 'Google Cloud Platform',
+        notes: ['8,000 req/day quota cap', 'API Key from Secret Manager'],
+        tag: ['all', 'scripts', 'overview'],
+        critical: true
+      }),
+      N('n-ext-razorpay', 'c-external', 'Razorpay', 'Payment Gateway', 1560, 240, 200, 48, 'var(--external)', {
+        role: 'Razorpay API for checkout and webhooks.',
+        plain: 'The bank handling the actual credit card transactions.',
+        path: 'razorpay.com',
+        notes: ['Uses Orders API & Subscriptions API', 'Live plan IDs hardcoded'],
+        tag: ['all', 'billing']
+      }),
+      N('n-ext-firebase', 'c-external', 'Firebase', 'Auth & AppCheck', 1560, 320, 200, 48, 'var(--external)', {
+        role: 'Firebase Authentication and ReCaptcha Enterprise.',
+        plain: 'Google\'s backend infrastructure protecting the app and managing users.',
+        path: 'Firebase',
+        notes: ['ReCaptcha site key embedded', 'publishkit.in domain allowed'],
+        tag: ['all', 'security']
+      })
+    ];
+
+    const edges = [
+      { from: 'n-scriptwriter', to: 'n-genscript', kind: 'critical', label: '1 · call' },
+      { from: 'n-multipost', to: 'n-genmultipost', kind: 'normal', label: 'call' },
+      { from: 'n-useupload', to: 'n-procaudio', kind: 'normal', label: 'upload triggers worker' },
+      { from: 'n-scriptwriter', to: 'n-fingerprint', kind: 'normal', label: 'get visitorId' },
+      { from: 'n-settings', to: 'n-firestore', kind: 'db', label: 'write profile' },
+      { from: 'n-genscript', to: 'n-auth', kind: 'critical', label: '2 · verify' },
+      { from: 'n-genscript', to: 'n-ratelimit', kind: 'critical', label: '3 · check limit' },
+      { from: 'n-auth', to: 'n-freetier', kind: 'normal', label: 'guard free' },
+      { from: 'n-genscript', to: 'n-handlescript', kind: 'critical', label: '4 · assemble' },
+      { from: 'n-genmultipost', to: 'n-handlerep', kind: 'normal', label: 'assemble' },
+      { from: 'n-handlescript', to: 'n-pickmodel', kind: 'critical', label: '5 · select' },
+      { from: 'n-handlerep', to: 'n-ext-gemini', kind: 'api', label: 'flash only' },
+      { from: 'n-pickmodel', to: 'n-ext-gemini', kind: 'critical', label: '6 · generate' },
+      { from: 'n-payment-routes', to: 'n-ext-razorpay', kind: 'api', label: 'verify/charge' },
+      { from: 'n-useauth', to: 'n-ext-firebase', kind: 'api', label: 'login' },
+      { from: 'n-auth', to: 'n-ext-firebase', kind: 'api', label: 'AppCheck' }
+    ];
+
+    const svg = document.getElementById('canvas');
+    const clustersLayer = document.getElementById('clusters-layer');
+    const edgesLayer = document.getElementById('edges-layer');
+    const nodesLayer = document.getElementById('nodes-layer');
+    const sidebar = document.getElementById('sidebar');
+
+    function renderSidebar(n) {
+      if (!n) {
+        sidebar.innerHTML = `
+          <h2>Notable findings</h2>
+          <div class="section">
+            <ul>
+              <li><strong>No dead code found.</strong> The architecture relies cleanly on centralized routers (<code>pickModel.ts</code>) and middleware.</li>
+              <li>Legacy references like <code>publishkit_codebase_reference.md</code> exist but are non-blocking.</li>
+              <li>Strict structural invariant protections against prompt injection found in <code>handleScript.ts</code>.</li>
+              <li>The single critical seam flows smoothly from UI to Callables, to auth/ratelimit, into prompt assembly, and out to Gemini.</li>
+            </ul>
+          </div>
+        `;
+        return;
+      }
+      sidebar.innerHTML = `
+        <h2>${n.label}</h2>
+        <div class="sub">${n.sub}</div>
+        <div class="section">
+          <div class="section-title">Path</div>
+          <div style="font-family: monospace; font-size:12px; word-break: break-all; color: var(--client)">${n.path}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">Role</div>
+          <div>${n.role}</div>
+          <div style="margin-top:12px; color:var(--muted)">${n.plain}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">Notes</div>
+          <ul>${n.notes.map(note => `<li>${note}</li>`).join('')}</ul>
+        </div>
+      `;
+    }
+
+    clusters.forEach(c => {
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', c.x); rect.setAttribute('y', c.y);
+      rect.setAttribute('width', c.w); rect.setAttribute('height', c.h);
+      rect.setAttribute('fill', c.color); rect.setAttribute('opacity', 0.1);
+      rect.setAttribute('rx', 8);
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', c.x + 16); text.setAttribute('y', c.y + 24);
+      text.setAttribute('fill', c.color); text.setAttribute('font-size', 14);
+      text.setAttribute('font-weight', 'bold');
+      text.setAttribute('letter-spacing', '0.05em');
+      text.setAttribute('text-transform', 'uppercase');
+      text.textContent = c.label;
+      clustersLayer.appendChild(rect);
+      clustersLayer.appendChild(text);
+    });
+
+    edges.forEach(e => {
+      const from = nodes.find(n => n.id === e.from);
+      const to = nodes.find(n => n.id === e.to);
+      if(!from || !to) return;
+      
+      const x1 = from.x + from.w, y1 = from.y + (from.h / 2);
+      const x2 = to.x - 6, y2 = to.y + (to.h / 2);
+      const cx1 = x1 + (x2 - x1)/2, cx2 = x1 + (x2 - x1)/2;
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${x2} ${y2}`);
+      path.setAttribute('stroke', e.kind === 'critical' ? 'var(--critical)' : 'var(--border)');
+      path.setAttribute('stroke-width', e.kind === 'critical' ? '2.5' : '1.5');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('marker-end', e.kind === 'critical' ? 'url(#arrow-critical)' : 'url(#arrow-normal)');
+      
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.classList.add('edge-group');
+      g.dataset.from = e.from; g.dataset.to = e.to;
+      g.appendChild(path);
+      
+      if (e.label) {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x1 + (x2 - x1)/2); text.setAttribute('y', y1 + (y2 - y1)/2 - 6);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('class', 'edge-label');
+        text.textContent = e.label;
+        if(e.kind === 'critical') text.setAttribute('fill', 'var(--critical)');
+        g.appendChild(text);
+      }
+      edgesLayer.appendChild(g);
+    });
+
+    nodes.forEach(n => {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('transform', `translate(${n.x}, ${n.y})`);
+      g.classList.add('node');
+      g.dataset.id = n.id;
+      g.dataset.tags = n.tag.join(',');
+      
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('width', n.w); rect.setAttribute('height', n.h);
+      rect.setAttribute('fill', 'var(--panel)');
+      rect.setAttribute('stroke', n.color);
+      rect.setAttribute('stroke-width', n.critical ? 2.5 : 1);
+      rect.setAttribute('rx', 4);
+      
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', 12); label.setAttribute('y', 20);
+      label.setAttribute('fill', 'white'); label.setAttribute('font-size', 13);
+      label.setAttribute('font-weight', 'bold');
+      label.textContent = n.label;
+      
+      const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      sub.setAttribute('x', 12); sub.setAttribute('y', 36);
+      sub.setAttribute('fill', 'var(--muted)'); sub.setAttribute('font-size', 11);
+      sub.textContent = n.sub;
+      
+      g.appendChild(rect);
+      g.appendChild(label);
+      g.appendChild(sub);
+      nodesLayer.appendChild(g);
+    });
+
+    // Interaction logic
+    let scale = 1, tx = 20, ty = 20;
+    let isDragging = false, startX, startY;
+    const tg = document.getElementById('transform-group');
+    const mc = document.getElementById('map-container');
+
+    function updateTransform() {
+      tg.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+    }
+
+    mc.addEventListener('wheel', e => {
+      e.preventDefault();
+      const ds = e.deltaY * -0.001;
+      const newScale = Math.min(Math.max(0.2, scale + ds), 3);
+      const rect = mc.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      tx = mouseX - (mouseX - tx) * (newScale / scale);
+      ty = mouseY - (mouseY - ty) * (newScale / scale);
+      scale = newScale;
+      updateTransform();
+    });
+
+    mc.addEventListener('mousedown', e => {
+      if (e.target.closest('.node')) return;
+      isDragging = true;
+      startX = e.clientX - tx;
+      startY = e.clientY - ty;
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      tx = e.clientX - startX;
+      ty = e.clientY - startY;
+      updateTransform();
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    // Filtering
+    const filterTags = ['overview', 'scripts', 'multipost', 'billing', 'security', 'all'];
+    const tb = document.getElementById('toolbar');
+    let activeTag = 'overview';
+
+    function applyFilter() {
+      document.querySelectorAll('.node').forEach(el => {
+        const tags = el.dataset.tags.split(',');
+        if (activeTag === 'all' || tags.includes(activeTag)) el.classList.remove('dimmed');
+        else el.classList.add('dimmed');
+      });
+      document.querySelectorAll('.edge-group').forEach(el => {
+        const fromNode = document.querySelector(`.node[data-id="${el.dataset.from}"]`);
+        const toNode = document.querySelector(`.node[data-id="${el.dataset.to}"]`);
+        if (fromNode.classList.contains('dimmed') || toNode.classList.contains('dimmed')) {
+          el.classList.add('dimmed');
+        } else {
+          el.classList.remove('dimmed');
+        }
+      });
+    }
+
+    filterTags.forEach(tag => {
+      const btn = document.createElement('div');
+      btn.className = `chip ${tag === activeTag ? 'active' : ''}`;
+      btn.textContent = tag;
+      btn.onclick = () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        activeTag = tag;
+        applyFilter();
+      };
+      tb.appendChild(btn);
+    });
+
+    // Hover / Select
+    let selectedNodeId = null;
+    function updateHighlights(hoverId) {
+      const activeId = selectedNodeId || hoverId;
+      if (!activeId) {
+        applyFilter();
+        renderSidebar(null);
+        return;
+      }
+      const connectedIds = new Set([activeId]);
+      edges.forEach(e => {
+        if (e.from === activeId) connectedIds.add(e.to);
+        if (e.to === activeId) connectedIds.add(e.from);
+      });
+      document.querySelectorAll('.node').forEach(el => {
+        if (connectedIds.has(el.dataset.id)) el.classList.remove('dimmed');
+        else el.classList.add('dimmed');
+      });
+      document.querySelectorAll('.edge-group').forEach(el => {
+        if (el.dataset.from === activeId || el.dataset.to === activeId) el.classList.remove('dimmed');
+        else el.classList.add('dimmed');
+      });
+    }
+
+    document.querySelectorAll('.node').forEach(el => {
+      el.addEventListener('mouseenter', () => { if(!selectedNodeId) { updateHighlights(el.dataset.id); renderSidebar(nodes.find(n => n.id === el.dataset.id)); } });
+      el.addEventListener('mouseleave', () => { if(!selectedNodeId) updateHighlights(null); });
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedNodeId = (selectedNodeId === el.dataset.id) ? null : el.dataset.id;
+        updateHighlights(selectedNodeId);
+        if(selectedNodeId) renderSidebar(nodes.find(n => n.id === el.dataset.id));
+      });
+    });
+
+    mc.addEventListener('click', () => {
+      selectedNodeId = null;
+      updateHighlights(null);
+    });
+
+    // Init
+    updateTransform();
+    applyFilter();
+    renderSidebar(null);
+  </script>
+</body>
+</html>

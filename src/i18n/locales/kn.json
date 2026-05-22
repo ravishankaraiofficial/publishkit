@@ -67,7 +67,6 @@
   "script.upgradeUltra": "ಯೋಜನೆಗಳನ್ನು ನೋಡಿ",
   "script.upgradePro": "ಮ್ಯಾక్స్ ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ →",
   "script.upgradeFree": "ಪ್ರೊ ಪ్ಲಾన్ ಅಥವಾ ಮ್ಯಾಕ್ಸ್ ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ →",
-
   "multipost.subtitle": "ನಿಮ್ಮ ವಿಷಯವನ್ನು X, Instagram ಮತ್ತು LinkedIn ಗಾಗಿ ಸೂಕ್ತವಾದ ಪೋಸ್ಟ್‌ಗಳಿಗೆ ಪರಿವರ್ತಿಸಿ",
   "multipost.usageCounter": "ಈ ತಿಂಗಳು {used} / {limit} ಬಳಸಲಾಗಿದೆ",
   "multipost.copyNotAvailable": "ಉಚಿತ ಪ್ಲಾನ್‌ನಲ್ಲಿ ನಕಲು ಲಭ್ಯವಿಲ್ಲ",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ಇಂಗ್ಲಿಷ್ + ಹಿಂದಿ ಬೆಂಬಲ",
   "pricing.feat.scriptN": "ಸ್ಕ್ರಿಪ್ಟ್ ರೈಟರ್ ({count}/ತಿಂಗಳು)",
   "pricing.feat.multipostN": "ಮಲ್ಟಿಪೋಸ್ಟ್ ({count}/ತಿಂಗಳು)",
-  "pricing.feat.copyMetadata": "ಮೆಟಾಡೇಟಾ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ನಕಲು ಗುಂಡಿಗಳು",  "pricing.feat.copyEverywhere": "ಎಲ್ಲೆಡೆ ನಕಲು ಗುಂಡಿಗಳು ಸಕ್ರಿಯ",
+  "pricing.feat.copyMetadata": "ಮೆಟಾಡೇಟಾ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ನಕಲು ಗುಂಡಿಗಳು",
+  "pricing.feat.copyEverywhere": "ಎಲ್ಲೆಡೆ ನಕಲು ಗುಂಡಿಗಳು ಸಕ್ರಿಯ",
   "pricing.feat.copyMax": "ಎಲ್ಲೆಡೆ ನಕಲು ಗುಂಡಿಗಳು",
   "settings.title": "ಸೃಷ್ಟಿಕರ್ತ ಪ್ರೊಫೈಲ್",
   "settings.subtitle": "ಈ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ ಇದರಿಂದ PublishKit ನ AI {name} ರಂತೆ ಧ್ವನಿಸುವ ಶೀರ್ಷಿಕೆಗಳು, ವಿವರಣೆಗಳು, ಥಂಬ್‌ನೇಲ್‌ಗಳು, ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳು ಮತ್ತು ಸಾಮಾಜಿಕ ಪೋಸ್ಟ್‌ಗಳನ್ನು ರಚಿಸುತ್ತದೆ, ಸಾಮಾನ್ಯ AI ನಂತಲ್ಲ. * ಎಂದು ಗುರುತಿಸಲಾದ ಕ್ಷೇತ್ರಗಳು ಕಡ್ಡಾಯವಾಗಿವೆ. ಉಳಿದವು ಐಚ್ಛಿಕವಾಗಿವೆ ಆದರೆ ಪ್ರತಿಯೊಂದು ನಿಮ್ಮ ಫಲಿತಾಂಶಗಳನ್ನು ಹೆಚ್ಚು ನಿಖರಗೊಳಿಸುತ್ತದೆ.",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "ಉದಾ., Instagram Reel ಸ್ವರೂಪವನ್ನು ಸೇರಿಸಿ",
   "feedback.modalDescLabel": "ವಿವರಣೆ",
   "feedback.modalDescPlaceholder": "ಈ ವೈಶಿಷ್ಟ್ಯ ಏಕೆ ಉಪಯುಕ್ತವಾಗಿರುತ್ತದೆ ಎಂದು ವಿವರಿಸಿ...",
-  "feedback.submitRequest": "ವಿನಂತಿಯನ್ನು ಸಲ್ಲಿಸಿ"
+  "feedback.submitRequest": "ವಿನಂತಿಯನ್ನು ಸಲ್ಲಿಸಿ",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

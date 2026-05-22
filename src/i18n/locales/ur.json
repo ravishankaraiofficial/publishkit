@@ -67,7 +67,6 @@
   "script.upgradeUltra": "پلان دیکھیں",
   "script.upgradePro": "میکس پلان پر اپ گریڈ کریں ←",
   "script.upgradeFree": "پرو پلان یا میکس پلان پر اپ گریڈ کریں ←",
-
   "multipost.subtitle": "اپنے مواد کو X, Instagram اور LinkedIn کے لیے موزوں پوسٹس میں تبدیل کریں",
   "multipost.usageCounter": "اس ماہ {used} / {limit} استعمال ہوا",
   "multipost.copyNotAvailable": "مفت پلان پر کاپی دستیاب نہیں",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "انگریزی + ہندی سپورٹ",
   "pricing.feat.scriptN": "اسکرپٹ رائٹر ({count}/ماہ)",
   "pricing.feat.multipostN": "ملٹی پوسٹ ({count}/ماہ)",
-  "pricing.feat.copyMetadata": "میٹاڈیٹا نتائج پر کاپی بٹن",  "pricing.feat.copyEverywhere": "ہر جگہ کاپی بٹن فعال",
+  "pricing.feat.copyMetadata": "میٹاڈیٹا نتائج پر کاپی بٹن",
+  "pricing.feat.copyEverywhere": "ہر جگہ کاپی بٹن فعال",
   "pricing.feat.copyMax": "ہر جگہ کاپی بٹن",
   "settings.title": "تخلیق کار پروفائل",
   "settings.subtitle": "اسے پُر کریں تاکہ PublishKit کا AI ایسے عنوانات، تفصیلات، تھمب نیلز، اسکرپٹس اور سوشل پوسٹس تیار کرے جو {name} کی طرح لگیں، نہ کہ عام AI کی طرح۔ جن خانوں پر * کا نشان ہے وہ ضروری ہیں۔ باقی اختیاری ہیں لیکن ہر ایک آپ کے نتائج کو بہتر بناتا ہے۔",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "مثال، Instagram Reel فارمیٹ شامل کریں",
   "feedback.modalDescLabel": "تفصیل",
   "feedback.modalDescPlaceholder": "وضاحت کریں کہ یہ خصوصیت کیوں مفید ہوگی...",
-  "feedback.submitRequest": "درخواست جمع کرائیں"
+  "feedback.submitRequest": "درخواست جمع کرائیں",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

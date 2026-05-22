@@ -210,3 +210,66 @@ export async function generateOutputs(
     partialErrors: Object.keys(partialErrors).length ? partialErrors : null,
   };
 }
+
+export async function generateScriptFromContent(
+  contentContext: string,
+  profile: any,
+  tone: string,
+  duration: string,
+  outputLanguage: OutputLanguage,
+  plan: string
+) {
+  const genAI = getGeminiClient();
+  const { pickModel } = require('./lib/pickModel');
+  const { buildScriptPrompt } = require('./lib/scriptPrompt');
+  
+  const modelName = pickModel(plan, 'script');
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+  });
+
+  const prompt = buildScriptPrompt(contentContext, profile, tone, duration, outputLanguage);
+
+  const result = await callWithTimeoutAndRetry(
+    () => model.generateContent(prompt),
+    'generateScriptFromContent',
+    DOC_CALL_TIMEOUT_MS // Use longer timeout for scripts
+  );
+
+  if (!result.ok) {
+    throw new Error('Script generation failed. Please try again.');
+  }
+
+  const responseText = result.value.response.text();
+
+  let jsonText = responseText;
+  const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    jsonText = jsonMatch[1];
+  } else {
+    const objectMatch = responseText.match(/\{[\s\S]*\}/);
+    if (objectMatch) {
+      jsonText = objectMatch[0];
+    }
+  }
+
+  let scriptData;
+  try {
+    scriptData = JSON.parse(jsonText);
+  } catch (e) {
+    throw new Error('Failed to parse script JSON output.');
+  }
+
+  if (
+    !scriptData.hook ||
+    !scriptData.intro ||
+    !Array.isArray(scriptData.sections) ||
+    !scriptData.cta
+  ) {
+    throw new Error('Invalid script structure from Gemini');
+  }
+
+  return scriptData;
+}
+

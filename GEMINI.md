@@ -248,6 +248,7 @@ English, Hindi, Hinglish, Telugu, Tamil, Gujarati, Marathi, Punjabi, Bengali, Ma
 ## Operational invariants — do NOT break
 - **Internal plan IDs:** `'free' | 'pro' | 'ultra'` (display "Free Plan" / "Pro Plan" / "Max Plan"). Renaming `'ultra'` would orphan live Razorpay subscriptions.
 - **Anti-prompt-injection structural rule:** in `handleScript.ts` and `handleRepurposing.ts`, the language directive + Requirements block MUST stay after all user-controlled text.
+- **MultiPost formatting:** In `handleRepurposing.ts`, the prompt MUST require PLAIN TEXT output and avoid JSON. Raw JSON breaks when the AI includes multiple paragraphs/newlines for social posts.
 - **HMAC compare:** use `safeEqual()` (wraps `crypto.timingSafeEqual`) in `handlePayment.ts` — never `!==`.
 - **App Check + auth checks:** must be the first two lines of every callable.
 - **Burst limit:** must be wired before any Gemini-bound work.

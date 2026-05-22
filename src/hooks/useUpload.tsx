@@ -25,6 +25,9 @@ interface PendingUpload {
   storagePath: string;
   outputLanguage: OutputLanguage;
   thumbnailPromptEnabled: boolean;
+  generationMode?: 'metadata' | 'script';
+  scriptTone?: string;
+  scriptDuration?: string;
 }
 
 function getStatusCycle(fileType: string): string[] {
@@ -86,6 +89,12 @@ interface UploadContextType {
   setResult: (res: Result | null) => void;
   quotaExceeded: boolean;
   setQuotaExceeded: (exceeded: boolean) => void;
+  uploadMode: 'metadata' | 'script';
+  setUploadMode: (mode: 'metadata' | 'script') => void;
+  scriptTone: string;
+  setScriptTone: (tone: string) => void;
+  scriptDuration: string;
+  setScriptDuration: (duration: string) => void;
   handleFileSelect: (file: File) => Promise<void>;
   reset: () => void;
 }
@@ -101,6 +110,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const [statusIndex, setStatusIndex] = useState(0);
   const [statusCycle, setStatusCycle] = useState<string[]>(getStatusCycle('audio/mpeg'));
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("English");
+  const [uploadMode, setUploadMode] = useState<'metadata' | 'script'>('metadata');
+  const [scriptTone, setScriptTone] = useState<string>('Casual');
+  const [scriptDuration, setScriptDuration] = useState<string>('10');
   const [thumbnailPromptEnabled, setThumbnailPromptEnabled] = useState(false);
   const [multiPostEnabled, setMultiPostEnabled] = useState(false);
   const [multiPostPlatforms, setMultiPostPlatforms] = useState<MultiPostPlatforms>({
@@ -196,6 +208,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             outputLanguage: parsed.outputLanguage,
             generateThumbnails: parsed.fileType.startsWith('audio/') ? parsed.thumbnailPromptEnabled : false,
             fileType: parsed.fileType,
+            generationMode: parsed.generationMode || 'metadata',
+            scriptTone: parsed.scriptTone,
+            scriptDuration: parsed.scriptDuration,
           }).then(res => {
             setResultId(res.data.resultId);
           }).catch((err) => {
@@ -374,7 +389,10 @@ export function UploadProvider({ children }: { children: ReactNode }) {
       fileSize: file.size,
       storagePath,
       outputLanguage,
-      thumbnailPromptEnabled
+      thumbnailPromptEnabled,
+      generationMode: uploadMode,
+      scriptTone,
+      scriptDuration
     });
 
     const storageRef = ref(storage, storagePath);
@@ -415,6 +433,9 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             generateThumbnails: isAudio ? thumbnailPromptEnabled : false,
             fileType: file.type,
             fingerprint: visitorId,
+            generationMode: uploadMode,
+            scriptTone,
+            scriptDuration,
           });
           setResultId(res.data.resultId);
         } catch (error: any) {

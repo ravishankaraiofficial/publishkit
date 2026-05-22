@@ -1,6 +1,5 @@
 {
   "languageBar.prompt": "भाषा चुनें",
-
   "nav.new": "नया",
   "nav.script": "स्क्रिप्ट",
   "nav.multipost": "मल्टीपोस्ट",
@@ -10,7 +9,6 @@
   "nav.settings": "सेटिंग्स",
   "nav.signIn": "साइन इन करें",
   "nav.signOut": "साइन आउट",
-
   "common.save": "सहेजें",
   "common.cancel": "रद्द करें",
   "common.confirm": "पुष्टि करें",
@@ -24,7 +22,6 @@
   "common.upgrade": "अपग्रेड",
   "common.submit": "सबमिट करें",
   "common.opening": "खुल रहा है...",
-
   "home.heroSubtitle": "अपनी ऑडियो को 90 सेकंड में YouTube-तैयार टाइटल, टाइमस्टैम्प और विवरण में बदलें।",
   "home.outputLanguage": "आउटपुट भाषा",
   "home.thumbnailPrompts": "थंबनेल प्रॉम्प्ट",
@@ -47,7 +44,6 @@
   "home.signInToGenerateAgain": "फिर से उत्पन्न करने के लिए Google से साइन इन करें — यह पूरी तरह से मुफ़्त है।",
   "home.viewHistoryGuest": "इतिहास में अपलोड की गई फ़ाइलें देखें",
   "home.viewHistoryFooter": "इतिहास में प्रक्रिया और अपलोड की गई फ़ाइलें देखें",
-
   "script.title": "YouTube स्क्रिप्ट लेखक",
   "script.subtitle": "अपने विषय के अनुरूप आकर्षक वीडियो स्क्रिप्ट बनाएं",
   "script.usageCounter": "इस महीने {used} / {limit} उपयोग किया गया",
@@ -71,8 +67,6 @@
   "script.upgradeUltra": "प्लान देखें",
   "script.upgradePro": "मैक्स प्लान पर अपग्रेड करें →",
   "script.upgradeFree": "प्रो प्लान या मैक्स प्लान पर अपग्रेड करें →",
-
-
   "multipost.subtitle": "अपनी सामग्री को X, Instagram और LinkedIn के लिए अनुकूलित पोस्ट में बदलें",
   "multipost.usageCounter": "इस महीने {used} / {limit} उपयोग किया गया",
   "multipost.copyNotAvailable": "मुफ़्त प्लान पर कॉपी उपलब्ध नहीं है",
@@ -86,7 +80,6 @@
   "multipost.selectPlatforms": "प्लेटफ़ॉर्म चुनें",
   "multipost.generateBtn": "पोस्ट बनाएं",
   "multipost.generatingBtn": "बन रहा है…",
-
   "pricing.title": "सरल, पारदर्शी मूल्य निर्धारण",
   "pricing.subtitle": "अपनी कंटेंट क्रिएशन ज़रूरतों के लिए सही प्लान चुनें",
   "pricing.toggleOneTime": "केवल एक महीना",
@@ -117,9 +110,9 @@
   "pricing.feat.languageSupport": "अंग्रेज़ी + हिन्दी समर्थन",
   "pricing.feat.scriptN": "स्क्रिप्ट लेखक ({count}/महीना)",
   "pricing.feat.multipostN": "मल्टीपोस्ट ({count}/महीना)",
-  "pricing.feat.copyMetadata": "मेटाडेटा परिणामों पर कॉपी बटन",  "pricing.feat.copyEverywhere": "हर जगह कॉपी बटन सक्षम",
+  "pricing.feat.copyMetadata": "मेटाडेटा परिणामों पर कॉपी बटन",
+  "pricing.feat.copyEverywhere": "हर जगह कॉपी बटन सक्षम",
   "pricing.feat.copyMax": "हर जगह कॉपी बटन",
-
   "settings.title": "क्रिएटर प्रोफ़ाइल",
   "settings.subtitle": "इसे भरें ताकि PublishKit का AI ऐसे टाइटल, विवरण, थंबनेल, स्क्रिप्ट और सोशल पोस्ट तैयार करे जो {name} की तरह लगें, न कि जेनेरिक AI की तरह। * चिह्नित फ़ील्ड अनिवार्य हैं। बाकी वैकल्पिक हैं, लेकिन हर एक आपके परिणामों को और बेहतर बनाता है।",
   "settings.subtitleNoName": "इसे भरें ताकि PublishKit का AI ऐसे टाइटल, विवरण, थंबनेल, स्क्रिप्ट और सोशल पोस्ट तैयार करे जो आपकी तरह लगें, न कि जेनेरिक AI की तरह। * चिह्नित फ़ील्ड अनिवार्य हैं। बाकी वैकल्पिक हैं, लेकिन हर एक आपके परिणामों को और बेहतर बनाता है।",
@@ -221,7 +214,6 @@
   "settings.bestVideoHooks.placeholder": "1. \"मैंने 5 AI टूल्स आजमाए ताकि आपको न करना पड़े...\"\n2. \"स्क्रॉल करना बंद करें — इस नोशन टेम्पलेट ने अभी मेरे ₹20,000 बचाए...\"\n3. ...",
   "settings.hookFormulas.label": "हुक फॉर्मूले जो आपके लिए काम करते हैं",
   "settings.hookFormulas.hint": "उदाहरण: \"पैसे बचाए\", \"पहले बनाम बाद में\", \"वह एक चीज़ जो X के बारे में कोई नहीं बताता\", \"मैं Y के बारे में गलत था\"।",
-
   "history.title": "इतिहास",
   "history.autoDelete": "सभी अपलोड प्रोसेसिंग के 3 घंटे बाद स्वचालित रूप से हटा दिए जाते हैं।",
   "history.manualDelete": "आप नीचे दिए गए विकल्पों का उपयोग करके अपना डेटा मैन्युअल रूप से भी हटा सकते हैं।",
@@ -246,7 +238,6 @@
   "history.itemDeletedToast": "आइटम हटा दिया गया",
   "history.deleteFailedToast": "हटाना विफल। कृपया पुनः प्रयास करें।",
   "history.justNow": "अभी-अभी",
-
   "feedback.title": "फ़ीडबैक बोर्ड",
   "feedback.subtitle": "मौजूदा सुविधाओं के लिए वोट करें या नई का अनुरोध करें।",
   "feedback.newRequest": "नया अनुरोध",
@@ -267,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "जैसे, Instagram Reel प्रारूप जोड़ें",
   "feedback.modalDescLabel": "विवरण",
   "feedback.modalDescPlaceholder": "बताएं कि यह सुविधा क्यों उपयोगी होगी...",
-  "feedback.submitRequest": "अनुरोध सबमिट करें"
+  "feedback.submitRequest": "अनुरोध सबमिट करें",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

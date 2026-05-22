@@ -67,7 +67,6 @@
   "script.upgradeUltra": "প্ল্যান দেখুন",
   "script.upgradePro": "ম্যাক্স প্ল্যানে আপগ্রেড করুন →",
   "script.upgradeFree": "প্রো প্ল্যান বা ম্যাক্স প্ল্যানে আপগ্রেড করুন →",
-
   "multipost.subtitle": "আপনার কনটেন্টকে X, Instagram এবং LinkedIn এর জন্য উপযুক্ত পোস্টে রূপান্তর করুন",
   "multipost.usageCounter": "এই মাসে {used} / {limit} ব্যবহৃত",
   "multipost.copyNotAvailable": "বিনামূল্যে প্ল্যানে কপি উপলব্ধ নয়",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ইংরেজি + হিন্দি সমর্থন",
   "pricing.feat.scriptN": "স্ক্রিপ্ট রাইটার ({count}/মাস)",
   "pricing.feat.multipostN": "মাল্টিপোস্ট ({count}/মাস)",
-  "pricing.feat.copyMetadata": "মেটাডেটা ফলাফলে কপি বোতাম",  "pricing.feat.copyEverywhere": "সর্বত্র কপি বোতাম সক্ষম",
+  "pricing.feat.copyMetadata": "মেটাডেটা ফলাফলে কপি বোতাম",
+  "pricing.feat.copyEverywhere": "সর্বত্র কপি বোতাম সক্ষম",
   "pricing.feat.copyMax": "সর্বত্র কপি বোতাম",
   "settings.title": "নির্মাতা প্রোফাইল",
   "settings.subtitle": "এই তথ্যগুলো পূরণ করুন যাতে PublishKit-এর AI এমন শিরোনাম, বিবরণ, থাম্বনেইল, স্ক্রিপ্ট এবং সোশ্যাল পোস্ট তৈরি করে যা {name}-এর মতো শোনায়, সাধারণ AI-এর মতো নয়। * চিহ্নিত ক্ষেত্রগুলো বাধ্যতামূলক। বাকিগুলো ঐচ্ছিক কিন্তু প্রতিটি তথ্য আপনার ফলাফলকে আরও নিখুঁত করে তোলে।",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "যেমন, Instagram Reel ফরম্যাট যোগ করুন",
   "feedback.modalDescLabel": "বিবরণ",
   "feedback.modalDescPlaceholder": "এই বৈশিষ্ট্য কেন উপযোগী হবে তা ব্যাখ্যা করুন...",
-  "feedback.submitRequest": "অনুরোধ জমা দিন"
+  "feedback.submitRequest": "অনুরোধ জমা দিন",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

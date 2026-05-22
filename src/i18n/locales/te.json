@@ -67,7 +67,6 @@
   "script.upgradeUltra": "ప్లాన్‌లను చూడండి",
   "script.upgradePro": "మ్యాక్స్ ప్లాన్‌కు అప్‌గ్రేడ్ చేయండి →",
   "script.upgradeFree": "ప్రో ప్లాన్ లేదా మ్యాక్స్ ప్లాన్‌కు అప్‌గ్రేడ్ చేయండి →",
-
   "multipost.subtitle": "మీ కంటెంట్‌ను X, Instagram మరియు LinkedIn కోసం అనుకూలీకరించిన పోస్ట్‌లుగా మార్చండి",
   "multipost.usageCounter": "ఈ నెల {used} / {limit} ఉపయోగించబడింది",
   "multipost.copyNotAvailable": "ఉచిత ప్లాన్‌లో కాపీ అందుబాటులో లేదు",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ఇంగ్లీష్ + హిందీ మద్దతు",
   "pricing.feat.scriptN": "స్క్రిప్ట్ రైటర్ ({count}/నెల)",
   "pricing.feat.multipostN": "మల్టీపోస్ట్ ({count}/నెల)",
-  "pricing.feat.copyMetadata": "మెటాడేటా ఫలితాలపై కాపీ బటన్‌లు",  "pricing.feat.copyEverywhere": "అన్నిచోట్లా కాపీ బటన్‌లు ప్రారంభించబడ్డాయి",
+  "pricing.feat.copyMetadata": "మెటాడేటా ఫలితాలపై కాపీ బటన్‌లు",
+  "pricing.feat.copyEverywhere": "అన్నిచోట్లా కాపీ బటన్‌లు ప్రారంభించబడ్డాయి",
   "pricing.feat.copyMax": "అన్నిచోట్లా కాపీ బటన్‌లు",
   "settings.title": "క్రియేటర్ ప్రొఫైల్",
   "settings.subtitle": "ఈ వివరాలను నింపండి, తద్వారా PublishKit యొక్క AI అనేది {name} లాగా అనిపించేలా టైటిల్స్, వివరణలు, థంబ్‌నెయిల్స్, స్క్రిప్ట్‌లు మరియు సోషల్ పోస్ట్‌లను సృష్టిస్తుంది, సాధారణ AI లాగా కాదు. * అని ఉన్న ఫీల్డ్‌లు తప్పనిసరి. మిగిలినవి ఐచ్ఛికం, కానీ ప్రతి సమాచారం మీ ఫలితాలను మరింత ఖచ్చితంగా చేస్తుంది.",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "ఉదా., Instagram Reel ఫార్మాట్ జోడించండి",
   "feedback.modalDescLabel": "వివరణ",
   "feedback.modalDescPlaceholder": "ఈ ఫీచర్ ఎందుకు ఉపయోగకరంగా ఉంటుందో వివరించండి...",
-  "feedback.submitRequest": "అభ్యర్థన సమర్పించండి"
+  "feedback.submitRequest": "అభ్యర్థన సమర్పించండి",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

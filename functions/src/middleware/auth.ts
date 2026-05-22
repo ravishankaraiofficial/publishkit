@@ -1,5 +1,5 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions/v1';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../lib/firestore';
 
 import * as crypto from 'crypto';
@@ -41,9 +41,9 @@ export async function verifyWhitelist(context: functions.https.CallableContext, 
     }
 
     if (!guestDoc.exists) {
-      transaction.set(guestRef, { uses: 1, firstUsedAt: admin.firestore.FieldValue.serverTimestamp() });
+      transaction.set(guestRef, { uses: 1, firstUsedAt: FieldValue.serverTimestamp() });
     } else {
-      transaction.update(guestRef, { uses: admin.firestore.FieldValue.increment(1) });
+      transaction.update(guestRef, { uses: FieldValue.increment(1) });
     }
   });
 

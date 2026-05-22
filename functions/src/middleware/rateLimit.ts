@@ -1,5 +1,5 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions/v1';
+import { FieldValue } from 'firebase-admin/firestore';
 import * as crypto from 'crypto';
 import { db } from '../lib/firestore';
 
@@ -52,8 +52,8 @@ export async function enforceRateLimit(uid: string, rawIp: string, plan: string 
     }
 
     // Both limits are safe — atomically increment both counters
-    const increment = admin.firestore.FieldValue.increment(1);
-    const timestamp = admin.firestore.FieldValue.serverTimestamp();
+    const increment = FieldValue.increment(1);
+    const timestamp = FieldValue.serverTimestamp();
 
     if (uidDoc.exists) {
       tx.update(uidRef, { count: increment, lastRequest: timestamp });
@@ -218,9 +218,9 @@ export async function enforceBurstLimit(uid: string, plan: string): Promise<void
 
     recent.push(nowMs);
     if (snap.exists) {
-      tx.update(burstRef, { timestamps: recent, lastRequest: admin.firestore.FieldValue.serverTimestamp() });
+      tx.update(burstRef, { timestamps: recent, lastRequest: FieldValue.serverTimestamp() });
     } else {
-      tx.set(burstRef, { timestamps: recent, lastRequest: admin.firestore.FieldValue.serverTimestamp() });
+      tx.set(burstRef, { timestamps: recent, lastRequest: FieldValue.serverTimestamp() });
     }
   });
 }

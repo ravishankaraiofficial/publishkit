@@ -67,7 +67,6 @@
   "script.upgradeUltra": "திட்டங்களைப் பார்க்க",
   "script.upgradePro": "மேக்ஸ் திட்டத்திற்கு மேம்படுத்தவும் →",
   "script.upgradeFree": "ப்ரோ திட்டம் அல்லது மேக்ஸ் திட்டத்திற்கு மேம்படுத்தவும் →",
-
   "multipost.subtitle": "உங்கள் உள்ளடக்கத்தை X, Instagram, மற்றும் LinkedIn-க்கான தனிப்பயனாக்கப்பட்ட இடுகைகளாக மாற்றவும்",
   "multipost.usageCounter": "இந்த மாதம் {used} / {limit} பயன்படுத்தப்பட்டது",
   "multipost.copyNotAvailable": "இலவச திட்டத்தில் நகலெடுப்பு கிடைக்காது",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ஆங்கிலம் + இந்தி ஆதரவு",
   "pricing.feat.scriptN": "ஸ்கிரிப்ட் ரைட்டர் ({count}/மாதம்)",
   "pricing.feat.multipostN": "மல்டிபோஸ்ட் ({count}/மாதம்)",
-  "pricing.feat.copyMetadata": "மெட்டாடேட்டா முடிவுகளில் நகல் பொத்தான்கள்",  "pricing.feat.copyEverywhere": "எல்லா இடங்களிலும் நகல் பொத்தான்கள் இயக்கப்பட்டுள்ளன",
+  "pricing.feat.copyMetadata": "மெட்டாடேட்டா முடிவுகளில் நகல் பொத்தான்கள்",
+  "pricing.feat.copyEverywhere": "எல்லா இடங்களிலும் நகல் பொத்தான்கள் இயக்கப்பட்டுள்ளன",
   "pricing.feat.copyMax": "எல்லா இடங்களிலும் நகல் பொத்தான்கள்",
   "settings.title": "உருவாக்குநர் சுயவிவரம்",
   "settings.subtitle": "இந்த விபரங்களை நிரப்பவும், இதன் மூலம் PublishKit-இன் AI ஆனது {name} போல ஒலிக்கும் தலைப்புகள், விளக்கங்கள், தம்ப்நெயில்கள், ஸ்கிரிப்ட்கள் மற்றும் சமூக இடுகைகளை உருவாக்கும், பொதுவான AI போல அல்ல. * குறியிடப்பட்ட புலங்கள் கட்டாயமானவை. மற்றவை விருப்பத்தேர்வு, ஆனால் ஒவ்வொன்றும் உங்கள் முடிவுகளைத் துல்லியமாக்கும்.",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "எ.கா., Instagram Reel வடிவத்தைச் சேர்க்கவும்",
   "feedback.modalDescLabel": "விளக்கம்",
   "feedback.modalDescPlaceholder": "இந்த அம்சம் ஏன் பயனுள்ளதாக இருக்கும் என்பதை விளக்கவும்...",
-  "feedback.submitRequest": "கோரிக்கை சமர்ப்பி"
+  "feedback.submitRequest": "கோரிக்கை சமர்ப்பி",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

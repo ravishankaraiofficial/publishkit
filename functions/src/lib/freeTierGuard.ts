@@ -1,5 +1,5 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions/v1';
+import { FieldValue } from 'firebase-admin/firestore';
 import * as crypto from 'crypto';
 import { db } from './firestore';
 
@@ -84,7 +84,7 @@ async function checkAndLink(collection: string, key: string, uid: string): Promi
       // device. Update lastSeenAt and continue.
       tx.set(
         ref,
-        { lastSeenAt: admin.firestore.FieldValue.serverTimestamp() },
+        { lastSeenAt: FieldValue.serverTimestamp() },
         { merge: true }
       );
       return;
@@ -103,8 +103,8 @@ async function checkAndLink(collection: string, key: string, uid: string): Promi
       ref,
       {
         uids: [...uids, uid],
-        firstSeenAt: doc.exists ? doc.data()?.firstSeenAt : admin.firestore.FieldValue.serverTimestamp(),
-        lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
+        firstSeenAt: doc.exists ? doc.data()?.firstSeenAt : FieldValue.serverTimestamp(),
+        lastSeenAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );

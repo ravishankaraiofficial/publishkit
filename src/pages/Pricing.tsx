@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Check } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/ui/Toast';
@@ -8,6 +9,7 @@ import { httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useT } from '../i18n';
+import { getPricingSchema, getFaqSchema } from '../lib/seo-schema';
 
 const Pricing: React.FC = () => {
   const { user, profile } = useAuth();
@@ -195,6 +197,17 @@ const Pricing: React.FC = () => {
 
   return (
     <PageContainer>
+      <Helmet>
+        <title>{t('seo.pricing.title')}</title>
+        <meta name="description" content={t('seo.pricing.description')} />
+        <link rel="canonical" href="https://publishkit.in/pricing" />
+        <script type="application/ld+json">
+          {JSON.stringify(getPricingSchema())}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(getFaqSchema())}
+        </script>
+      </Helmet>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

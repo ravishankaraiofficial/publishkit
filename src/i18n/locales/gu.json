@@ -67,7 +67,6 @@
   "script.upgradeUltra": "પ્લાન જુઓ",
   "script.upgradePro": "મેક્સ પ્લાનમાં અપગ્રેડ કરો →",
   "script.upgradeFree": "પ્રો પ્લાન અથવા મેક્સ પ્લાનમાં અપગ્રેડ કરો →",
-
   "multipost.subtitle": "તમારી સામગ્રીને X, Instagram અને LinkedIn માટે અનુકૂળ પોસ્ટમાં બદલો",
   "multipost.usageCounter": "આ મહિને {used} / {limit} વાપર્યું",
   "multipost.copyNotAvailable": "મફત પ્લાનમાં કૉપિ ઉપલબ્ધ નથી",
@@ -259,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "દા.ત., Instagram Reel ફોર્મેટ ઉમેરો",
   "feedback.modalDescLabel": "વર્ણન",
   "feedback.modalDescPlaceholder": "આ સુવિધા શા માટે ઉપયોગી હશે તે સમજાવો...",
-  "feedback.submitRequest": "વિનંતી સબમિટ કરો"
+  "feedback.submitRequest": "વિનંતી સબમિટ કરો",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

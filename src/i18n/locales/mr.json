@@ -67,7 +67,6 @@
   "script.upgradeUltra": "प्लॅन पहा",
   "script.upgradePro": "मॅक्स प्लॅनवर अपग्रेड करा →",
   "script.upgradeFree": "प्रो प्लॅन किंवा मॅक्स प्लॅनवर अपग्रेड करा →",
-
   "multipost.subtitle": "तुमची सामग्री X, Instagram आणि LinkedIn साठी अनुकूल पोस्टमध्ये बदला",
   "multipost.usageCounter": "या महिन्यात {used} / {limit} वापरले",
   "multipost.copyNotAvailable": "विनामूल्य योजनेवर कॉपी उपलब्ध नाही",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "इंग्रजी + हिंदी समर्थन",
   "pricing.feat.scriptN": "स्क्रिप्ट रायटर ({count}/महिना)",
   "pricing.feat.multipostN": "मल्टीपोस्ट ({count}/महिना)",
-  "pricing.feat.copyMetadata": "मेटाडेटा निकालांवर कॉपी बटण",  "pricing.feat.copyEverywhere": "सर्वत्र कॉपी बटण सक्षम",
+  "pricing.feat.copyMetadata": "मेटाडेटा निकालांवर कॉपी बटण",
+  "pricing.feat.copyEverywhere": "सर्वत्र कॉपी बटण सक्षम",
   "pricing.feat.copyMax": "सर्वत्र कॉपी बटण",
   "settings.title": "क्रिएटर प्रोफाइल",
   "settings.subtitle": "ही माहिती भरा जेणेकरून PublishKit चे AI अशी शीर्षके, वर्णने, थंबनेल्स, स्क्रिप्ट्स आणि सोशल पोस्ट्स तयार करेल ज्या {name} सारख्या वाटतील, सामान्य AI सारख्या नाही. * चिन्हांकित फील्ड अनिवार्य आहेत. बाकीचे पर्यायी आहेत पण प्रत्येक माहिती तुमचे निकाल अधिक अचूक बनवते.",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "उदा., Instagram Reel स्वरूप जोडा",
   "feedback.modalDescLabel": "वर्णन",
   "feedback.modalDescPlaceholder": "हे वैशिष्ट्य का उपयुक्त असेल ते स्पष्ट करा...",
-  "feedback.submitRequest": "विनंती सबमिट करा"
+  "feedback.submitRequest": "विनंती सबमिट करा",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

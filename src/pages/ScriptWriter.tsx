@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Zap, Copy, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { httpsCallable } from 'firebase/functions';
@@ -8,9 +9,12 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { useToast } from '../components/ui/Toast';
 import { Picker } from '../components/ui/Picker';
 import { LanguagePicker } from '../components/ui/LanguagePicker';
+import { DropZone } from '../components/upload/DropZone';
+import { useUpload } from '../hooks/useUpload';
 import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
 import { useT } from '../i18n';
+import { Shield } from 'lucide-react';
 
 interface ScriptOutput {
   hook: string;
@@ -47,6 +51,37 @@ const ScriptWriter: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+
+  const {
+    setUploadMode,
+    setScriptTone,
+    setScriptDuration,
+    isUploading,
+    uploadProgress,
+    statusIndex,
+    statusCycle,
+    result,
+    handleFileSelect,
+    reset
+  } = useUpload();
+
+  React.useEffect(() => {
+    setUploadMode('script');
+    setScriptTone(tone);
+    setScriptDuration(duration);
+  }, [tone, duration, setUploadMode, setScriptTone, setScriptDuration]);
+
+  // Sync file upload result to local output state
+  React.useEffect(() => {
+    if (result && result.status === 'complete' && result.hook) {
+      setOutput(result as any);
+    }
+  }, [result]);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => reset();
+  }, []);
 
   const translatedToneOptions = TONE_OPTIONS.map(opt => ({
     ...opt,
@@ -187,6 +222,11 @@ ${output.cta}
 
   return (
     <PageContainer>
+      <Helmet>
+        <title>{t('seo.scriptWriter.title')}</title>
+        <meta name="description" content={t('seo.scriptWriter.description')} />
+        <link rel="canonical" href="https://publishkit.in/script-writer" />
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -209,15 +249,42 @@ ${output.cta}
 
         {/* Input Section */}
         <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-8">
+          {/* Dropzone Area */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">{t('script.dropzoneHeadline')}</h2>
+            <p className="text-gray-400 mb-6">{t('script.dropzoneSubtitle')}</p>
+            
+            <DropZone
+              onFileSelect={handleFileSelect}
+              isUploading={isUploading}
+              progress={uploadProgress}
+              statusMessage={statusCycle[statusIndex] || "Processing..."}
+            />
+            
+            <div className="mt-4 flex flex-col items-center gap-2 text-sm text-gray-500">
+              <p>{t('script.dropzoneSupported')}</p>
+              <div className="flex items-center gap-1.5 text-emerald-500/80 bg-emerald-500/10 px-3 py-1 rounded-full">
+                <Shield className="w-4 h-4" />
+                <span>{t('script.dropzonePrivacy')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative flex items-center py-5">
+            <div className="flex-grow border-t border-gray-800"></div>
+            <span className="flex-shrink-0 mx-4 text-gray-500 text-sm font-medium uppercase tracking-wider">OR TYPE A TOPIC</span>
+            <div className="flex-grow border-t border-gray-800"></div>
+          </div>
+
           {/* Topic */}
-          <div className="mb-6">
+          <div className="mb-6 mt-2">
             <label className="block text-white font-semibold mb-2">{t('script.topicLabel')}</label>
             <textarea
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder={t('script.topicPlaceholder')}
               rows={3}
-              disabled={loading}
+              disabled={loading || isUploading}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-600 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
@@ -242,7 +309,7 @@ ${output.cta}
                 value={duration}
                 options={translatedDurationOptions}
                 onChange={(next) => setDuration(next as any)}
-                disabled={loading}
+                disabled={loading || isUploading}
                 variant="input"
               />
             </div>
@@ -258,7 +325,7 @@ ${output.cta}
                     toast(`Output will be in ${toastNativeName(next)}`, 'info');
                   }
                 }}
-                disabled={loading}
+                disabled={loading || isUploading}
                 variant="input"
               />
             </div>
@@ -266,7 +333,7 @@ ${output.cta}
 
           <button
             onClick={handleGenerate}
-            disabled={loading}
+            disabled={loading || isUploading}
             className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white font-semibold py-3 rounded-lg hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? t('script.generatingBtn') : t('script.generateBtn')}

@@ -10,4 +10,7 @@ export const processAudioCall = httpsCallable<{
   generateThumbnails?: boolean;
   fileType?: string;
   fingerprint?: string;
+  generationMode?: 'metadata' | 'script';
+  scriptTone?: string;
+  scriptDuration?: string;
 }, { resultId: string; cached?: boolean }>(functions, 'processAudio');

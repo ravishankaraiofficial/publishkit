@@ -1002,7 +1002,7 @@ Nothing from the Vite starter template (`App.tsx`, `App.css`, `index.css` conten
 See [Section 8](#8-all-npm-packages) for full list.
 
 ### `functions/` directory — created from scratch
-Complete Node.js 20 Firebase Cloud Functions project with TypeScript.
+Complete Node.js 22 Firebase Cloud Functions project with TypeScript.
 
 ### Root config files added/modified
 - `firebase.json` — written (hosting, functions, firestore, storage, security headers)

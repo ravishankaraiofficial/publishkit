@@ -1,9 +1,11 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 // Initialize the Firebase Admin SDK if not already initialized
-if (admin.apps.length === 0) {
-  admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
 }
 
-export const db = admin.firestore();
-export const storage = admin.storage();
+export const db = getFirestore();
+export const storage = getStorage();

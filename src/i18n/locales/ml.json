@@ -67,7 +67,6 @@
   "script.upgradeUltra": "പ്ലാനുകൾ കാണുക",
   "script.upgradePro": "മാക്സ് പ്ലാനിലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുക →",
   "script.upgradeFree": "പ്രോ പ്ലാനിലേക്കോ മാക്സ് പ്ലാനിലേക്കോ അപ്ഗ്രേഡ് ചെയ്യുക →",
-
   "multipost.subtitle": "നിങ്ങളുടെ ഉള്ളടക്കം X, Instagram, LinkedIn എന്നിവയ്ക്കായി അനുയോജ്യമായ പോസ്റ്റുകളാക്കി മാറ്റുക",
   "multipost.usageCounter": "ഈ മാസം {used} / {limit} ഉപയോഗിച്ചു",
   "multipost.copyNotAvailable": "സൗജന്യ പ്ലാനിൽ പകർത്തൽ ലഭ്യമല്ല",
@@ -111,7 +110,8 @@
   "pricing.feat.languageSupport": "ഇംഗ്ലീഷ് + ഹിന്ദി പിന്തുണ",
   "pricing.feat.scriptN": "സ്ക്രിപ്റ്റ് റൈറ്റർ ({count}/മാസം)",
   "pricing.feat.multipostN": "മൾട്ടിപോസ്റ്റ് ({count}/മാസം)",
-  "pricing.feat.copyMetadata": "മെറ്റാഡാറ്റ ഫലങ്ങളിൽ കോപ്പി ബട്ടണുകൾ",  "pricing.feat.copyEverywhere": "എല്ലായിടത്തും കോപ്പി ബട്ടണുകൾ പ്രവർത്തനക്ഷമം",
+  "pricing.feat.copyMetadata": "മെറ്റാഡാറ്റ ഫലങ്ങളിൽ കോപ്പി ബട്ടണുകൾ",
+  "pricing.feat.copyEverywhere": "എല്ലായിടത്തും കോപ്പി ബട്ടണുകൾ പ്രവർത്തനക്ഷമം",
   "pricing.feat.copyMax": "എല്ലായിടത്തും കോപ്പി ബട്ടണുകൾ",
   "settings.title": "ക്രിയേറ്റർ പ്രൊഫൈൽ",
   "settings.subtitle": "ഇത് പൂരിപ്പിക്കുക, അതുവഴി PublishKit-ന്റെ AI ജനറിക് AI പോലെയല്ല, {name} പോലെ തോന്നിക്കുന്ന ശീർഷകങ്ങൾ, വിവരണങ്ങൾ, ലഘുചിത്രങ്ങൾ, സ്ക്രിപ്റ്റുകൾ, സോഷ്യൽ പോസ്റ്റുകൾ എന്നിവ സൃഷ്ടിക്കുന്നു. * എന്ന് അടയാളപ്പെടുത്തിയ ഫീൽഡുകൾ നിർബന്ധമാണ്. ബാക്കിയുള്ളവ ഓപ്ഷണൽ ആണ്, എന്നാൽ ഓരോന്നും നിങ്ങളുടെ ഫലങ്ങൾ മികച്ചതാക്കുന്നു.",
@@ -258,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "ഉദാ., Instagram Reel ഫോർമാറ്റ് ചേർക്കുക",
   "feedback.modalDescLabel": "വിവരണം",
   "feedback.modalDescPlaceholder": "ഈ സവിശേഷത എന്തുകൊണ്ട് ഉപയോഗപ്രദമാകുമെന്ന് വിശദീകരിക്കുക...",
-  "feedback.submitRequest": "അഭ്യർത്ഥന സമർപ്പിക്കുക"
+  "feedback.submitRequest": "അഭ്യർത്ഥന സമർപ്പിക്കുക",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

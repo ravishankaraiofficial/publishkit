@@ -1,6 +1,5 @@
 {
   "languageBar.prompt": "Bhasha chuno",
-
   "nav.new": "New",
   "nav.script": "Script",
   "nav.multipost": "MultiPost",
@@ -10,7 +9,6 @@
   "nav.settings": "Settings",
   "nav.signIn": "Sign in",
   "nav.signOut": "Sign out",
-
   "common.save": "Save karo",
   "common.cancel": "Cancel",
   "common.confirm": "Confirm karo",
@@ -24,7 +22,6 @@
   "common.upgrade": "Upgrade",
   "common.submit": "Submit karo",
   "common.opening": "Khul raha hai...",
-
   "home.heroSubtitle": "Apni audio ko 90 seconds mein YouTube-ready Titles, Timestamps & Descriptions mein convert karo.",
   "home.outputLanguage": "Output Language",
   "home.thumbnailPrompts": "Thumbnail Prompts",
@@ -47,7 +44,6 @@
   "home.signInToGenerateAgain": "Dobara generate karne ke liye Google se sign in karo — bilkul free hai.",
   "home.viewHistoryGuest": "History mein uploaded files dekho",
   "home.viewHistoryFooter": "History mein processing aur uploaded files dekho",
-
   "script.title": "YouTube Script Writer",
   "script.subtitle": "Apne niche ke hisaab se engaging video scripts banao",
   "script.usageCounter": "Is mahine {used} / {limit} use kiya",
@@ -71,8 +67,6 @@
   "script.upgradeUltra": "Plans dekhein",
   "script.upgradePro": "Max Plan pe upgrade karein →",
   "script.upgradeFree": "Pro Plan ya Max Plan pe upgrade karein →",
-
-
   "multipost.subtitle": "Apne content ko X, Instagram aur LinkedIn ke liye tailored posts mein convert karo",
   "multipost.usageCounter": "Is mahine {used} / {limit} use kiya",
   "multipost.copyNotAvailable": "Free Plan pe Copy available nahi hai",
@@ -86,7 +80,6 @@
   "multipost.selectPlatforms": "Platforms choose karo",
   "multipost.generateBtn": "Posts banao",
   "multipost.generatingBtn": "Ban raha hai…",
-
   "pricing.title": "Simple, Transparent Pricing",
   "pricing.subtitle": "Apni content creation needs ke liye sahi plan choose karo",
   "pricing.toggleOneTime": "Sirf ek mahina",
@@ -117,9 +110,9 @@
   "pricing.feat.languageSupport": "English + Hindi support",
   "pricing.feat.scriptN": "Script Writer ({count}/mahina)",
   "pricing.feat.multipostN": "MultiPost ({count}/mahina)",
-  "pricing.feat.copyMetadata": "Metadata results pe Copy buttons",  "pricing.feat.copyEverywhere": "Har jagah Copy buttons enabled",
+  "pricing.feat.copyMetadata": "Metadata results pe Copy buttons",
+  "pricing.feat.copyEverywhere": "Har jagah Copy buttons enabled",
   "pricing.feat.copyMax": "Har jagah Copy buttons",
-
   "settings.title": "Creator Profile",
   "settings.subtitle": "Isko bharo taaki PublishKit ka AI aise titles, descriptions, thumbnails, scripts, aur social posts banaye jo {name} ki tarah sound karein, generic AI ki tarah nahi. * wale fields required hain. Baaki optional hain par har field aapke results ko sharp banata hai.",
   "settings.subtitleNoName": "Isko bharo taaki PublishKit ka AI aise titles, descriptions, thumbnails, scripts, aur social posts banaye jo aapki tarah sound karein, generic AI ki tarah nahi. * wale fields required hain. Baaki optional hain par har field aapke results ko sharp banata hai.",
@@ -221,7 +214,6 @@
   "settings.bestVideoHooks.placeholder": "1. \"I tried 5 AI tools so you don't have to...\"\n2. \"Stop scrolling — is Notion template ne mere ₹20,000 bachaye...\"\n3. ...",
   "settings.hookFormulas.label": "Hook formulas jo aapke liye kaam karte hain",
   "settings.hookFormulas.hint": "Examples: \"money saved\", \"before vs after\", \"the one thing nobody tells you about X\", \"I was wrong about Y\".",
-
   "history.title": "HISTORY",
   "history.autoDelete": "Saari uploads processing ke 3 ghante baad automatically delete ho jaati hain.",
   "history.manualDelete": "Aap niche diye gaye options se apna data manually bhi delete kar sakte ho.",
@@ -246,7 +238,6 @@
   "history.itemDeletedToast": "Item delete ho gaya",
   "history.deleteFailedToast": "Delete fail ho gaya. Please dobara try karo.",
   "history.justNow": "Abhi-abhi",
-
   "feedback.title": "Feedback Board",
   "feedback.subtitle": "Existing features ke liye vote karo ya new request karo.",
   "feedback.newRequest": "New Request",
@@ -267,5 +258,9 @@
   "feedback.modalTitlePlaceholder": "Jaise, Instagram Reel format add karo",
   "feedback.modalDescLabel": "Description",
   "feedback.modalDescPlaceholder": "Bataao yeh feature kyun useful hoga...",
-  "feedback.submitRequest": "Request submit karo"
+  "feedback.submitRequest": "Request submit karo",
+  "script.dropzoneHeadline": "Stop typing. Start dropping.",
+  "script.dropzoneSubtitle": "Turn your raw voice notes, research documents, or screenshots into full, high-retention YouTube scripts tailored completely to your unique niche and voice.",
+  "script.dropzoneSupported": "Supported Inputs: MP3/WAV Audio · PDF Documents · JPG/PNG Research Images",
+  "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours"
 }

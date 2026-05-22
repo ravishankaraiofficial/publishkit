@@ -1,14 +1,13 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { defineSecret } from 'firebase-functions/params';
-import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import * as crypto from 'crypto';
 import https from 'https';
+import { db } from './lib/firestore';
 
 const razorpayKeyId = defineSecret('RAZORPAY_KEY_ID');
 const razorpayKeySecret = defineSecret('RAZORPAY_KEY_SECRET');
 const razorpayWebhookSecret = defineSecret('RAZORPAY_WEBHOOK_SECRET');
-
-const db = admin.firestore();
 
 // Live-mode plan IDs (Razorpay dashboard → Subscriptions → Plans).
 // 'ultra' is the internal plan key — surfaces as "PublishKit Max" to customers.
@@ -314,7 +313,7 @@ export const verifyOrderPayment = functions
           razorpayLastPaymentId: razorpay_payment_id,
           // Defensive: clear any stale subscription ID — this user is on the
           // one-time track now.
-          razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+          razorpaySubscriptionId: FieldValue.delete(),
         },
         { merge: true }
       );
@@ -351,8 +350,8 @@ export const expireOneTimePlans = functions.pubsub
         doc.ref,
         {
           plan: 'free',
-          planType: admin.firestore.FieldValue.delete(),
-          planExpiresAt: admin.firestore.FieldValue.delete(),
+          planType: FieldValue.delete(),
+          planExpiresAt: FieldValue.delete(),
         },
         { merge: true }
       );
@@ -426,7 +425,7 @@ export const razorpayWebhook = functions
           
           // Reserve the event ID before doing work.
           tx.set(eventRef, {
-            processedAt: admin.firestore.FieldValue.serverTimestamp(),
+            processedAt: FieldValue.serverTimestamp(),
           });
           return false;
         });
@@ -466,7 +465,7 @@ export const razorpayWebhook = functions
               planType: 'one_time',
               planExpiresAt: expiresAt.toISOString(),
               razorpayLastPaymentId: payment.id,
-              razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+              razorpaySubscriptionId: FieldValue.delete(),
             },
             { merge: true }
           );
@@ -522,8 +521,8 @@ export const razorpayWebhook = functions
         if (storedSubId && storedSubId === subId) {
           await userRef.set({
             plan: 'free',
-            planExpiry: admin.firestore.FieldValue.delete(),
-            razorpaySubscriptionId: admin.firestore.FieldValue.delete(),
+            planExpiry: FieldValue.delete(),
+            razorpaySubscriptionId: FieldValue.delete(),
           }, { merge: true });
         }
       }
