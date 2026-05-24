@@ -76,18 +76,18 @@ interface LangConfig {
 
 const LANG_CONFIG: Record<string, LangConfig> = {
   English:   { name: 'English',   script: '' },
-  Hindi:     { name: 'Hindi',     script: 'Devanagari' },
+  Hindi:     { name: 'Hindi',     script: 'Devanagari', scriptNote: 'हिंदी' },
   Hinglish:  { name: 'Hinglish',  script: 'Latin/Roman characters' },
-  Telugu:    { name: 'Telugu',    script: 'Telugu' },
-  Tamil:     { name: 'Tamil',     script: 'Tamil' },
-  Gujarati:  { name: 'Gujarati',  script: 'Gujarati' },
-  Marathi:   { name: 'Marathi',   script: 'Devanagari', scriptNote: 'distinct from Hindi' },
-  Punjabi:   { name: 'Punjabi',   script: 'Gurmukhi' },
-  Bengali:   { name: 'Bengali',   script: 'Bengali' },
-  Malayalam: { name: 'Malayalam', script: 'Malayalam' },
-  Kannada:   { name: 'Kannada',   script: 'Kannada' },
-  Bhojpuri:  { name: 'Bhojpuri',  script: 'Devanagari', scriptNote: 'Hindi-flavoured fallback acceptable' },
-  Urdu:      { name: 'Urdu',      script: 'Nastaliq/Arabic' },
+  Telugu:    { name: 'Telugu',    script: 'Telugu', scriptNote: 'తెలుగు' },
+  Tamil:     { name: 'Tamil',     script: 'Tamil', scriptNote: 'தமிழ்' },
+  Gujarati:  { name: 'Gujarati',  script: 'Gujarati', scriptNote: 'ગુજરાતી' },
+  Marathi:   { name: 'Marathi',   script: 'Devanagari', scriptNote: 'मराठी; distinct from Hindi' },
+  Punjabi:   { name: 'Punjabi',   script: 'Gurmukhi', scriptNote: 'ਪੰਜਾਬੀ' },
+  Bengali:   { name: 'Bengali',   script: 'Bengali', scriptNote: 'বাংলা' },
+  Malayalam: { name: 'Malayalam', script: 'Malayalam', scriptNote: 'മലയാളം' },
+  Kannada:   { name: 'Kannada',   script: 'Kannada', scriptNote: 'ಕನ್ನಡ' },
+  Bhojpuri:  { name: 'Bhojpuri',  script: 'Devanagari', scriptNote: 'भोजपुरी; Hindi-flavoured fallback acceptable' },
+  Urdu:      { name: 'Urdu',      script: 'Nastaliq/Arabic', scriptNote: 'اردو' },
 };
 
 /**
@@ -135,9 +135,12 @@ export function thumbnailLanguageDirective(lang: string): string {
   }
   const cfg = LANG_CONFIG[lang];
   if (!cfg || !cfg.script) return '';
+  
+  const scriptHint = cfg.scriptNote ? `${cfg.script} script (${cfg.scriptNote})` : `${cfg.script} script`;
+
   return (
     `\nCRITICAL INSTRUCTION: Any text that appears IN the thumbnail image MUST be ` +
-    `written in ${cfg.name} (${cfg.script} script). The description of the image ` +
+    `written in ${cfg.name} (${scriptHint}). The description of the image ` +
     `itself should be in English so the AI image generator understands it.\n`
   );
 }
