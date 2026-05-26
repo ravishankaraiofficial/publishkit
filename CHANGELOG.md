@@ -1,5 +1,66 @@
 # PublishKit Changelog
 
+## [2026-05-26] Post-Launch Polish — i18n Native Scripts, Multimodal Script Writer, YouTube Community Posts, Pass 5 Security
+
+Five days after launch, the product hardened in three directions: AI output reliability, feature scope, and security. Done primarily in Antigravity (Gemini CLI). Net result: PublishKit now handles regional-language generation correctly, accepts file uploads on Script Writer, repurposes to 4 platforms (added YouTube), and survived another security pass.
+
+### i18n — AI now reliably outputs in the requested language
+- **Commit `00bd31c`** — backend `LANG_CONFIG` injects **native script samples** directly into the system prompts (देवनागरी for Hindi, తెలుగు for Telugu, தமிழ் for Tamil, বাংলা for Bengali, ગુજરાતી for Gujarati, etc.)
+- **Bug it fixed:** Gemini was silently defaulting to English for regional languages — metadata titles, descriptions, timestamps, and thumbnail prompts all came back in English even when the user picked Telugu/Bengali. Now Gemini sees actual native characters in the directive and adheres reliably.
+- **Coverage:** all 4 generation paths — Metadata (`generate.ts`), Script (`handleScript.ts`), MultiPost (`handleRepurposing.ts`), Transcribe (`transcribe.ts`).
+
+### Script Writer — multimodal upload (Commit `5f009b6`)
+- **What changed:** Script Writer used to only accept a text topic. Now it accepts the same uploads as Home page — **audio / PDF / image** — and uses them as source material for the script.
+- **Use case:** A creator uploads a 10-min raw audio diary → Script Writer turns it into a structured YouTube script with hook, intro, sections, CTA, all in the creator's voice.
+- Follow-up commits `a76487e` (build errors), `d53fb93` (emoji cleanup on copy button).
+
+### MultiPost — YouTube Community Posts + single-variant default
+- **Commit `38052c1`** — added **YouTube Community Posts** as a 4th platform alongside X / Instagram / LinkedIn. Tone is conversational and community-focused, designed for the YouTube Community tab.
+- **Commit `5a75fa9`** — switched from "multiple variants per platform" to **1 high-quality variant per platform** by default. New "Generate more options" button lets users get additional variants on demand.
+- **Commit `4d6477e`** — hardened JSON parsing in `handleRepurposing.ts`. Previously Gemini occasionally returned partial / fenced JSON that caused one platform's output to silently disappear. Now: fenced code blocks stripped, partial JSON tolerated, all requested platforms always returned.
+- **Commit `34cbe77`** — earlier intermediate state (2 variations per platform) before settling on 1+button.
+- **Commit `35d2983`** — usage UI shows MultiPost counter consistently; legacy result documents from before this commit are re-formatted on read.
+
+### UI & Mobile polish
+- **Commit `74c2250`** — on mobile, MultiPost input field and language picker now **stack vertically** instead of fighting for horizontal space (was overlapping at <480px).
+- **Commit `e578bd6`** — MultiPost toggle + platform selector remain visible **during** audio upload (previously hidden when upload spinner was active).
+- **Commit `f125268`** — MultiPost block stays visible during upload + after — quotas enforced in UI before submission.
+- **Commit `f4a7bd8`** — native translations applied for **DropZone** text and **Copy** buttons across all 13 locales (these had been left in English).
+
+### Security — Pass 5 hardening (Commit `7f88443`)
+Fifth full security audit pass. Closed:
+- **Payment bypass in `verifyOrderPayment`** — client could previously claim any plan during signature verification. Now the server fetches the actual paid plan from Razorpay Orders API and writes that, not what the client says.
+- **IDOR in `processAudio`** — storage path ownership now enforced (caller's uid must match the path's uid segment).
+- **Webhook race condition** — `razorpayWebhook` event-ID idempotency now wrapped in a Firestore transaction so concurrent webhook deliveries can't both apply the same event.
+- **Feedback voting duplication** — same user voting twice on a feedback item now properly blocked.
+- **Firestore rules** — `firestore.rules` now allows users to **delete their own result documents** (was read-only — users couldn't clean up old generations from their History page).
+- Dependencies bumped to fix moderate-severity advisories.
+- Updated `SECURITY.md` to document the Pass 5 controls.
+
+### Files changed across this batch
+- `functions/src/handleScript.ts` — multimodal input parsing + native-script LANG_CONFIG
+- `functions/src/handleRepurposing.ts` — 4-platform support, single-variant default, JSON parser hardening
+- `functions/src/handlePayment.ts` — Pass 5 payment-bypass fix, webhook race fix
+- `functions/src/processAudio.ts` — Pass 5 IDOR fix (storage path ownership)
+- `functions/src/transcribe.ts` — native-script LANG_CONFIG
+- `functions/src/generate.ts` — native-script LANG_CONFIG
+- `firestore.rules` — user can delete own results + server-managed-fields protection
+- `src/pages/ScriptWriter.tsx` — multimodal upload UI
+- `src/pages/MultiPost.tsx` — YouTube checkbox, single-variant + generate-more UI, mobile stacking
+- `src/components/upload/DropZone.tsx` — i18n keys for all 13 locales
+- `src/i18n/locales/*.json` — DropZone + Copy button keys added across all 13 files
+- `SECURITY.md` — Pass 5 documentation
+- `CHANGELOG.md` — Pass 5 entry
+
+### Production state at end of this batch
+- ✅ All 4 generation features (Metadata, Script Writer, MultiPost, Transcribe) reliably output in the user's chosen regional language
+- ✅ Script Writer accepts audio / PDF / image (parity with Home page)
+- ✅ MultiPost supports 4 platforms; default UX is "1 great variant per platform + button for more"
+- ✅ Mobile MultiPost layout no longer overlaps at narrow widths
+- ✅ Users can delete their own past results (cleanup workflow now possible)
+- ✅ 5 security passes complete (payment, IDOR, webhook race, feedback voting closed)
+- ✅ Live, paying-customer-ready at https://publishkit.in
+
 ## [2026-05-21] Production Launch — publishkit.in Live, Razorpay Live Mode, SEO, Legal Pages
 
 This session shipped 6 fixes + custom domain + live payments + analytics + legal in one continuous push. Net result: PublishKit went from "feature-complete on web.app" to **production-grade SaaS at publishkit.in with real INR payments**.

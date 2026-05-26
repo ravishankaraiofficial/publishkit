@@ -9,13 +9,13 @@
 - **GitHub:** https://github.com/ravishankaraiofficial/publishkit
 - **Firebase Project:** `gen-lang-client-0079285803`
 - **Root Directory:** `D:\Project\Project 01\Google Antigravity Files`
-- **Latest Commit on `main`:** `13b359c` — feat(seo+analytics): GA4, sitemap, robots, OAuth verification scaffolding
-- **Last Updated:** 2026-05-21
+- **Latest Commit on `main`:** `00bd31c` — fix(i18n): inject native scripts in language directives to enforce AI output language
+- **Last Updated:** 2026-05-26
 
 ---
 
 ## What this app does
-Upload audio / PDF / image → Gemini AI returns titles, timestamped chapters, SEO description, thumbnail prompts (audio only). Plus standalone **Script Writer** (full YouTube scripts in the creator's own voice) and **MultiPost** (one click → X / Instagram / LinkedIn posts from the same source). 13 output languages AND 13 full UI translations.
+Upload audio / PDF / image → Gemini AI returns titles, timestamped chapters, SEO description, thumbnail prompts (audio only). Plus standalone **Script Writer** (full YouTube scripts in the creator's own voice — now also accepts audio / PDF / image as source material, not just text topics) and **MultiPost** (one click → **X / Instagram / LinkedIn / YouTube Community** posts from the same source — 4 platforms, 1 high-quality variant per platform by default with a "Generate more options" button). 13 output languages AND 13 full UI translations. Native scripts injected directly into the backend language directive so Gemini reliably outputs in Telugu/Bengali/Tamil/etc. — no more silent English fallback.
 
 ---
 
@@ -132,8 +132,8 @@ If publishkit.in starts returning auth errors, check these 4 allowlists FIRST be
 | `src/components/ui/Picker.tsx` | Generic dropdown component with **mobile bottom-sheet** style + glass effect (orange hover) |
 | `src/components/ui/LanguagePicker.tsx` | Wraps Picker for OutputLanguage |
 | `src/pages/Home.tsx` | Main upload page; thumbnail toggle + MultiPost toggle |
-| `src/pages/ScriptWriter.tsx` | Script generation UI (calls `generateScript` callable); sends `visitorId` |
-| `src/pages/MultiPost.tsx` | Repurposing UI (calls `generateRepurposing` callable); sends `visitorId` |
+| `src/pages/ScriptWriter.tsx` | Script generation UI (calls `generateScript` callable); **multimodal — accepts audio / PDF / image uploads as input**, not just text topics. sends `visitorId` |
+| `src/pages/MultiPost.tsx` | Repurposing UI (calls `generateRepurposing` callable); **4 platforms: X / Instagram / LinkedIn / YouTube Community**. Block stays visible during upload + after; toggles + platform selector always reachable. sends `visitorId` |
 | `src/pages/Pricing.tsx` | 3-tier card layout (Free 3 / Pro 100 / Max 350); **one-time vs subscription toggle**; one-time is default |
 | `src/pages/Settings.tsx` | 30-question Script System questionnaire; all free-text fields use `isMeaningfulText` Zod refinement (handle field exempt) |
 | `src/pages/Login.tsx` | Hero + Google sign-in; **footer with Privacy/Terms links** for OAuth verification |
@@ -148,8 +148,8 @@ If publishkit.in starts returning auth errors, check these 4 allowlists FIRST be
 |---|---|
 | `index.ts` | Exports: `processAudio`, `processAudioWorker`, `deleteOldAudio`, `generateScript`, `generateRepurposing`, `createSubscription`, `razorpayWebhook`, **`createOrder`**, **`verifyOrderPayment`**, **`expireOneTimePlans`** |
 | `processAudio.ts` | Callable + Firestore-onCreate worker. App Check + auth + burst limit + monthly+per-IP quota + whitelist + VPN check + **free-tier guard** |
-| `handleScript.ts` | `generateScript` callable. Routes via `pickModel(plan, 'script')` — Pro for Max, Flash otherwise. Anti-prompt-injection structural invariant preserved |
-| `handleRepurposing.ts` | `generateRepurposing` callable. Always Flash. Each platform counts as one generation against monthly quota |
+| `handleScript.ts` | `generateScript` callable. **Multimodal: handles topic text + optional audio / PDF / image attachments.** Routes via `pickModel(plan, 'script')` — Pro for Max, Flash otherwise. Anti-prompt-injection structural invariant preserved. `LANG_CONFIG` injects native script samples (देवनागरी / తెలుగు / বাংলা / etc.) into the language directive to lock AI output to the requested language |
+| `handleRepurposing.ts` | `generateRepurposing` callable. Always Flash. **4 platforms supported: `x`, `instagram`, `linkedin`, `youtube` (Community Posts)**. Returns **1 high-quality variant per platform** by default (was multiple); UI exposes a "Generate more options" button for follow-up calls. Hardened JSON parsing — fenced/partial JSON tolerated; never silently drops a platform. Each platform requested counts as one generation against the monthly quota |
 | `handlePayment.ts` | `createSubscription`, `razorpayWebhook`, **`createOrder` (Orders API, no autopay), `verifyOrderPayment` (HMAC signature verify, 30-day expiry grant), `expireOneTimePlans` (daily scheduled, downgrades expired one-timers)** |
 | `cleanup.ts` | Scheduled `deleteOldAudio` — prunes results (3h), rate-limit ring buffers, `webhookEvents/` docs older than 7 days |
 | `middleware/rateLimit.ts` | `enforceBurstLimit`, `enforceMonthlyQuota`, `enforceIpQuota`, `enforceScriptTrial`, `enforceRepurposingTrial`. `PLAN_MONTHLY_LIMITS = { free: 3, pro: 100, ultra: 350 }`. `FEATURE_MONTHLY_LIMITS` same shape |
@@ -180,7 +180,7 @@ To add a new string: define key in `en.json` first, then add to all 12 other loc
 
 ## Security posture (current state)
 
-The repo has been through **4 hardening passes + free-tier guard** — see `SECURITY.md` for the full threat model. Highlights:
+The repo has been through **5 hardening passes + free-tier guard** — see `SECURITY.md` for the full threat model. Pass 5 (commit `7f88443`) closed: payment bypass in `verifyOrderPayment` (now fetches verified plan from Razorpay, not client), IDOR in `processAudio` (enforces storage path ownership), webhook race condition (Firestore transaction wrapping), feedback voting duplication. Firestore rules now allow users to **delete their own results** (previously read-only). Highlights:
 
 - **App Check** (ReCaptcha Enterprise) enforced as first line in all callables
 - **Auth check** as second line
