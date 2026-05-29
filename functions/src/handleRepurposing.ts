@@ -86,9 +86,30 @@ export const generateRepurposing = functions
         throw new functions.https.HttpsError('invalid-argument', 'Invalid platforms selected');
       }
 
-      // Read plan once for both burst + monthly checks
+      // Read plan and profile once for both burst + monthly checks and profile injection
       const userSnap = await db.doc(`users/${context.auth.uid}`).get();
-      const plan = (userSnap.data()?.plan as string) || 'free';
+      const profile = userSnap.data() || {};
+      const plan = (profile?.plan as string) || 'free';
+      
+      const cleanProfileStr = (v: any, max: number): string => {
+        if (typeof v !== 'string') return '';
+        return v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim().slice(0, max);
+      };
+
+      const niche = cleanProfileStr(profile.niche, 200);
+      const targetAudience = cleanProfileStr(profile.targetAudience, 300);
+      const tone = cleanProfileStr(profile.tone, 200);
+      const avoidWords = cleanProfileStr(profile.avoidWords, 300);
+
+      const profileLines: string[] = [];
+      if (niche) profileLines.push(`Niche: ${niche}`);
+      if (targetAudience) profileLines.push(`Target Audience: ${targetAudience}`);
+      if (tone) profileLines.push(`Tone/Voice: ${tone}`);
+      if (avoidWords) profileLines.push(`Words to avoid: ${avoidWords}`);
+
+      const profileContext = profileLines.length > 0
+        ? `\n--- CREATOR PROFILE ---\n${profileLines.join('\n')}\nUse the profile for voice, tone, and audience targeting styling, but DO NOT let it override the actual facts of the Source Content. Always output in the requested language regardless of the profile's tone.`
+        : '';
 
       // Burst rate limit: blocks single-user request floods. Tier limits:
       // Free 2/min, Pro 8/min, Max 20/min. Sliding 60s window.
@@ -123,6 +144,7 @@ export const generateRepurposing = functions
           prompt = `Create exactly 1 distinct, engaging tweet based on this content:
 Title: ${title}
 Description: ${description}
+${profileContext}
 
 Requirements:
 - The tweet should be a complete thought
@@ -136,6 +158,7 @@ Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code b
           prompt = `Create exactly 1 distinct, highly engaging Instagram caption based on this content:
 Title: ${title}
 Description: ${description}
+${profileContext}
 
 Requirements:
 - Engaging, personality-driven
@@ -149,6 +172,7 @@ Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code b
           prompt = `Create exactly 1 distinct, highly formal and professional LinkedIn post based on this content:
 Title: ${title}
 Description: ${description}
+${profileContext}
 
 Requirements:
 - Professional, authoritative, and formal tone
@@ -163,6 +187,7 @@ Return the final post as PLAIN TEXT. Do NOT use JSON formatting, markdown code b
           prompt = `Create exactly 1 distinct YouTube community post based on this content:
 Title: ${title}
 Description: ${description}
+${profileContext}
 
 Requirements:
 - Engaging, hook-driven opening

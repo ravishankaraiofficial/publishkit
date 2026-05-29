@@ -944,7 +944,7 @@ export async function analyzeDocument(
 `getTitlesPrompt(transcript, profile, outputLanguage)`
 
 - Requests 5 YouTube titles ranked by viral potential
-- Personalised with `profile.niche`, `profile.name`, target language
+- Personalised with `profile.niche`, `profile.targetAudience`, and `profile.tone` to tailor titles
 - **JSON output:**
   ```json
   { "titles": [{ "title": "...", "reason": "..." }, ...] }
@@ -952,10 +952,11 @@ export async function analyzeDocument(
 
 #### `functions/src/prompts/timestamps.ts`
 
-`getTimestampsPrompt(transcript, outputLanguage)`
+`getTimestampsPrompt(transcript, profile, outputLanguage)`
 
 - Estimates video duration from word count at 150 words/minute
 - Up to 10 chapter timestamps in `MM:SS Title` format
+- Personalised with `profile.niche` to mildly influence chapter phrasing
 - Outputs in target language
 
 #### `functions/src/prompts/description.ts`
@@ -963,7 +964,7 @@ export async function analyzeDocument(
 `getDescriptionPrompt(transcript, profile, outputLanguage)`
 
 - Generates full YouTube description: hook paragraph, key points, `[TIMESTAMPS_PLACEHOLDER]`, CTA, hashtags
-- Personalised with `profile.name`, `profile.niche`, `profile.handle`
+- Personalised with `profile.niche`, `profile.targetAudience`, and `profile.tone` to tailor the hook and description
 - Written in `outputLanguage`
 
 #### `functions/src/prompts/thumbnails.ts`

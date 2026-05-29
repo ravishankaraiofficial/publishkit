@@ -130,7 +130,7 @@ export async function generateOutputs(
       'titles'
     ),
     callWithTimeoutAndRetry(
-      () => modelText.generateContent(getTimestampsPrompt(transcript, outputLanguage)),
+      () => modelText.generateContent(getTimestampsPrompt(transcript, profile, outputLanguage)),
       'timestamps'
     ),
     callWithTimeoutAndRetry(

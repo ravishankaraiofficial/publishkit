@@ -2,6 +2,7 @@ import { introductionWord, strongLanguageDirective } from '../lib/languages';
 
 export function getTimestampsPrompt(
   transcript: string,
+  profile: any,
   outputLanguage: string = 'English'
 ): string {
   // Re-shape the strong directive for timestamps (no "respond in language" — these are chapter labels).
@@ -11,8 +12,18 @@ export function getTimestampsPrompt(
   );
   const intro = introductionWord(outputLanguage);
 
+  const cleanProfileStr = (v: any, max: number): string => {
+    if (typeof v !== 'string') return '';
+    return v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim().slice(0, max);
+  };
+
+  const niche = cleanProfileStr(profile?.niche, 200);
+  const profileContext = niche
+    ? `\nCreator Niche: ${niche}\nKeep the chapter titles relevant to this niche if applicable, but rely on the Source Content for the actual topics.`
+    : '';
+
   return `
-Read the following transcript, identify natural topic transitions, and output YouTube chapter timestamps.
+Read the following transcript, identify natural topic transitions, and output YouTube chapter timestamps.${profileContext}
 
 STRUCTURE RULES:
 1. If the content is long (likely resulting in 8 or more timestamps), group the timestamps into logical "Chapters" (e.g., 3-4 timestamps per chapter).
