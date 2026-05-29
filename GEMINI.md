@@ -238,6 +238,8 @@ Despite all this, verification kept failing for unknown reasons (likely Google s
 
 `handleScript.ts` reads ALL the above (sanitized, length-capped) and injects into the Gemini prompt so scripts sound in the creator's voice — that's why Settings makes 10 fields required.
 
+Additionally, `handleRepurposing.ts` (MultiPost) and the metadata prompts (`titles.ts`, `description.ts`, `timestamps.ts`) extract specific profile fields (`niche`, `targetAudience`, `tone`, `avoidWords`) to personalize their outputs and ensure the generated text matches the creator's precise style and target audience.
+
 ---
 
 ## Output languages (13)

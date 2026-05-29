@@ -1,5 +1,12 @@
 # PublishKit Changelog
 
+## [2026-05-29] Creator Profile Injection for Metadata and MultiPost
+
+- **What changed:** Titles, descriptions, timestamps, and MultiPost generations now strictly follow the creator's profile settings.
+- **Implementation:** The backend now reads the user's `niche`, `targetAudience`, `tone`, and `avoidWords` from Firestore, sanitizes them against prompt injection, and injects them into the Gemini generation instructions. 
+- **Use case:** A video description or a MultiPost tweet is no longer generic; it is written exactly in the user's target tone and voice for their specific audience.
+- **Files changed:** `functions/src/handleRepurposing.ts`, `functions/src/prompts/titles.ts`, `functions/src/prompts/description.ts`, `functions/src/prompts/timestamps.ts`, `functions/src/generate.ts`
+
 ## [2026-05-26] Post-Launch Polish — i18n Native Scripts, Multimodal Script Writer, YouTube Community Posts, Pass 5 Security
 
 Five days after launch, the product hardened in three directions: AI output reliability, feature scope, and security. Done primarily in Antigravity (Gemini CLI). Net result: PublishKit now handles regional-language generation correctly, accepts file uploads on Script Writer, repurposes to 4 platforms (added YouTube), and survived another security pass.
