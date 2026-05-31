@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <title>PublishKit — AI YouTube Content Generator | Titles, Descriptions &amp; Timestamps</title>
+    <title>PublishKit — AI YouTube Content Generator</title>
 
     <!-- Legal links in <head> — some verification systems (Google OAuth,
          some EU regulators) honor these link rel tags for machine-readable
@@ -115,15 +115,6 @@
   <body>
     <div id="root"></div>
 
-    <!-- Static SEO H1 — the visible heading is rendered by React inside #root,
-         which is empty in the raw HTML response, so crawlers that parse static
-         HTML (Bing flagged "H1 tag missing") saw no <h1>. This screen-reader-only
-         heading lives OUTSIDE #root so React's render never removes it, giving
-         the page exactly one top-level <h1> in the initial HTML. -->
-    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
-      PublishKit — AI YouTube Content Generator
-    </h1>
-
     <!-- Hidden SEO-only legal links — invisible to users (display:none)
          but present in the initial HTML response so crawlers and OAuth
          verifiers that parse static HTML can still discover Privacy and
@@ -140,7 +131,7 @@
     <!-- noscript fallback — visible only if JavaScript is disabled. -->
     <noscript>
       <div style="padding:20px;text-align:center;color:#fff;background:#0D0D0D;font-family:sans-serif;">
-        <h1>PublishKit</h1>
+        <p style="font-size:24px;font-weight:800;">PublishKit</p>
         <p>PublishKit needs JavaScript enabled. Please enable JavaScript and reload.</p>
         <p>
           <a href="https://publishkit.in/privacy" style="color:#E05A1E;">Privacy Policy</a> ·
