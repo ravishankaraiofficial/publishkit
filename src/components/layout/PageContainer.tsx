@@ -78,6 +78,9 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#666]">
             <p>© {new Date().getFullYear()} PublishKit · Made in India 🇮🇳</p>
             <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+              <a href="/about" className="hover:text-white transition-colors">
+                About
+              </a>
               <a href="/privacy" className="hover:text-white transition-colors">
                 Privacy Policy
               </a>

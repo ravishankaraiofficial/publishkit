@@ -16,6 +16,8 @@ import ScriptWriter from './pages/ScriptWriter';
 import MultiPost from './pages/MultiPost';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
+import { About } from './pages/About';
+import { NotFound } from './pages/NotFound';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UiLanguageSync } from './i18n/UiLanguageSync';
 
@@ -40,6 +42,7 @@ function AuthGatedRoutes() {
             (and search crawlers) can fetch them. */}
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/about" element={<About />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
@@ -52,6 +55,9 @@ function AuthGatedRoutes() {
           <Route path="/multipost" element={<MultiPost />} />
           <Route path="/repurposing" element={<MultiPost />} />
         </Route>
+
+        {/* Catch-all 404 — public so unknown URLs don't bounce through auth. */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
