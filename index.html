@@ -23,6 +23,24 @@
     <link rel="terms-of-service" href="https://publishkit.in/terms" />
     <link rel="canonical" href="https://publishkit.in/" />
 
+    <!-- Duplicate-content guard — the same app is served on the custom domain
+         (publishkit.in) and the default Firebase domains (publishkit.web.app,
+         publishkit.firebaseapp.com). We want ONLY publishkit.in to rank, so on
+         any Firebase domain we inject a robots noindex tag. Both Googlebot and
+         Bingbot execute JS and honor an injected robots meta, so this drops the
+         duplicate hosts from both search engines. Runs inline before paint. -->
+    <script>
+      (function () {
+        var h = location.hostname;
+        if (h.endsWith('.web.app') || h.endsWith('.firebaseapp.com')) {
+          var m = document.createElement('meta');
+          m.name = 'robots';
+          m.content = 'noindex, nofollow';
+          document.head.appendChild(m);
+        }
+      })();
+    </script>
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <!-- Google Analytics 4 (GA4) — tracks page views, signups, payments, generations.
