@@ -80,6 +80,15 @@
   <body>
     <div id="root"></div>
 
+    <!-- Static SEO H1 — the visible heading is rendered by React inside #root,
+         which is empty in the raw HTML response, so crawlers that parse static
+         HTML (Bing flagged "H1 tag missing") saw no <h1>. This screen-reader-only
+         heading lives OUTSIDE #root so React's render never removes it, giving
+         the page exactly one top-level <h1> in the initial HTML. -->
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+      PublishKit — AI YouTube Content Generator
+    </h1>
+
     <!-- Hidden SEO-only legal links — invisible to users (display:none)
          but present in the initial HTML response so crawlers and OAuth
          verifiers that parse static HTML can still discover Privacy and
