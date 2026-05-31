@@ -13,7 +13,8 @@ import { useToast } from '../components/ui/Toast';
 import { toastNativeName } from '../lib/languages';
 import { useT } from '../i18n';
 import { getRemainingMultiPostQuota } from '../lib/quota';
-import { getWebAppSchema } from '../lib/seo-schema';
+import { getWebAppSchema, getFaqSchema } from '../lib/seo-schema';
+import { HomeSeoContent } from '../components/seo/HomeSeoContent';
 
 export function Home() {
   const { user, profile } = useAuth();
@@ -56,6 +57,9 @@ export function Home() {
         <link rel="canonical" href="https://publishkit.in/" />
         <script type="application/ld+json">
           {JSON.stringify(getWebAppSchema())}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(getFaqSchema())}
         </script>
       </Helmet>
 
@@ -378,6 +382,10 @@ export function Home() {
           {t('home.viewHistoryFooter')}
         </Link>
       </div>
+
+      {/* SEO content + FAQ — shown on the landing view so crawlers (and new
+          visitors) get substantial textual content and FAQ rich-result data. */}
+      {showUpload && !quotaExceeded && <HomeSeoContent />}
 
     </PageContainer>
   );
