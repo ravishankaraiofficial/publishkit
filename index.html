@@ -23,6 +23,23 @@
     <link rel="terms-of-service" href="https://publishkit.in/terms" />
     <link rel="canonical" href="https://publishkit.in/" />
 
+    <!-- Structured data (JSON-LD) — placed statically in the initial HTML so
+         crawlers that parse raw HTML (Bing reports "No Markup found" otherwise)
+         see it without executing JS. Mirrors getSoftwareAppSchema() in
+         src/lib/seo-schema.ts. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "PublishKit",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web",
+      "description": "AI-powered YouTube content generator. Turn audio, PDFs, and images into ready-to-publish titles, descriptions, timestamps, scripts, and social posts.",
+      "url": "https://publishkit.in",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" }
+    }
+    </script>
+
     <!-- Duplicate-content guard — the same app is served on the custom domain
          (publishkit.in) and the default Firebase domains (publishkit.web.app,
          publishkit.firebaseapp.com). We want ONLY publishkit.in to rank, so on
