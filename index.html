@@ -7,14 +7,29 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#0D0D0D" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="PublishKit — YouTube Content Generator. AI-powered titles, descriptions, and thumbnails." />
-    
+    <meta name="description" content="PublishKit is an AI YouTube content generator that turns your audio into titles, descriptions, and timestamps in 90 seconds. Free to start." />
+    <meta name="keywords" content="AI YouTube content generator, YouTube title generator, YouTube description generator, YouTube timestamp generator, AI script generator, YouTube SEO tool" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PublishKit" />
+    <meta property="og:url" content="https://publishkit.in/" />
+    <meta property="og:title" content="PublishKit — AI YouTube Content Generator" />
+    <meta property="og:description" content="Turn your audio, PDFs, or images into ready-to-publish YouTube titles, descriptions, timestamps, scripts, and social posts in 90 seconds." />
+    <meta property="og:image" content="https://publishkit.in/icons.svg" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PublishKit — AI YouTube Content Generator" />
+    <meta name="twitter:description" content="Turn your audio into ready-to-publish YouTube titles, descriptions, and timestamps in 90 seconds. Free to start." />
+    <meta name="twitter:image" content="https://publishkit.in/icons.svg" />
+
     <!-- Preload Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <title>PublishKit — YouTube Content Generator</title>
+    <title>PublishKit — AI YouTube Content Generator | Titles, Descriptions &amp; Timestamps</title>
 
     <!-- Legal links in <head> — some verification systems (Google OAuth,
          some EU regulators) honor these link rel tags for machine-readable
@@ -22,6 +37,43 @@
     <link rel="privacy-policy" href="https://publishkit.in/privacy" />
     <link rel="terms-of-service" href="https://publishkit.in/terms" />
     <link rel="canonical" href="https://publishkit.in/" />
+
+    <!-- Structured data (JSON-LD) — placed statically in the initial HTML so
+         crawlers that parse raw HTML (Bing reports "No Markup found" otherwise)
+         see it without executing JS. Mirrors getSoftwareAppSchema() in
+         src/lib/seo-schema.ts. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "PublishKit",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web",
+      "description": "AI-powered YouTube content generator. Turn audio, PDFs, and images into ready-to-publish titles, descriptions, timestamps, scripts, and social posts.",
+      "url": "https://publishkit.in",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" }
+    }
+    </script>
+
+    <!-- FAQ structured data — static copy so raw-HTML crawlers see it. Mirrors
+         FAQ_ITEMS / getFaqSchema() in src/lib/seo-schema.ts and the visible FAQ
+         accordion on the home page. Keep these in sync. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "What is an AI YouTube content generator?", "acceptedAnswer": { "@type": "Answer", "text": "An AI YouTube content generator turns your raw video material — audio, PDFs, or images — into ready-to-publish YouTube assets like titles, descriptions, chapter timestamps, thumbnail prompts, scripts, and social posts. PublishKit does all of this in about 90 seconds." } },
+        { "@type": "Question", "name": "How does PublishKit generate YouTube titles and descriptions?", "acceptedAnswer": { "@type": "Answer", "text": "You upload your recording or notes and PublishKit's AI analyzes the content, then writes click-worthy titles, an SEO-optimized description, and accurate timestamps based on what's actually said in your video." } },
+        { "@type": "Question", "name": "Can it create YouTube chapter timestamps automatically?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. PublishKit listens to your audio and produces accurate, clickable chapter timestamps so viewers can jump to sections, which improves watch time and retention." } },
+        { "@type": "Question", "name": "Will the AI sound like a robot?", "acceptedAnswer": { "@type": "Answer", "text": "No. PublishKit uses your Creator Profile — your brand, tone, and style — to keep output in your voice rather than a generic template." } },
+        { "@type": "Question", "name": "Why use PublishKit instead of ChatGPT for free?", "acceptedAnswer": { "@type": "Answer", "text": "PublishKit is purpose-built for creators. It works directly from audio, PDF, or image, generates timestamps automatically, and keeps your voice consistent — saving 20+ hours a month." } },
+        { "@type": "Question", "name": "Does it support Indian and other languages?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. PublishKit supports 13 languages including Hinglish, Hindi, Telugu, Tamil, Marathi, Punjabi, and Bhojpuri with proper native scripts." } },
+        { "@type": "Question", "name": "Is PublishKit free to use?", "acceptedAnswer": { "@type": "Answer", "text": "You can start free with a session that needs no sign-in. Paid plans unlock higher monthly limits and extra features like social repurposing." } },
+        { "@type": "Question", "name": "Is my uploaded audio or video private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Uploaded media is processed for your generation and automatically deleted within 3 hours, and it is never used to train AI models." } }
+      ]
+    }
+    </script>
 
     <!-- Duplicate-content guard — the same app is served on the custom domain
          (publishkit.in) and the default Firebase domains (publishkit.web.app,
@@ -62,6 +114,15 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Static SEO H1 — the visible heading is rendered by React inside #root,
+         which is empty in the raw HTML response, so crawlers that parse static
+         HTML (Bing flagged "H1 tag missing") saw no <h1>. This screen-reader-only
+         heading lives OUTSIDE #root so React's render never removes it, giving
+         the page exactly one top-level <h1> in the initial HTML. -->
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+      PublishKit — AI YouTube Content Generator
+    </h1>
 
     <!-- Hidden SEO-only legal links — invisible to users (display:none)
          but present in the initial HTML response so crawlers and OAuth
