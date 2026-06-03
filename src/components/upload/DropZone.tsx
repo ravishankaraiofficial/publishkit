@@ -69,7 +69,7 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
         onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "w-full h-72 rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all bg-[#1A1A1A]",
+          "w-full h-44 rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all bg-[#1A1A1A]",
           "border-2 border-dashed",
           isDragging
             ? "border-[#E05A1E] shadow-[0_0_20px_rgba(224,90,30,0.25)]"
