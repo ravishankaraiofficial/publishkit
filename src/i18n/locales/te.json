@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "ప్రైవసీ షీల్డ్ యాక్టివ్: అప్‌లోడ్ చేసిన ఫైల్‌లు మరియు స్క్రిప్ట్‌లు అన్నీ 3 గంటల తర్వాత మా సిస్టమ్ నుండి పూర్తిగా తొలగించబడతాయి.",
   "upload.dropzoneTitle": "మీ ఆడియోను ఇక్కడ అప్‌లోడ్ చేయండి (లేదా విశ్లేషణ కోసం PDF / ఇమేజ్)",
   "upload.dropzoneSubtitle": "ఆడియో · PDF · ఇమేజ్ · గరిష్టంగా 200MB",
-  "script.copyFullScript": "పూర్తి స్క్రిప్ట్‌ను కాపీ చేయండి"
+  "script.copyFullScript": "పూర్తి స్క్రిప్ట్‌ను కాపీ చేయండి",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "प्राइवेसी शील्ड एक्टिव: सगरी अपलोड कइल फाइल और बनल स्क्रिप्ट 3 घंटा बाद हमनी के सिस्टम से अपने आप डिलीट हो जाला।",
   "upload.dropzoneTitle": "आपन ऑडियो इहाँ अपलोड करीं (या विश्लेषण खातिर PDF / इमेज)",
   "upload.dropzoneSubtitle": "ऑडियो · PDF · इमेज · जादे से जादे 200MB",
-  "script.copyFullScript": "पूरा स्क्रिप्ट कॉपी करीं"
+  "script.copyFullScript": "पूरा स्क्रिप्ट कॉपी करीं",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

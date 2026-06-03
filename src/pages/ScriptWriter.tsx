@@ -101,9 +101,15 @@ const ScriptWriter: React.FC = () => {
   const planLabel = PLAN_LABELS[plan] ?? PLAN_LABELS.free;
   const monthlyLimit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const usage =
-    profile?.scriptUsageMonth === currentMonth ? (profile?.scriptUsageThisMonth ?? 0) : 0;
+  let usage = profile?.scriptUsage ?? 0;
+  const cycleStartStr = profile?.usageCycleStart;
+  if (cycleStartStr) {
+    const cycleStartDate = new Date(cycleStartStr);
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() - cycleStartDate.getTime() > THIRTY_DAYS_MS) {
+      usage = 0; // Visually reset if cycle is expired
+    }
+  }
   const limitReached = usage >= monthlyLimit;
 
   const handleCopy = (text: string) => {
@@ -274,6 +280,17 @@ ${output.cta}
                 <span>{t('script.dropzonePrivacy')}</span>
               </div>
             </div>
+
+            {(isUploading || loading) && (
+              <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center text-center font-medium animate-pulse">
+                {t('script.resultComing')}
+              </div>
+            )}
+            {!isUploading && !loading && output && (
+              <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-center font-medium">
+                {t('script.resultGenerated')}
+              </div>
+            )}
           </div>
 
           <div className="relative flex items-center py-5">

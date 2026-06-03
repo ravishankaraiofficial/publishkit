@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Inter:wght@400&display=swap" rel="stylesheet">
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        background: #000;
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        overflow-x: auto;
+    }
+    .slide {
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        flex-shrink: 0;
+        overflow: hidden;
+        background-color: #100D08;
+    }
+    .background-image {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+    }
+    .overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(26, 18, 8, 0.65); /* #1A1208 dark brown overlay */
+        z-index: 2;
+    }
+    .border-frame {
+        position: absolute;
+        top: 24px; left: 24px; right: 24px; bottom: 24px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 40px;
+    }
+    
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Inter', sans-serif;
+        font-size: 32px;
+        color: #F5EDD6;
+        font-weight: 400;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        padding-bottom: 20px;
+        margin-top: -10px; /* Offset to bring it closer to the border */
+        margin-left: -40px;
+        margin-right: -40px;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .bottom-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: 'Inter', sans-serif;
+        font-size: 32px;
+        color: #F5EDD6;
+        font-weight: 400;
+        border-top: 2px solid rgba(255, 255, 255, 0.15);
+        padding-top: 20px;
+        margin-bottom: -10px;
+        margin-left: -40px;
+        margin-right: -40px;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .cta-button {
+        background-color: #C9A84C;
+        width: 80px;
+        height: 60px;
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 40px;
+        position: relative;
+    }
+
+    .heading {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 140px;
+        line-height: 1.1;
+        color: #F5EDD6;
+        font-weight: 700;
+        margin-bottom: 60px;
+        text-align: left;
+        max-width: 900px;
+    }
+
+    .italic-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .italic-text {
+        font-style: italic;
+        font-weight: 400;
+        color: #C9A84C;
+        padding: 0 20px;
+    }
+
+    .ellipse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120%;
+        height: 120%;
+        pointer-events: none;
+    }
+
+    .subtext-container {
+        font-family: 'Inter', sans-serif;
+        font-size: 40px;
+        color: #C8B99A;
+        line-height: 1.4;
+        max-width: 450px;
+        position: absolute;
+    }
+
+    .left-subtext {
+        bottom: 100px;
+        left: 40px;
+    }
+
+    .right-subtext {
+        bottom: 250px;
+        right: 40px;
+        text-align: right;
+    }
+
+    .arrow {
+        position: absolute;
+    }
+    .arrow-down {
+        top: -100px;
+        left: 60px;
+    }
+    .arrow-up {
+        bottom: -90px;
+        right: 60px;
+    }
+
+</style>
+</head>
+<body>
+    
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide1.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 01</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        Automate Your 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Workflow</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Save hours on production details.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Create once, publish everywhere.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide2.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 02</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        Perfect YouTube 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Metadata</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Instant SEO titles and chapters.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Stop wrestling with descriptions.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide3.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 03</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        Multimodal 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Script Writer</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Upload audio, PDF, or text.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Generate scripts in your authentic voice.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide4.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 04</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        MultiPost 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Distribution</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>1 click generates posts for 4 platforms.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>X, Instagram, LinkedIn, and YouTube.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide5.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 05</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        Reliable 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Localization</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Native scripts in 13 languages.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>No more silent English fallbacks.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="background-image" style="background-image: url('assets/slide6.png');"></div>
+            <div class="overlay"></div>
+            
+            <div class="border-frame">
+                <div class="top-bar">
+                    <span class="brand">Publishkit.in</span>
+                    <span class="slide-number">Slide 06</span>
+                </div>
+
+                <div class="content">
+                    <h1 class="heading">
+                        Reclaim Your 
+                        <span class="italic-wrapper">
+                            <svg class="ellipse" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="50" rx="145" ry="45" stroke="#C9A84C" stroke-width="6" fill="transparent" />
+</svg>
+                            <span class="italic-text">Freedom</span>
+                        </span> 
+                        
+                    </h1>
+
+                    <div class="subtext-container left-subtext">
+                        <div class="arrow arrow-down"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Focus on creating, not formatting.</p>
+                    </div>
+
+                    <div class="subtext-container right-subtext">
+                        <div class="arrow arrow-up" style="transform: scaleX(-1) rotate(90deg);"><svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 20 C 50 10, 80 40, 60 70 S 10 90, 80 80" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+  <path d="M70 70 L85 80 L70 90" stroke="#C9A84C" stroke-width="4" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div>
+                        <p>Start automating today.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <span class="url">www.publishkit.in</span>
+                    <div class="cta-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0D0A05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+</body>
+</html>

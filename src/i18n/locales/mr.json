@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "प्रायव्हसी शील्ड अ‍ॅक्टिव्ह: सर्व अपलोड केलेल्या फाइल्स आणि तयार केलेल्या स्क्रिप्ट्स 3 तासांनंतर आमच्या सिस्टीममधून आपोआप हटवल्या जातात.",
   "upload.dropzoneTitle": "तुमचा ऑडिओ येथे अपलोड करा (किंवा विश्लेषणासाठी PDF / इमेज)",
   "upload.dropzoneSubtitle": "ऑडिओ · PDF · इमेज · कमाल 200MB",
-  "script.copyFullScript": "पूर्ण स्क्रिप्ट कॉपी करा"
+  "script.copyFullScript": "पूर्ण स्क्रिप्ट कॉपी करा",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

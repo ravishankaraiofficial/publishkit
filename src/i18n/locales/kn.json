@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "ಗೌಪ್ಯತೆ ರಕ್ಷಣೆ ಸಕ್ರಿಯವಾಗಿದೆ: ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಎಲ್ಲಾ ಫೈಲ್‌ಗಳು ಮತ್ತು ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳನ್ನು 3 ಗಂಟೆಗಳ ನಂತರ ನಮ್ಮ ಸಿಸ್ಟಮ್‌ನಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅಳಿಸಲಾಗುತ್ತದೆ.",
   "upload.dropzoneTitle": "ನಿಮ್ಮ ಆಡಿಯೊವನ್ನು ಇಲ್ಲಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (ಅಥವಾ ವಿಶ್ಲೇಷಣೆಗಾಗಿ PDF / ಚಿತ್ರ)",
   "upload.dropzoneSubtitle": "ಆಡಿಯೋ · PDF · ಚಿತ್ರ · ಗರಿಷ್ಠ 200MB",
-  "script.copyFullScript": "ಪೂರ್ಣ ಸ್ಕ್ರಿಪ್ಟ್ ನಕಲಿಸಿ"
+  "script.copyFullScript": "ಪೂರ್ಣ ಸ್ಕ್ರಿಪ್ಟ್ ನಕಲಿಸಿ",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

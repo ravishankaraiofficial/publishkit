@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "પ્રાઇવસી શિલ્ડ એક્ટિવ: અપલોડ કરેલી ફાઇલો અને જનરેટ કરેલી સ્ક્રિપ્ટ્સ 3 કલાક પછી અમારી સિસ્ટમમાંથી આપમેળે ભૂંસી નાખવામાં આવે છે.",
   "upload.dropzoneTitle": "તમારો ઑડિઓ અહીં અપલોડ કરો (અથવા વિશ્લેષણ માટે PDF / ઇમેજ)",
   "upload.dropzoneSubtitle": "ઑડિઓ · PDF · ઇમેજ · મહત્તમ 200MB",
-  "script.copyFullScript": "આખી સ્ક્રિપ્ટ કૉપિ કરો"
+  "script.copyFullScript": "આખી સ્ક્રિપ્ટ કૉપિ કરો",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

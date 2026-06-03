@@ -83,26 +83,29 @@ const Pricing: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user || user.isAnonymous) {
+    if (!profile) {
+      if (user && !user.isAnonymous) {
+        // Still loading profile
+        return;
+      }
       setLoading(false);
       return;
     }
 
-    const fetchUsage = async () => {
-      try {
-        const month = new Date().toISOString().slice(0, 7); // YYYY-MM
-        const usageRef = doc(db, `users/${user.uid}/usage/${month}`);
-        const usageDoc = await getDoc(usageRef);
-        setUsage(usageDoc.exists() ? (usageDoc.data()?.count || 0) : 0);
-      } catch (error) {
-        console.error('Error fetching usage:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const cycleStartStr = profile.usageCycleStart;
+    let currentUsage = profile.metadataUsage || 0;
 
-    fetchUsage();
-  }, [user]);
+    if (cycleStartStr) {
+      const cycleStartDate = new Date(cycleStartStr);
+      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+      if (Date.now() - cycleStartDate.getTime() > THIRTY_DAYS_MS) {
+        currentUsage = 0; // Visually reset if cycle is expired
+      }
+    }
+
+    setUsage(currentUsage);
+    setLoading(false);
+  }, [user, profile]);
 
   const handleUpgrade = async (planKey: 'pro' | 'ultra') => {
     if (!user || user.isAnonymous) {
@@ -225,7 +228,9 @@ const Pricing: React.FC = () => {
         ) : (
           <div className="bg-neutral-900 border border-orange-600/30 rounded-2xl p-8 mb-12">
             <div className="max-w-2xl mx-auto">
-              <p className="text-gray-400 text-sm mb-2">{t('pricing.currentUsage')} — {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
+              <p className="text-gray-400 text-sm mb-2">
+                {t('pricing.currentUsage')} — {profile?.usageCycleStart ? new Date(profile.usageCycleStart).toLocaleDateString() + ' to ' + new Date(new Date(profile.usageCycleStart).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Current Cycle'}
+              </p>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-2xl font-semibold text-white">
                   {t('pricing.usedOf', { used: usage, limit: plans[currentPlan as keyof typeof plans].limit })}

@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "தனியுரிமைப் பாதுகாப்பு: பதிவேற்றப்பட்ட கோப்புகள் மற்றும் ஸ்கிரிப்ட்கள் 3 மணிநேரத்திற்குப் பிறகு எங்கள் கணினியிலிருந்து தானாகவே அழிக்கப்படும்.",
   "upload.dropzoneTitle": "உங்கள் ஆடியோவை இங்கே பதிவேற்றவும் (அல்லது பகுப்பாய்விற்கு PDF / படம்)",
   "upload.dropzoneSubtitle": "ஆடியோ · PDF · படம் · அதிகபட்சம் 200MB",
-  "script.copyFullScript": "முழு ஸ்கிரிப்ட்டையும் நகலெடு"
+  "script.copyFullScript": "முழு ஸ்கிரிப்ட்டையும் நகலெடு",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

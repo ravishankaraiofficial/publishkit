@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "ਪ੍ਰਾਈਵੇਸੀ ਸ਼ੀਲਡ ਐਕਟਿਵ: ਸਾਰੀਆਂ ਅੱਪਲੋਡ ਕੀਤੀਆਂ ਫਾਈਲਾਂ ਅਤੇ ਬਣਾਈਆਂ ਗਈਆਂ ਸਕ੍ਰਿਪਟਾਂ 3 ਘੰਟਿਆਂ ਬਾਅਦ ਸਾਡੇ ਸਿਸਟਮ ਤੋਂ ਆਪਣੇ ਆਪ ਹਟਾ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
   "upload.dropzoneTitle": "ਆਪਣਾ ਆਡੀਓ ਇੱਥੇ ਅੱਪਲੋਡ ਕਰੋ (ਜਾਂ ਵਿਸ਼ਲੇਸ਼ਣ ਲਈ PDF / ਚਿੱਤਰ)",
   "upload.dropzoneSubtitle": "ਆਡੀਓ · PDF · ਚਿੱਤਰ · ਵੱਧ ਤੋਂ ਵੱਧ 200MB",
-  "script.copyFullScript": "ਪੂਰੀ ਸਕ੍ਰਿਪਟ ਕਾਪੀ ਕਰੋ"
+  "script.copyFullScript": "ਪੂਰੀ ਸਕ੍ਰਿਪਟ ਕਾਪੀ ਕਰੋ",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "Privacy Shield Active: Sabhi upload ki gayi files aur generated scripts 3 ghante baad hamare system se automatically delete ho jaati hain.",
   "upload.dropzoneTitle": "Apna Audio yahan upload karein (ya analysis ke liye PDF / Image)",
   "upload.dropzoneSubtitle": "Audio · PDF · Image · Max 200MB",
-  "script.copyFullScript": "Puri script copy karein"
+  "script.copyFullScript": "Puri script copy karein",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

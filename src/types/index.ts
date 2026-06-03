@@ -68,6 +68,14 @@ export interface CreatorProfile {
   // ─── Server-managed trial / usage (Admin SDK only — see firestore.rules) ─
   scriptTrialLastUsedAt?: Timestamp | null;
   repurposingTrialLastUsedAt?: Timestamp | null;
+  
+  // ─── 30-Day Window Usage (NEW) ──────────────────────────────────────────
+  usageCycleStart?: string;
+  metadataUsage?: number;
+  scriptUsage?: number;
+  repurposingUsage?: number;
+  
+  // Legacy fields (kept for type compatibility during migration)
   scriptUsageThisMonth?: number;
   repurposingUsageThisMonth?: number;
   scriptUsageMonth?: string;

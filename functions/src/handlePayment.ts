@@ -314,6 +314,10 @@ export const verifyOrderPayment = functions
           // Defensive: clear any stale subscription ID — this user is on the
           // one-time track now.
           razorpaySubscriptionId: FieldValue.delete(),
+          usageCycleStart: new Date().toISOString(),
+          metadataUsage: 0,
+          scriptUsage: 0,
+          repurposingUsage: 0,
         },
         { merge: true }
       );
@@ -466,6 +470,10 @@ export const razorpayWebhook = functions
               planExpiresAt: expiresAt.toISOString(),
               razorpayLastPaymentId: payment.id,
               razorpaySubscriptionId: FieldValue.delete(),
+              usageCycleStart: new Date().toISOString(),
+              metadataUsage: 0,
+              scriptUsage: 0,
+              repurposingUsage: 0,
             },
             { merge: true }
           );
@@ -508,6 +516,10 @@ export const razorpayWebhook = functions
           plan,
           planExpiry: nextBilling.toISOString(),
           razorpaySubscriptionId: subId,
+          usageCycleStart: new Date().toISOString(),
+          metadataUsage: 0,
+          scriptUsage: 0,
+          repurposingUsage: 0,
         }, { merge: true });
       }
 

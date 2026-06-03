@@ -54,9 +54,15 @@ const MultiPost: React.FC = () => {
   const planLabel = PLAN_LABELS[plan] ?? PLAN_LABELS.free;
   const monthlyLimit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const usage =
-    profile?.repurposingUsageMonth === currentMonth ? (profile?.repurposingUsageThisMonth ?? 0) : 0;
+  let usage = profile?.repurposingUsage ?? 0;
+  const cycleStartStr = profile?.usageCycleStart;
+  if (cycleStartStr) {
+    const cycleStartDate = new Date(cycleStartStr);
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() - cycleStartDate.getTime() > THIRTY_DAYS_MS) {
+      usage = 0; // Visually reset if cycle is expired
+    }
+  }
   const limitReached = usage >= monthlyLimit;
 
   // Fetch past results for dropdown

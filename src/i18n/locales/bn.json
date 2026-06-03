@@ -265,5 +265,7 @@
   "script.dropzonePrivacy": "গোপনীয়তা ঢাল সক্রিয়: সমস্ত আপলোড করা ফাইল এবং জেনারেট করা স্ক্রিপ্ট 3 ঘন্টা পরে আমাদের সিস্টেম থেকে স্বয়ংক্রিয়ভাবে মুছে ফেলা হয়।",
   "upload.dropzoneTitle": "আপনার অডিও এখানে আপলোড করুন (বা বিশ্লেষণের জন্য PDF / ছবি)",
   "upload.dropzoneSubtitle": "অডিও · PDF · ছবি · সর্বোচ্চ 200MB",
-  "script.copyFullScript": "সম্পূর্ণ স্ক্রিপ্ট কপি করুন"
+  "script.copyFullScript": "সম্পূর্ণ স্ক্রিপ্ট কপি করুন",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }

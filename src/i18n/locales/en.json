@@ -276,5 +276,7 @@
   "script.dropzonePrivacy": "Privacy Shield Active: All uploaded files and generated scripts are automatically and completely wiped from our systems after 3 hours",
   "upload.dropzoneTitle": "Upload your Audio here (or PDF / Image for analysis)",
   "upload.dropzoneSubtitle": "Audio · PDF · Image · Max 200MB",
-  "script.copyFullScript": "Copy Full Script"
+  "script.copyFullScript": "Copy Full Script",
+  "script.resultComing": "The result is coming...",
+  "script.resultGenerated": "✅ The output has been generated below!"
 }
