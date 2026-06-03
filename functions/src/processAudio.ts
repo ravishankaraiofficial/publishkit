@@ -124,7 +124,7 @@ export const processAudio = functions
 
       // Enforce atomic monthly rate limits (UID + IP based)
       const rawIp = context.rawRequest.ip || 'unknown';
-      await enforceRateLimit(uid, rawIp, plan);
+      await enforceRateLimit(uid, rawIp, plan, generationMode);
 
       // Anti-abuse: block fresh UIDs from reusing the free tier on the same
       // device/IP as a previous free-tier account. No-op for paid users.

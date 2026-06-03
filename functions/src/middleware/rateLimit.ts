@@ -20,7 +20,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
  * Both checks and increments happen inside a single Firestore transaction,
  * eliminating TOCTOU race conditions. Throws HttpsError if either limit is reached.
  */
-export async function enforceRateLimit(uid: string, rawIp: string, plan: string = 'free'): Promise<void> {
+export async function enforceRateLimit(uid: string, rawIp: string, plan: string = 'free', generationMode: 'metadata' | 'script' = 'metadata'): Promise<void> {
   const month = new Date().toISOString().slice(0, 7); // YYYY-MM for IP (kept calendar month for simplicity)
   const limit = PLAN_MONTHLY_LIMITS[plan] ?? 10;
 
@@ -50,7 +50,8 @@ export async function enforceRateLimit(uid: string, rawIp: string, plan: string 
       data.repurposingUsage = 0;
     }
 
-    const uidCount = data.metadataUsage ?? 0;
+    const usageField = generationMode === 'script' ? 'scriptUsage' : 'metadataUsage';
+    const uidCount = data[usageField] ?? 0;
 
     // Check per-UID limit
     if (uidCount >= limit) {
@@ -71,11 +72,12 @@ export async function enforceRateLimit(uid: string, rawIp: string, plan: string 
     // Both limits are safe — atomically increment both counters
     const payload: any = {
       usageCycleStart: cycleStartStr,
-      metadataUsage: uidCount + 1,
+      [usageField]: uidCount + 1,
     };
     
     // If we're resetting, also apply 0 to others in this transaction
-    if (data.scriptUsage === 0) payload.scriptUsage = 0;
+    if (generationMode === 'script' && data.metadataUsage === 0) payload.metadataUsage = 0;
+    if (generationMode === 'metadata' && data.scriptUsage === 0) payload.scriptUsage = 0;
     if (data.repurposingUsage === 0) payload.repurposingUsage = 0;
 
     if (userDoc.exists) {
