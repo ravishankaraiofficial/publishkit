@@ -43,6 +43,20 @@ export function Home() {
 
   const isGuest = !!user?.isAnonymous;
 
+  const plan = profile?.plan ?? 'free';
+  const planLabel = plan === 'ultra' ? 'Max Plan' : plan === 'pro' ? 'Pro Plan' : 'Free Plan';
+  const monthlyLimit = plan === 'ultra' ? 350 : plan === 'pro' ? 100 : 3;
+
+  let usage = profile?.metadataUsage ?? 0;
+  const cycleStartStr = profile?.usageCycleStart;
+  if (cycleStartStr) {
+    const cycleStartDate = new Date(cycleStartStr);
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() - cycleStartDate.getTime() > THIRTY_DAYS_MS) {
+      usage = 0;
+    }
+  }
+
   const showResults = !!(result && result.status === 'complete');
   const showProcessing =
     (isUploading && !showResults) ||
@@ -160,6 +174,17 @@ export function Home() {
 
         {!quotaExceeded && showUpload && (
           <div className="fade-in">
+            {/* Usage counter */}
+            {!isGuest && (
+              <div className="bg-neutral-900 border border-gray-800 rounded-2xl p-4 mb-8">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <p className="text-sm text-gray-300">
+                    {t('script.usageCounter', { used: usage, limit: monthlyLimit })}
+                    <span className="text-[#888888] ml-2">({planLabel})</span>
+                  </p>
+                </div>
+              </div>
+            )}
             <DropZone onFileSelect={handleFileSelect} />
           </div>
         )}

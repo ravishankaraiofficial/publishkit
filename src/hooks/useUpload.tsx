@@ -286,7 +286,12 @@ export function UploadProvider({ children }: { children: ReactNode }) {
         if (data.status === 'complete' || data.status === 'failed') {
           setIsUploading(false);
           setPendingUpload(null);
-          if (user) localStorage.removeItem(`pendingUpload_${user.uid}`);
+          if (user) {
+            localStorage.removeItem(`pendingUpload_${user.uid}`);
+            if (!user.isAnonymous) {
+              refreshProfile().catch(console.error);
+            }
+          }
 
           if (data.status === 'complete' && user?.isAnonymous) {
             // Mark free trial as consumed so next visit gates to login.
