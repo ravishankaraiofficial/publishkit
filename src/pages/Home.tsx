@@ -274,7 +274,7 @@ export function Home() {
                         className={cn(
                           "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer",
                           checked
-                            ? "border-[#E05A1E]/60 bg-[#E05A1E]/10 text-white"
+                            ? "border-[#E05A1E]/60 bg-[#E05A1E]/10 text-gray-900 dark:text-white"
                             : "border-gray-200 dark:border-[#2A2A2A] bg-transparent text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40",
                           !multiPostEnabled && "opacity-60",
                           (!multiPostEnabled || isUploading || showResults) && "cursor-not-allowed"

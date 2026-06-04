@@ -692,7 +692,7 @@ export function Settings() {
                         className={cn(
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
-                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
+                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-gray-900 dark:text-white'
                             : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
@@ -714,7 +714,7 @@ export function Settings() {
                         className={cn(
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
-                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
+                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-gray-900 dark:text-white'
                             : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
@@ -736,7 +736,7 @@ export function Settings() {
                         className={cn(
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
-                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
+                            ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-gray-900 dark:text-white'
                             : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
