@@ -28,6 +28,7 @@ import ml from './locales/ml.json';
 import kn from './locales/kn.json';
 import bho from './locales/bho.json';
 import ur from './locales/ur.json';
+import as from './locales/as.json';
 import type { OutputLanguage } from '../lib/languages';
 
 type Dict = Record<string, string>;
@@ -48,6 +49,7 @@ const DICTIONARIES: Partial<Record<OutputLanguage, Dict>> = {
   Kannada: kn,
   Bhojpuri: bho,
   Urdu: ur,
+  Assamese: as,
 };
 
 const STORAGE_KEY = 'pk_ui_lang_v1';
