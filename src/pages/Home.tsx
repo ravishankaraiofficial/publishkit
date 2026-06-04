@@ -79,7 +79,7 @@ export function Home() {
 
       {/* Hero */}
       <section className="text-center pt-6 sm:pt-10 pb-5 sm:pb-8">
-        <h1 className="hero-glow text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 className="hero-glow text-4xl sm:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">
           PublishKit
         </h1>
         <p className="hero-glow mt-3 sm:mt-6 text-[#E05A1E] text-base sm:text-2xl max-w-3xl mx-auto font-medium px-2">
@@ -126,7 +126,7 @@ export function Home() {
             )}></div>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <span className="text-xs font-semibold text-white leading-tight sm:text-sm">{t('home.thumbnailPrompts')}</span>
+            <span className="text-xs font-semibold text-gray-900 dark:text-white leading-tight sm:text-sm">{t('home.thumbnailPrompts')}</span>
             <span className="text-[10px] text-gray-400 dark:text-[#555555] leading-tight sm:text-sm sm:text-gray-500 dark:text-[#888888]">
               <span className="hidden sm:inline">— </span>{t('home.thumbnailOffBydefault')}
               <span className="hidden sm:inline"> · {t('home.thumbnailAudioOnly')}</span>
@@ -142,7 +142,7 @@ export function Home() {
           <div className="flex items-center gap-2 justify-center bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/30 rounded-xl px-4 py-3 text-sm text-center">
             <span className="text-[#E05A1E]">✦</span>
             <span className="text-gray-700 dark:text-[#CFCFCF]">
-              <span className="text-white font-semibold">{t('home.freeSessionBadge')}</span> {t('home.freeSessionDesc')}
+              <span className="text-gray-900 dark:text-white font-semibold">{t('home.freeSessionBadge')}</span> {t('home.freeSessionDesc')}
             </span>
           </div>
         </div>
@@ -153,7 +153,7 @@ export function Home() {
         {/* Guest quota exhausted — prompt sign-in instead of upload zone */}
         {quotaExceeded && (
           <div className="fade-in bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-8 text-center">
-            <p className="text-white font-semibold text-lg mb-2">{t('home.freeSessionComplete')}</p>
+            <p className="text-gray-900 dark:text-white font-semibold text-lg mb-2">{t('home.freeSessionComplete')}</p>
             <p className="text-gray-500 dark:text-[#888888] text-sm mb-6 leading-relaxed">
               {t('home.freeSessionCompleteDesc')}
             </p>
@@ -254,7 +254,7 @@ export function Home() {
                     )}></div>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 flex-1">
-                    <span className="text-xs font-semibold text-white leading-tight sm:text-sm">{t('home.multipostLabel')}</span>
+                    <span className="text-xs font-semibold text-gray-900 dark:text-white leading-tight sm:text-sm">{t('home.multipostLabel')}</span>
                     <span className="text-[10px] text-gray-400 dark:text-[#555555] leading-tight sm:text-sm sm:text-gray-500 dark:text-[#888888]">
                       <span className="hidden sm:inline">— </span>
                       {multiPostEnabled ? t('home.multipostOn') : t('home.multipostOff')}
@@ -314,7 +314,7 @@ export function Home() {
       {showResults && result && (
         <div className="max-w-4xl mx-auto fade-in mt-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
-            <h2 className="text-xl font-semibold text-white truncate">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
               {t('home.resultsFor')} <span className="text-gray-500 dark:text-[#888888]">{result.audioFileName}</span>
             </h2>
           </div>
@@ -323,7 +323,7 @@ export function Home() {
 
           {/* Feedback Prompt for Signed-in Users */}
           {!isGuest && (
-            <div className="mt-12 p-8 rounded-3xl bg-gradient-to-b from-[#1A1A1A] to-[#0D0D0D] border border-[#E05A1E]/20 text-center relative overflow-hidden group">
+            <div className="mt-12 p-8 rounded-3xl bg-gradient-to-b from-gray-50 to-white dark:from-[#1A1A1A] dark:to-[#0D0D0D] border border-gray-200 dark:border-[#E05A1E]/20 shadow-sm dark:shadow-none text-center relative overflow-hidden group">
               {/* Subtle background glow */}
               <div className="absolute inset-0 bg-[#E05A1E]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
@@ -334,7 +334,7 @@ export function Home() {
                   </svg>
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-2">{t('home.savedTime')}</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('home.savedTime')}</h3>
                 <p className="text-gray-500 dark:text-[#888888] text-sm mb-8 max-w-md mx-auto leading-relaxed">
                   {t('home.savedTimeDesc')}
                 </p>
@@ -363,7 +363,7 @@ export function Home() {
             {isGuest && (
               /* Guest: trial just consumed — prompt to sign in */
               <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-6 max-w-sm mx-auto fade-in">
-                <p className="text-white font-semibold mb-1">{t('home.thatWasFreeSession')}</p>
+                <p className="text-gray-900 dark:text-white font-semibold mb-1">{t('home.thatWasFreeSession')}</p>
                 <p className="text-gray-500 dark:text-[#888888] text-sm mb-5 leading-relaxed">
                   {t('home.signInToGenerateAgain')}
                 </p>
@@ -399,7 +399,7 @@ export function Home() {
       <div className="mt-12 mb-8 flex justify-center w-full">
         <Link
           to="/results"
-          className="flex items-center gap-2 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 text-gray-700 dark:text-[#CFCFCF] hover:text-white px-6 py-3.5 rounded-2xl text-sm font-medium transition-all shadow-lg hover:shadow-[0_0_20px_rgba(224,90,30,0.15)] w-full max-w-md justify-center"
+          className="flex items-center gap-2 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 text-gray-700 dark:text-[#CFCFCF] hover:text-gray-900 dark:hover:text-white px-6 py-3.5 rounded-2xl text-sm font-medium transition-all shadow-lg hover:shadow-[0_0_20px_rgba(224,90,30,0.15)] w-full max-w-md justify-center"
         >
           <svg className="w-4 h-4 text-[#E05A1E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

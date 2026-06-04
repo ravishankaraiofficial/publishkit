@@ -16,13 +16,13 @@ import { FAQ_ITEMS } from '../../lib/seo-schema';
 export function HomeSeoContent() {
   return (
     <section className="max-w-3xl mx-auto mt-16 mb-8 px-1 text-left">
-      <article className="prose prose-invert max-w-none text-[#B5B5B5] leading-relaxed space-y-6">
-        <h2 className="text-2xl font-bold text-white">
+      <article className="prose prose-invert max-w-none text-gray-700 dark:text-[#B5B5B5] leading-relaxed space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           The AI YouTube Content Generator for Faster Publishing
         </h2>
         <p>
           PublishKit is an{' '}
-          <strong className="text-white">AI YouTube content generator</strong>{' '}
+          <strong className="text-gray-900 dark:text-white">AI YouTube content generator</strong>{' '}
           built for creators who would rather make videos than spend hours on
           metadata. Upload your raw audio, a PDF, or an image, and PublishKit
           turns it into everything you need to publish: click-worthy titles, an
@@ -31,36 +31,36 @@ export function HomeSeoContent() {
           90 seconds.
         </p>
 
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           Generate YouTube titles, descriptions, and timestamps
         </h3>
         <p>
           Writing a good YouTube title is part art, part SEO. PublishKit reads
           what is actually said in your video and proposes titles designed to
           earn clicks while staying true to your topic. The{' '}
-          <strong className="text-white">YouTube description generator</strong>{' '}
+          <strong className="text-gray-900 dark:text-white">YouTube description generator</strong>{' '}
           produces a structured, keyword-aware description with the right
           context, links section, and call-to-action — no blank-page staring.
           The built-in{' '}
-          <strong className="text-white">timestamp generator</strong> listens to
+          <strong className="text-gray-900 dark:text-white">timestamp generator</strong> listens to
           your audio and creates clean, clickable chapters so viewers can jump
           to the part they want, which improves watch time and retention.
         </p>
 
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           Turn one video into a full content kit
         </h3>
         <p>
           Modern creators publish everywhere. With PublishKit's repurposing,
           one upload becomes posts for X, Instagram, LinkedIn, and YouTube
           Community — each adapted to the platform instead of copy-pasted. The{' '}
-          <strong className="text-white">AI script generator</strong> can also
+          <strong className="text-gray-900 dark:text-white">AI script generator</strong> can also
           draft or tighten your script, so your next video starts from a strong
           outline rather than a blank document. Everything is generated from
           your actual content, keeping the message consistent across channels.
         </p>
 
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           Sounds like you, in your language
         </h3>
         <p>
@@ -72,7 +72,7 @@ export function HomeSeoContent() {
           audience you actually serve.
         </p>
 
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           Private, fast, and free to start
         </h3>
         <p>
@@ -82,7 +82,7 @@ export function HomeSeoContent() {
           train AI models. Paid plans unlock higher monthly limits and extra
           features when you are ready to scale. Whether you are a new creator
           publishing your first video or a studio shipping content daily, an{' '}
-          <strong className="text-white">AI YouTube content generator</strong>{' '}
+          <strong className="text-gray-900 dark:text-white">AI YouTube content generator</strong>{' '}
           like PublishKit removes the busywork so you can focus on creating.
           Learn more on our{' '}
           <Link to="/about" className="text-[#E05A1E] hover:underline">
@@ -106,7 +106,7 @@ function HomeFaq() {
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
         Frequently asked questions
       </h2>
       <div className="space-y-3">
@@ -123,7 +123,7 @@ function HomeFaq() {
                 aria-expanded={isOpen}
                 className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left"
               >
-                <span className="text-sm sm:text-base font-semibold text-white">
+                <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                   {item.q}
                 </span>
                 <span
@@ -135,7 +135,7 @@ function HomeFaq() {
                 </span>
               </button>
               {isOpen && (
-                <div className="px-4 pb-4 text-sm text-[#B5B5B5] leading-relaxed">
+                <div className="px-4 pb-4 text-sm text-gray-700 dark:text-[#B5B5B5] leading-relaxed">
                   {item.a}
                 </div>
               )}

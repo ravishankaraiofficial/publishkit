@@ -96,7 +96,7 @@ export function Navbar() {
 
             <button
               onClick={handleAuthAction}
-              className="px-3 py-1.5 rounded-lg text-gray-500 dark:text-[#888888] hover:text-white hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10 transition-all duration-200 ease-out flex items-center gap-1.5 active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.04] hover:backdrop-blur-sm dark:hover:ring-1 dark:hover:ring-white/10 transition-all duration-200 ease-out flex items-center gap-1.5 active:scale-95"
             >
               {isGuest ? (
                 <>

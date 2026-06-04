@@ -69,7 +69,7 @@ export function Login() {
 
         {/* Big glowing title */}
         <h1
-          className="hero-glow text-6xl sm:text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-tight"
+          className="hero-glow text-6xl sm:text-7xl md:text-8xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight"
           style={{ letterSpacing: '-0.03em' }}
         >
           PublishKit
@@ -114,7 +114,7 @@ export function Login() {
         {/* Free trial exhausted message */}
         {localStorage.getItem('freeTrialUsed') === 'true' && (
           <div className="mt-10 mb-4 w-full max-w-sm rounded-xl bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 px-5 py-4 text-center">
-            <p className="text-white font-semibold text-sm mb-1">Your free session has been used</p>
+            <p className="text-gray-900 dark:text-white font-semibold text-sm mb-1">Your free session has been used</p>
             <p className="text-gray-500 dark:text-[#888888] text-xs leading-relaxed">
               Sign in with Google to continue using PublishKit — it's free.
             </p>
@@ -155,13 +155,13 @@ export function Login() {
             Visible link to Privacy Policy and Terms is mandatory on the
             home page that the OAuth consent screen points to. */}
         <footer className="mt-12 pt-6 border-t border-[#222] w-full max-w-sm flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-[#777]">
-          <a href="/privacy" className="hover:text-white transition-colors">
+          <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">
             Privacy Policy
           </a>
-          <a href="/terms" className="hover:text-white transition-colors">
+          <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">
             Terms of Service
           </a>
-          <a href="mailto:ravishankaraiofficial@gmail.com" className="hover:text-white transition-colors">
+          <a href="mailto:ravishankaraiofficial@gmail.com" className="hover:text-gray-900 dark:hover:text-white transition-colors">
             Contact
           </a>
         </footer>
