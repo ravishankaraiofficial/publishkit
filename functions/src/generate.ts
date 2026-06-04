@@ -261,12 +261,7 @@ export async function generateScriptFromContent(
     throw new Error('Failed to parse script JSON output.');
   }
 
-  if (
-    !scriptData.hook ||
-    !scriptData.intro ||
-    !Array.isArray(scriptData.sections) ||
-    !scriptData.cta
-  ) {
+  if (!scriptData.script || !scriptData.analysis) {
     throw new Error('Invalid script structure from Gemini');
   }
 
