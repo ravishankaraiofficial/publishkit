@@ -115,7 +115,7 @@ function HomeFaq() {
           return (
             <div
               key={i}
-              className="border border-[#2A2A2A] rounded-xl bg-[#1A1A1A] overflow-hidden"
+              className="border border-gray-200 dark:border-[#2A2A2A] rounded-xl bg-gray-50 dark:bg-[#1A1A1A] overflow-hidden"
             >
               <button
                 type="button"

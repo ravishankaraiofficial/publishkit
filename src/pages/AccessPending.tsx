@@ -7,7 +7,7 @@ export function AccessPending() {
   const { logout } = useAuth();
 
   return (
-    <div className="relative min-h-screen bg-[#0D0D0D] text-[#F5F5F5] flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative min-h-screen bg-white dark:bg-[#0D0D0D] text-gray-900 dark:text-[#F5F5F5] flex items-center justify-center p-4 overflow-hidden">
       <div className="glow-bg" aria-hidden="true">
         <div className="blob b1" />
         <div className="blob b2" />

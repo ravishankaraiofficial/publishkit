@@ -69,11 +69,11 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
         onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "w-full h-44 rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all bg-[#1A1A1A]",
+          "w-full h-44 rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all bg-gray-50 dark:bg-[#1A1A1A]",
           "border-2 border-dashed",
           isDragging
             ? "border-[#E05A1E] shadow-[0_0_20px_rgba(224,90,30,0.25)]"
-            : "border-[#2A2A2A] hover:border-[#E05A1E] hover:shadow-[0_0_20px_rgba(224,90,30,0.15)]",
+            : "border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E] hover:shadow-[0_0_20px_rgba(224,90,30,0.15)]",
           isLoading && "opacity-50 pointer-events-none"
         )}
       >
@@ -83,10 +83,10 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
             isDragging ? "text-[#FF7A3D]" : "text-[#E05A1E]"
           )}
         />
-        <p className="text-white text-base font-medium">
+        <p className="text-gray-900 dark:text-white text-base font-medium">
           {t('upload.dropzoneTitle')}
         </p>
-        <p className="mt-2 text-xs text-[#555555] tracking-wide">
+        <p className="mt-2 text-xs text-gray-500 dark:text-[#555555] tracking-wide">
           {t('upload.dropzoneSubtitle')}
         </p>
 
@@ -100,7 +100,7 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
       </div>
 
       {error && (
-        <div className="mt-4 px-4 py-2.5 bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] rounded-lg text-sm w-full text-center">
+        <div className="mt-4 px-4 py-2.5 bg-[#EF4444]/10 border border-[#EF4444]/30 text-red-600 dark:text-[#EF4444] rounded-lg text-sm w-full text-center">
           {error}
         </div>
       )}

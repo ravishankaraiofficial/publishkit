@@ -91,7 +91,7 @@ export function Home() {
       <div className="flex flex-col items-center gap-3 mb-6 sm:mb-10">
         {/* Output language dropdown — 13 options */}
         <div className="flex flex-col items-center gap-1">
-          <label className="text-xs text-[#888888]">{t('home.outputLanguage')}</label>
+          <label className="text-xs text-gray-500 dark:text-[#888888]">{t('home.outputLanguage')}</label>
           <LanguagePicker
             value={outputLanguage}
             onChange={(next) => {
@@ -107,7 +107,7 @@ export function Home() {
         </div>
 
         {/* Thumbnail Toggle — compact on mobile, full width like free-session box on desktop */}
-        <label className="flex items-center gap-3 cursor-pointer group bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-2.5 w-full max-w-sm sm:max-w-[600px] sm:justify-center sm:py-3 transition-all hover:border-[#E05A1E]/40">
+        <label className="flex items-center gap-3 cursor-pointer group bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-2.5 w-full max-w-sm sm:max-w-[600px] sm:justify-center sm:py-3 transition-all hover:border-[#E05A1E]/40">
           <div className="relative flex-shrink-0">
             <input
               type="checkbox"
@@ -118,7 +118,7 @@ export function Home() {
             />
             <div className={cn(
               "block w-10 h-[22px] rounded-full transition-colors",
-              thumbnailPromptEnabled ? "bg-[#E05A1E]" : "bg-[#2A2A2A]"
+              thumbnailPromptEnabled ? "bg-[#E05A1E]" : "bg-gray-200 dark:bg-[#2A2A2A]"
             )}></div>
             <div className={cn(
               "dot absolute left-[3px] top-[3px] bg-white w-4 h-4 rounded-full transition-transform",
@@ -127,7 +127,7 @@ export function Home() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
             <span className="text-xs font-semibold text-white leading-tight sm:text-sm">{t('home.thumbnailPrompts')}</span>
-            <span className="text-[10px] text-[#555555] leading-tight sm:text-sm sm:text-[#888888]">
+            <span className="text-[10px] text-gray-400 dark:text-[#555555] leading-tight sm:text-sm sm:text-gray-500 dark:text-[#888888]">
               <span className="hidden sm:inline">— </span>{t('home.thumbnailOffBydefault')}
               <span className="hidden sm:inline"> · {t('home.thumbnailAudioOnly')}</span>
             </span>
@@ -139,9 +139,9 @@ export function Home() {
       {/* Free trial notice for anonymous visitors */}
       {isGuest && (
         <div className="max-w-[600px] mx-auto mb-4 fade-in">
-          <div className="flex items-center gap-2 justify-center bg-[#1A1A1A] border border-[#E05A1E]/30 rounded-xl px-4 py-3 text-sm text-center">
+          <div className="flex items-center gap-2 justify-center bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/30 rounded-xl px-4 py-3 text-sm text-center">
             <span className="text-[#E05A1E]">✦</span>
-            <span className="text-[#CFCFCF]">
+            <span className="text-gray-700 dark:text-[#CFCFCF]">
               <span className="text-white font-semibold">{t('home.freeSessionBadge')}</span> {t('home.freeSessionDesc')}
             </span>
           </div>
@@ -152,9 +152,9 @@ export function Home() {
       <div className="max-w-[600px] mx-auto">
         {/* Guest quota exhausted — prompt sign-in instead of upload zone */}
         {quotaExceeded && (
-          <div className="fade-in bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-8 text-center">
+          <div className="fade-in bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-8 text-center">
             <p className="text-white font-semibold text-lg mb-2">{t('home.freeSessionComplete')}</p>
-            <p className="text-[#888888] text-sm mb-6 leading-relaxed">
+            <p className="text-gray-500 dark:text-[#888888] text-sm mb-6 leading-relaxed">
               {t('home.freeSessionCompleteDesc')}
             </p>
             <button
@@ -180,7 +180,7 @@ export function Home() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <p className="text-sm text-gray-300">
                     {t('script.usageCounter', { used: usage, limit: monthlyLimit })}
-                    <span className="text-[#888888] ml-2">({planLabel})</span>
+                    <span className="text-gray-500 dark:text-[#888888] ml-2">({planLabel})</span>
                   </p>
                 </div>
               </div>
@@ -211,7 +211,7 @@ export function Home() {
             {/* MultiPost — optional add-on that triggers automatically after
                 the audio result lands. Signed-in users only; guests don't
                 have a plan quota for MultiPost. */}
-              <div className="mt-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-3 sm:py-4 transition-all hover:border-[#E05A1E]/40">
+              <div className="mt-4 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl px-4 py-3 sm:py-4 transition-all hover:border-[#E05A1E]/40">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative flex-shrink-0">
                     <input
@@ -246,7 +246,7 @@ export function Home() {
                     />
                     <div className={cn(
                       "block w-10 h-[22px] rounded-full transition-colors",
-                      multiPostEnabled ? "bg-[#E05A1E]" : "bg-[#2A2A2A]"
+                      multiPostEnabled ? "bg-[#E05A1E]" : "bg-gray-200 dark:bg-[#2A2A2A]"
                     )}></div>
                     <div className={cn(
                       "dot absolute left-[3px] top-[3px] bg-white w-4 h-4 rounded-full transition-transform",
@@ -255,7 +255,7 @@ export function Home() {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 flex-1">
                     <span className="text-xs font-semibold text-white leading-tight sm:text-sm">{t('home.multipostLabel')}</span>
-                    <span className="text-[10px] text-[#555555] leading-tight sm:text-sm sm:text-[#888888]">
+                    <span className="text-[10px] text-gray-400 dark:text-[#555555] leading-tight sm:text-sm sm:text-gray-500 dark:text-[#888888]">
                       <span className="hidden sm:inline">— </span>
                       {multiPostEnabled ? t('home.multipostOn') : t('home.multipostOff')}
                     </span>
@@ -275,7 +275,7 @@ export function Home() {
                           "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer",
                           checked
                             ? "border-[#E05A1E]/60 bg-[#E05A1E]/10 text-white"
-                            : "border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#E05A1E]/40",
+                            : "border-gray-200 dark:border-[#2A2A2A] bg-transparent text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40",
                           !multiPostEnabled && "opacity-60",
                           (!multiPostEnabled || isUploading || showResults) && "cursor-not-allowed"
                         )}
@@ -315,7 +315,7 @@ export function Home() {
         <div className="max-w-4xl mx-auto fade-in mt-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
             <h2 className="text-xl font-semibold text-white truncate">
-              {t('home.resultsFor')} <span className="text-[#888888]">{result.audioFileName}</span>
+              {t('home.resultsFor')} <span className="text-gray-500 dark:text-[#888888]">{result.audioFileName}</span>
             </h2>
           </div>
 
@@ -335,7 +335,7 @@ export function Home() {
                 </div>
                 
                 <h3 className="text-xl font-bold text-white mb-2">{t('home.savedTime')}</h3>
-                <p className="text-[#888888] text-sm mb-8 max-w-md mx-auto leading-relaxed">
+                <p className="text-gray-500 dark:text-[#888888] text-sm mb-8 max-w-md mx-auto leading-relaxed">
                   {t('home.savedTimeDesc')}
                 </p>
                 
@@ -350,7 +350,7 @@ export function Home() {
 
                   <button
                     onClick={reset}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-2xl border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#E05A1E]/40 transition-all duration-300 active:scale-95 font-medium"
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-2xl border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white hover:border-[#E05A1E]/40 transition-all duration-300 active:scale-95 font-medium"
                   >
                     {t('home.generateAnother')}
                   </button>
@@ -362,15 +362,15 @@ export function Home() {
           <div className="text-center mt-8">
             {isGuest && (
               /* Guest: trial just consumed — prompt to sign in */
-              <div className="bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-6 max-w-sm mx-auto fade-in">
+              <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 rounded-2xl px-6 py-6 max-w-sm mx-auto fade-in">
                 <p className="text-white font-semibold mb-1">{t('home.thatWasFreeSession')}</p>
-                <p className="text-[#888888] text-sm mb-5 leading-relaxed">
+                <p className="text-gray-500 dark:text-[#888888] text-sm mb-5 leading-relaxed">
                   {t('home.signInToGenerateAgain')}
                 </p>
                 {/* History link ABOVE the sign-in button */}
                 <Link
                   to="/results"
-                  className="flex items-center justify-center gap-2 w-full mb-3 py-2.5 rounded-xl border border-[#2A2A2A] hover:border-[#E05A1E]/60 text-[#CFCFCF] hover:text-white text-sm font-medium transition-all"
+                  className="flex items-center justify-center gap-2 w-full mb-3 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 text-gray-700 dark:text-[#CFCFCF] hover:text-white text-sm font-medium transition-all"
                 >
                   <svg className="w-4 h-4 text-[#E05A1E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -399,7 +399,7 @@ export function Home() {
       <div className="mt-12 mb-8 flex justify-center w-full">
         <Link
           to="/results"
-          className="flex items-center gap-2 bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#E05A1E]/60 text-[#CFCFCF] hover:text-white px-6 py-3.5 rounded-2xl text-sm font-medium transition-all shadow-lg hover:shadow-[0_0_20px_rgba(224,90,30,0.15)] w-full max-w-md justify-center"
+          className="flex items-center gap-2 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 text-gray-700 dark:text-[#CFCFCF] hover:text-white px-6 py-3.5 rounded-2xl text-sm font-medium transition-all shadow-lg hover:shadow-[0_0_20px_rgba(224,90,30,0.15)] w-full max-w-md justify-center"
         >
           <svg className="w-4 h-4 text-[#E05A1E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

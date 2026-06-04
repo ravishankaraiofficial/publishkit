@@ -36,7 +36,7 @@ export function AppLoader() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#F5F5F5] flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D0D] text-gray-900 dark:text-[#F5F5F5] flex flex-col items-center justify-center px-6">
       <div className="flex items-center gap-3 mb-10">
         <Zap className="w-7 h-7 text-[#E05A1E]" />
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#E05A1E]">
@@ -54,13 +54,13 @@ export function AppLoader() {
 
       <p
         key={tipIndex}
-        className="status-text max-w-md text-center text-sm sm:text-base text-[#CFCFCF] leading-relaxed"
+        className="status-text max-w-md text-center text-sm sm:text-base text-gray-600 dark:text-[#CFCFCF] leading-relaxed"
       >
         {TIPS[tipIndex]}
       </p>
 
       {/* Tiny build marker — lets us verify the user is on the latest deploy */}
-      <p className="text-[10px] text-[#333333] mt-12">build 2026-05-05-c</p>
+      <p className="text-[10px] text-gray-400 dark:text-[#333333] mt-12">build 2026-05-05-c</p>
     </div>
   );
 }

@@ -43,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               "flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm w-full fade-in-fast",
               t.type === 'success' && "bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981]",
               t.type === 'error' && "bg-[#EF4444]/10 border border-[#EF4444]/40 text-[#EF4444]",
-              t.type === 'info' && "bg-[#1A1A1A] border border-[#2A2A2A] text-[#CFCFCF]"
+              t.type === 'info' && "bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-gray-900 dark:text-[#CFCFCF]"
             )}
           >
             {t.type === 'success' && <CheckCircle2 className="w-5 h-5 shrink-0" />}

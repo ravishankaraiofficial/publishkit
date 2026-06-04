@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ToastProvider } from './components/ui/Toast';
+import { ThemeProvider } from './hooks/useTheme';
 import { UploadProvider } from './hooks/useUpload';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { AppLoader } from './components/layout/AppLoader';
@@ -66,14 +67,16 @@ function AuthGatedRoutes() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <UiLanguageSync />
-          <UploadProvider>
-            <AuthGatedRoutes />
-          </UploadProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <UiLanguageSync />
+            <UploadProvider>
+              <AuthGatedRoutes />
+            </UploadProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

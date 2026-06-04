@@ -175,17 +175,17 @@ export function PastResults() {
 
         {/* ── Static info text ── */}
         <div className="flex flex-col items-center gap-1 mb-6 text-center">
-          <p className="text-xs text-[#888888] flex items-center gap-1.5">
+          <p className="text-xs text-gray-500 dark:text-[#888888] flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#E05A1E]" />
             {t('history.autoDelete')}
           </p>
-          <p className="text-xs text-[#888888]">
+          <p className="text-xs text-gray-500 dark:text-[#888888]">
             {t('history.manualDelete')}
           </p>
         </div>
 
         {/* ── DELETE BROWSING DATA section ── */}
-        <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-5 mb-6">
+        <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-5 mb-6">
           <p className="text-white text-lg font-bold mb-4">{t('history.deleteSectionTitle')}</p>
 
           {/* Pill buttons */}
@@ -201,7 +201,7 @@ export function PastResults() {
                     "px-4 py-1.5 rounded-full text-sm font-medium border transition-all",
                     active
                       ? "bg-[#EF4444] text-white border-[#EF4444]"
-                      : "bg-transparent border-[#2A2A2A] text-[#888888] hover:text-white"
+                      : "bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white"
                   )}
                 >
                   {label}
@@ -222,15 +222,15 @@ export function PastResults() {
         {/* ── Delete range confirmation dialog ── */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
+            <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
               <p className="text-white font-semibold mb-2">{t('history.confirmRangeTitle', { range: rangeLabel })}</p>
-              <p className="text-sm text-[#888888] mb-6">
+              <p className="text-sm text-gray-500 dark:text-[#888888] mb-6">
                 {t('history.confirmRangeDesc', { range: rangeLabel })}
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
+                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white text-sm transition-colors"
                 >
                   {t('common.cancel')}
                 </button>
@@ -248,13 +248,13 @@ export function PastResults() {
         {/* ── Single item trash confirmation dialog ── */}
         {trashConfirmId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
+            <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
               <p className="text-white font-semibold mb-2">{t('history.confirmItemTitle')}</p>
-              <p className="text-sm text-[#888888] mb-6">{t('history.confirmItemDesc')}</p>
+              <p className="text-sm text-gray-500 dark:text-[#888888] mb-6">{t('history.confirmItemDesc')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setTrashConfirmId(null)}
-                  className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
+                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white text-sm transition-colors"
                 >
                   {t('common.cancel')}
                 </button>
@@ -272,13 +272,13 @@ export function PastResults() {
         {/* ── Delete selected confirmation dialog ── */}
         {showSelectionConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
+            <div className="bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 max-w-sm w-full mx-4">
               <p className="text-white font-semibold mb-2">{t('history.confirmSelectedTitle', { count: selectedIds.size })}</p>
-              <p className="text-sm text-[#888888] mb-6">{t('history.confirmSelectedDesc')}</p>
+              <p className="text-sm text-gray-500 dark:text-[#888888] mb-6">{t('history.confirmSelectedDesc')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowSelectionConfirm(false)}
-                  className="flex-1 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
+                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white text-sm transition-colors"
                 >
                   {t('common.cancel')}
                 </button>
@@ -299,8 +299,8 @@ export function PastResults() {
             <Spinner text={t('history.loadingHistory')} />
           </div>
         ) : results.length === 0 ? (
-          <div className="text-center py-20 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl">
-            <p className="text-[#888888]">{t('history.empty')}</p>
+          <div className="text-center py-20 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl">
+            <p className="text-gray-500 dark:text-[#888888]">{t('history.empty')}</p>
           </div>
         ) : (
           <>
@@ -315,7 +315,7 @@ export function PastResults() {
                 </button>
                 <button
                   onClick={() => setSelectedIds(new Set())}
-                  className="px-4 py-2 rounded-lg border border-[#2A2A2A] text-[#888888] hover:text-white text-sm transition-colors"
+                  className="px-4 py-2 rounded-lg border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white text-sm transition-colors"
                 >
                   {t('history.clearSelection')}
                 </button>
@@ -346,7 +346,7 @@ export function PastResults() {
                   <div
                     key={result.id}
                     className={cn(
-                      "border border-[#2A2A2A] rounded-2xl bg-[#1A1A1A] overflow-hidden transition-all duration-400",
+                      "border border-gray-200 dark:border-[#2A2A2A] rounded-2xl bg-gray-50 dark:bg-[#1A1A1A] overflow-hidden transition-all duration-400",
                       isRemoving && "opacity-0 scale-95"
                     )}
                   >
@@ -365,9 +365,9 @@ export function PastResults() {
                         className="flex-1 flex items-center gap-3 text-left min-w-0 hover:opacity-80 transition-opacity"
                       >
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-[#888888] flex-shrink-0" />
+                          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-[#888888] flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-[#888888] flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-gray-500 dark:text-[#888888] flex-shrink-0" />
                         )}
 
                         {fileIcon(result.fileType)}
@@ -376,7 +376,7 @@ export function PastResults() {
                           <p className="font-medium text-white text-sm truncate max-w-[160px] sm:max-w-md">
                             {result.audioFileName}
                           </p>
-                          <p className="text-xs text-[#555555]">{date} {time}</p>
+                          <p className="text-xs text-gray-400 dark:text-[#555555]">{date} {time}</p>
                         </div>
 
                         <span className={cn(
@@ -392,7 +392,7 @@ export function PastResults() {
                       {/* Trash icon */}
                       <button
                         onClick={() => result.id && setTrashConfirmId(result.id)}
-                        className="flex-shrink-0 p-1.5 text-[#555555] hover:text-[#EF4444] transition-colors"
+                        className="flex-shrink-0 p-1.5 text-gray-400 dark:text-[#555555] hover:text-[#EF4444] transition-colors"
                         aria-label="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -400,13 +400,13 @@ export function PastResults() {
                     </div>
 
                     {isExpanded && (
-                      <div className="p-4 sm:p-6 border-t border-[#2A2A2A] bg-[#0D0D0D]/40">
+                      <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D]/40">
                         {result.status === 'complete' ? (
                           <ResultTabs result={result} />
                         ) : result.status === 'failed' ? (
                           <p className="text-[#EF4444] text-sm">{result.errorMessage || t('history.processingFailed')}</p>
                         ) : (
-                          <p className="text-[#888888] text-sm">{t('history.processingInProgress')}</p>
+                          <p className="text-gray-500 dark:text-[#888888] text-sm">{t('history.processingInProgress')}</p>
                         )}
                       </div>
                     )}

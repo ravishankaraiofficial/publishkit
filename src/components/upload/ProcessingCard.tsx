@@ -7,7 +7,7 @@ export function ProcessingCard({
 }) {
   return (
     <div
-      className="fade-in-fast w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-10 flex flex-col items-center"
+      className="fade-in-fast w-full bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-10 flex flex-col items-center"
       style={{ minHeight: 288 }}
     >
       <div
@@ -20,20 +20,20 @@ export function ProcessingCard({
 
       <p
         key={statusText}
-        className="status-text mt-8 text-[#F5F5F5] text-base"
+        className="status-text mt-8 text-gray-900 dark:text-[#F5F5F5] text-base"
       >
         {statusText}
       </p>
 
       {uploadProgress > 0 && uploadProgress < 100 && (
         <div className="w-full max-w-xs mt-6">
-          <div className="h-1 w-full bg-[#2A2A2A] rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-gray-200 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
             <div
               className="h-full bg-[#E05A1E] transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
-          <p className="text-xs text-[#555555] text-center mt-2">
+          <p className="text-xs text-gray-500 dark:text-[#555555] text-center mt-2">
             {Math.round(uploadProgress)}%
           </p>
         </div>

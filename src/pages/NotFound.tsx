@@ -8,7 +8,7 @@ import { Home as HomeIcon } from 'lucide-react';
  */
 export function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#F5F5F5] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D0D] text-gray-900 dark:text-[#F5F5F5] flex items-center justify-center px-6">
       <div className="max-w-lg w-full text-center">
         <p className="text-7xl md:text-8xl font-extrabold text-[#E05A1E]">404</p>
         <h1 className="text-2xl md:text-3xl font-bold mt-4 mb-3">Page not found</h1>

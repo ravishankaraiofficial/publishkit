@@ -100,7 +100,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
                 "px-4 py-2 rounded-full text-sm font-medium transition-all capitalize",
                 activeTab === tab
                   ? "bg-[#E05A1E] text-white shadow-[0_0_18px_rgba(224,90,30,0.3)]"
-                  : "bg-transparent border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
+                  : "bg-transparent border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
               )}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -109,18 +109,18 @@ export function ResultTabs({ result }: ResultTabsProps) {
         </div>
 
         {activeTab === 'summary' && (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14">
+          <div className="relative bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 pt-14">
             <CopyButton text={result.summary || ''} />
-            <pre className="whitespace-pre-wrap font-sans text-[#CFCFCF] leading-relaxed text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-[#CFCFCF] leading-relaxed text-sm">
               {result.summary || ''}
             </pre>
           </div>
         )}
 
         {activeTab === 'description' && (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14">
+          <div className="relative bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 pt-14">
             <CopyButton text={result.description || ''} />
-            <pre className="whitespace-pre-wrap font-sans text-[#CFCFCF] leading-relaxed text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-[#CFCFCF] leading-relaxed text-sm">
               {result.description || ''}
             </pre>
           </div>
@@ -158,7 +158,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
         };
 
         return (
-          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
             {errorMessage ? (
               <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4 mb-4">
                 <p className="text-[#EF4444] text-sm font-medium">Generation Error</p>
@@ -167,23 +167,22 @@ export function ResultTabs({ result }: ResultTabsProps) {
             ) : (
               <div className="space-y-4">
                 {(result.titles || []).map((t, i) => (
-                  <div key={i} className="group relative bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#E05A1E]/40 transition-all">
+                  <div key={i} className="group relative bg-gray-50 dark:bg-[#0D0D0D] border border-gray-200 dark:border-[#2A2A2A] rounded-xl p-4 hover:border-[#E05A1E]/40 transition-all">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-white leading-snug">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
                           {i + 1}. {t.title}
                         </h4>
-                        <p className="text-xs text-[#888888] italic mt-1.5 leading-relaxed">{t.reason}</p>
+                        <p className="text-xs text-gray-500 dark:text-[#888888] italic mt-1.5 leading-relaxed">{t.reason}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => copyTitle(t.title, i)}
-                        className="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all"
-                        style={
+                        className={`flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all ${
                           copiedIndex === i
-                            ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' }
-                            : { borderColor: '#2A2A2A', background: '#0D0D0D', color: '#888888' }
-                        }
+                            ? 'border-[#10B981]/50 bg-[#10B981]/10 text-[#10B981]'
+                            : 'border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D] text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white hover:border-[#E05A1E]/60'
+                        }`}
                       >
                         {copiedIndex === i ? (
                           <><Check className="w-3.5 h-3.5" />Copied</>  
@@ -237,7 +236,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
             );
 
         return (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14 space-y-10">
+          <div className="relative bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 pt-14 space-y-10">
             {errorMessage ? (
               <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4">
                 <p className="text-[#EF4444] text-sm font-medium">Generation Error</p>
@@ -265,7 +264,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
                         {chapter.title}
                       </h4>
                     )}
-                    <pre className="whitespace-pre-wrap font-sans text-[#CFCFCF] leading-relaxed text-sm bg-[#0D0D0D]/30 p-4 rounded-xl border border-[#2A2A2A]/50 shadow-inner">
+                    <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-[#CFCFCF] leading-relaxed text-sm bg-gray-50 dark:bg-[#0D0D0D]/30 p-4 rounded-xl border border-gray-200 dark:border-[#2A2A2A]/50 shadow-inner">
                       {chapter.items.join('\n')}
                     </pre>
                   </div>
@@ -278,7 +277,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
 
       case 'description':
         return (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14">
+          <div className="relative bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 pt-14">
             {errorMessage ? (
               <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4">
                 <p className="text-[#EF4444] text-sm font-medium">Generation Error</p>
@@ -287,7 +286,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
             ) : (
               <>
                 <CopyButton text={result.description || ''} />
-                <pre className="whitespace-pre-wrap font-sans text-[#CFCFCF] leading-relaxed text-sm">
+                <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-[#CFCFCF] leading-relaxed text-sm">
                   {result.description}
                 </pre>
               </>
@@ -330,7 +329,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
         };
 
         return (
-          <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 pt-14 space-y-8">
+          <div className="relative bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 pt-14 space-y-8">
             {errorMessage ? (
               <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-4">
                 <p className="text-[#EF4444] text-sm font-medium">Generation Error</p>
@@ -342,10 +341,10 @@ export function ResultTabs({ result }: ResultTabsProps) {
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-white">Google Imagen 3 Prompt</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Google Imagen 3 Prompt</h4>
                     <span className="text-[10px] bg-[#E05A1E]/10 text-[#E05A1E] px-2 py-0.5 rounded-full border border-[#E05A1E]/20">Best for Realism</span>
                   </div>
-                  <p className="text-[#CFCFCF] bg-[#0D0D0D] p-4 rounded-xl border border-[#2A2A2A] text-sm leading-relaxed shadow-inner">
+                  <p className="text-gray-700 dark:text-[#CFCFCF] bg-gray-50 dark:bg-[#0D0D0D] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A2A] text-sm leading-relaxed shadow-inner">
                     {result.thumbnailPromptImagen}
                   </p>
                   <button 
@@ -359,22 +358,25 @@ export function ResultTabs({ result }: ResultTabsProps) {
                   </button>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t border-[#2A2A2A]">
+                <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-[#2A2A2A]">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-white">ChatGPT / DALL-E 3 Prompt</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">ChatGPT / DALL-E 3 Prompt</h4>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={copyAndNotifyChatGPT}
-                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all border-[#2A2A2A] bg-[#0D0D0D] text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
-                        style={chatGPTCopied ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' } : {}}
+                        className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all ${
+                          chatGPTCopied
+                            ? 'border-[#10B981]/50 bg-[#10B981]/10 text-[#10B981]'
+                            : 'border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D] text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white hover:border-[#E05A1E]/60'
+                        }`}
                       >
                         {chatGPTCopied ? <><Check className="w-3.5 h-3.5" />Copied ✓</> : <><Copy className="w-3.5 h-3.5" />Copy</>}
                       </button>
                       <span className="text-[10px] bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">Best for Bold Graphics</span>
                     </div>
                   </div>
-                  <p className="text-[#CFCFCF] bg-[#0D0D0D] p-4 rounded-xl border border-[#2A2A2A] text-sm leading-relaxed shadow-inner">
+                  <p className="text-gray-700 dark:text-[#CFCFCF] bg-gray-50 dark:bg-[#0D0D0D] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A2A] text-sm leading-relaxed shadow-inner">
                     {result.thumbnailPromptChatGPT}
                   </p>
                   <button 
@@ -403,7 +405,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
         const copyChip = (text: string, key: string) => {
           if (isFreePlan) {
             return (
-              <span className="text-xs text-[#888888] italic flex-shrink-0">
+              <span className="text-xs text-gray-500 dark:text-[#888888] italic flex-shrink-0">
                 Copy not available on Free Plan
               </span>
             );
@@ -412,12 +414,11 @@ export function ResultTabs({ result }: ResultTabsProps) {
             <button
               type="button"
               onClick={() => copyMp(text, key)}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all"
-              style={
+              className={`flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium border transition-all ${
                 mpCopiedKey === key
-                  ? { borderColor: 'rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.1)', color: '#10B981' }
-                  : { borderColor: '#2A2A2A', background: '#0D0D0D', color: '#888888' }
-              }
+                  ? 'border-[#10B981]/50 bg-[#10B981]/10 text-[#10B981]'
+                  : 'border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D] text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white hover:border-[#E05A1E]/60'
+              }`}
             >
               {mpCopiedKey === key ? (
                 <><Check className="w-3.5 h-3.5" />Copied</>
@@ -434,19 +435,19 @@ export function ResultTabs({ result }: ResultTabsProps) {
               <div className="space-y-4">
                 <div className="flex flex-col gap-4">
                   {mp.x.map((tweet, i) => (
-                    <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 relative">
+                    <div key={i} className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 relative">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-semibold text-white">Tweet Option {i + 1}</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Tweet Option {i + 1}</h4>
                         {copyChip(tweet, `x-${i}`)}
                       </div>
-                      <p className="text-[#CFCFCF] text-sm leading-relaxed">{tweet}</p>
+                      <p className="text-gray-700 dark:text-[#CFCFCF] text-sm leading-relaxed">{tweet}</p>
                     </div>
                   ))}
                 </div>
                 <button
                   onClick={() => handleGenerateMore('x')}
                   disabled={loadingMore === 'x'}
-                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-gray-500 dark:text-[#888888] hover:text-white transition-all disabled:opacity-50"
                 >
                   <Zap className="w-4 h-4 text-[#E05A1E]" />
                   {loadingMore === 'x' ? 'Generating...' : 'Generate another option'}
@@ -457,18 +458,18 @@ export function ResultTabs({ result }: ResultTabsProps) {
             {mp.instagram && mp.instagram.length > 0 && (
               <div className="space-y-4">
                 {(Array.isArray(mp.instagram) ? mp.instagram : [mp.instagram]).map((caption, i) => (
-                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                  <div key={i} className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-white">Instagram Caption {i + 1}</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Instagram Caption {i + 1}</h4>
                       {copyChip(caption, `instagram-${i}`)}
                     </div>
-                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{caption}</p>
+                    <p className="text-gray-700 dark:text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{caption}</p>
                   </div>
                 ))}
                 <button
                   onClick={() => handleGenerateMore('instagram')}
                   disabled={loadingMore === 'instagram'}
-                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-gray-500 dark:text-[#888888] hover:text-white transition-all disabled:opacity-50"
                 >
                   <Zap className="w-4 h-4 text-[#E05A1E]" />
                   {loadingMore === 'instagram' ? 'Generating...' : 'Generate another option'}
@@ -479,18 +480,18 @@ export function ResultTabs({ result }: ResultTabsProps) {
             {mp.linkedin && mp.linkedin.length > 0 && (
               <div className="space-y-4">
                 {(Array.isArray(mp.linkedin) ? mp.linkedin : [mp.linkedin]).map((post, i) => (
-                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                  <div key={i} className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-white">LinkedIn Post {i + 1}</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">LinkedIn Post {i + 1}</h4>
                       {copyChip(post, `linkedin-${i}`)}
                     </div>
-                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
+                    <p className="text-gray-700 dark:text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
                 <button
                   onClick={() => handleGenerateMore('linkedin')}
                   disabled={loadingMore === 'linkedin'}
-                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-gray-500 dark:text-[#888888] hover:text-white transition-all disabled:opacity-50"
                 >
                   <Zap className="w-4 h-4 text-[#E05A1E]" />
                   {loadingMore === 'linkedin' ? 'Generating...' : 'Generate another option'}
@@ -501,18 +502,18 @@ export function ResultTabs({ result }: ResultTabsProps) {
             {mp.youtube && mp.youtube.length > 0 && (
               <div className="space-y-4">
                 {(Array.isArray(mp.youtube) ? mp.youtube : [mp.youtube]).map((post, i) => (
-                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                  <div key={i} className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-white">YouTube Post {i + 1}</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">YouTube Post {i + 1}</h4>
                       {copyChip(post, `youtube-${i}`)}
                     </div>
-                    <p className="text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
+                    <p className="text-gray-700 dark:text-[#CFCFCF] text-sm leading-relaxed whitespace-pre-wrap">{post}</p>
                   </div>
                 ))}
                 <button
                   onClick={() => handleGenerateMore('youtube')}
                   disabled={loadingMore === 'youtube'}
-                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-[#888888] hover:text-white transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-4 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#4A4A4A] rounded-xl text-gray-500 dark:text-[#888888] hover:text-white transition-all disabled:opacity-50"
                 >
                   <Zap className="w-4 h-4 text-[#E05A1E]" />
                   {loadingMore === 'youtube' ? 'Generating...' : 'Generate another option'}
@@ -521,7 +522,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
             )}
 
             {!mp.x?.length && !mp.instagram?.length && !mp.linkedin?.length && !mp.youtube?.length && (
-              <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 text-center text-sm text-[#888888]">
+              <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl p-6 text-center text-sm text-gray-500 dark:text-[#888888]">
                 MultiPost is generating in the background…
               </div>
             )}
@@ -545,7 +546,7 @@ export function ResultTabs({ result }: ResultTabsProps) {
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
               activeTab === tab.id
                 ? "bg-[#E05A1E] text-white shadow-[0_0_18px_rgba(224,90,30,0.3)]"
-                : "bg-transparent border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
+                : "bg-transparent border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-white hover:border-[#E05A1E]/60"
             )}
           >
             {tab.label}

@@ -188,9 +188,9 @@ const Pricing: React.FC = () => {
         {feature.included ? (
           <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
         ) : (
-          <div className="w-5 h-5 border-2 border-gray-600 rounded mt-0.5"></div>
+          <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded mt-0.5"></div>
         )}
-        <span className={feature.included ? 'text-gray-100' : 'text-gray-400'}>
+        <span className={feature.included ? 'text-gray-800 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}>
           {t(feature.key, feature.params)}
         </span>
       </div>
@@ -213,25 +213,25 @@ const Pricing: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             {t('pricing.title')}
           </h1>
-          <p className="text-gray-400 text-lg">{t('pricing.subtitle')}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">{t('pricing.subtitle')}</p>
         </div>
 
         {/* Usage Counter */}
         {loading ? (
-          <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 mb-12 text-center">
-            <div className="h-8 bg-gray-700 rounded w-48 mx-auto animate-pulse"></div>
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 mb-12 text-center">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto animate-pulse"></div>
           </div>
         ) : (
-          <div className="bg-neutral-900 border border-orange-600/30 rounded-2xl p-8 mb-12">
+          <div className="bg-white dark:bg-neutral-900 border border-orange-600/30 rounded-2xl p-8 mb-12 shadow-sm">
             <div className="max-w-2xl mx-auto">
-              <p className="text-gray-400 text-sm mb-2">
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
                 {t('pricing.currentUsage')} — {profile?.usageCycleStart ? new Date(profile.usageCycleStart).toLocaleDateString() + ' to ' + new Date(new Date(profile.usageCycleStart).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Current Cycle'}
               </p>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                   {t('pricing.usedOf', { used: usage, limit: plans[currentPlan as keyof typeof plans].limit })}
                 </p>
               </div>
@@ -249,14 +249,14 @@ const Pricing: React.FC = () => {
 
         {/* Billing-mode toggle: one-time (no autopay) vs subscription */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full border border-gray-700 bg-neutral-900 p-1">
+          <div className="inline-flex rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-neutral-900 p-1 shadow-sm">
             <button
               type="button"
               onClick={() => setBillingMode('one_time')}
               className={`px-5 py-2 text-sm font-semibold rounded-full transition-all ${
                 billingMode === 'one_time'
                   ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               {t('pricing.toggleOneTime')}
@@ -267,7 +267,7 @@ const Pricing: React.FC = () => {
               className={`px-5 py-2 text-sm font-semibold rounded-full transition-all ${
                 billingMode === 'subscription'
                   ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               {t('pricing.toggleSubscription')}
@@ -289,8 +289,8 @@ const Pricing: React.FC = () => {
                 key={planKey}
                 className={`group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
                   isUltra
-                    ? 'md:scale-105 bg-gradient-to-b from-orange-950 to-neutral-900 border-2 border-orange-600/70 shadow-xl shadow-orange-600/10 hover:shadow-2xl hover:shadow-orange-600/25 hover:border-orange-500'
-                    : 'bg-neutral-900 border border-gray-800 hover:border-orange-600/60 hover:shadow-2xl hover:shadow-orange-600/30'
+                    ? 'md:scale-105 bg-gradient-to-b from-orange-50 to-white dark:from-orange-950 dark:to-neutral-900 border-2 border-orange-600/70 shadow-xl shadow-orange-600/10 hover:shadow-2xl hover:shadow-orange-600/25 hover:border-orange-500'
+                    : 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-800 shadow-lg dark:shadow-none hover:border-orange-600/60 hover:shadow-2xl hover:shadow-orange-600/30'
                 } ${isCurrent && !isUltra ? 'border-orange-600/50' : ''}`}
               >
                 {/* Current plan badge */}
@@ -309,13 +309,13 @@ const Pricing: React.FC = () => {
 
                 <div className={`p-8 ${plan.badgeKey ? 'pt-14' : ''}`}>
                   {/* Plan name and price */}
-                  <h3 className="text-2xl font-bold text-white mb-2">{t(plan.nameKey)}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t(plan.nameKey)}</h3>
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">{plan.price}</span>
-                      <span className="text-gray-400">{plan.periodKey ? t(plan.periodKey) : ''}</span>
+                      <span className="text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
+                      <span className="text-gray-500 dark:text-gray-400">{plan.periodKey ? t(plan.periodKey) : ''}</span>
                     </div>
-                    <p className="text-sm text-gray-400 mt-3 mb-4">{t('pricing.uploadsPerMonth', { count: plan.limit })}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 mb-4">{t('pricing.uploadsPerMonth', { count: plan.limit })}</p>
                   </div>
 
                   {/* CTA: Upgrade button for Pro / Max — replaced with value-prop lines on Free.
@@ -331,7 +331,7 @@ const Pricing: React.FC = () => {
                       ].map((key) => (
                         <div key={key} className="flex items-start gap-3 py-2">
                           <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-100">{t(key)}</span>
+                          <span className="text-gray-800 dark:text-gray-100">{t(key)}</span>
                         </div>
                       ))}
                     </>
@@ -341,12 +341,12 @@ const Pricing: React.FC = () => {
                       disabled={isCurrent || upgrading === planKey}
                       className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 mb-8 ${
                         isCurrent
-                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                          ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 cursor-not-allowed'
                           : upgrading === planKey
-                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-75'
+                          ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-75'
                           : isUltra
                           ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600 shadow-lg shadow-orange-600/30'
-                          : 'bg-gray-800 text-white hover:bg-gray-700'
+                          : 'bg-gray-800 dark:bg-gray-800 text-white hover:bg-gray-700 dark:hover:bg-gray-700'
                       }`}
                     >
                       {isCurrent ? '✓ ' + t('pricing.currentPlan') : upgrading === planKey ? t('common.loading') : t('pricing.upgrade')}
@@ -362,9 +362,9 @@ const Pricing: React.FC = () => {
         </div>
 
         {/* FAQ / Info */}
-        <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8 max-w-2xl mx-auto">
-          <h3 className="text-xl font-semibold text-white mb-4">{t('pricing.helpTitle')}</h3>
-          <ul className="space-y-3 text-gray-300 text-sm">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 max-w-2xl mx-auto shadow-md">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t('pricing.helpTitle')}</h3>
+          <ul className="space-y-3 text-gray-600 dark:text-gray-300 text-sm">
             <li>{t('pricing.helpFree')}</li>
             <li>{t('pricing.helpPro')}</li>
             <li>{t('pricing.helpMax')}</li>

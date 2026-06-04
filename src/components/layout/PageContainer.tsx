@@ -47,7 +47,7 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
   const glowOpacity = isTouchRef.current ? 0.4 : overContent ? 0.15 : 0.7;
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-[#0D0D0D] dark:text-white relative overflow-hidden font-sans">
       {/* Background Glow Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#E05A1E] rounded-full blur-[120px] opacity-[0.06] animate-float"></div>
@@ -74,25 +74,25 @@ export function PageContainer({ children }: { children: React.ReactNode }) {
 
         {/* Site footer with legal links — required by Google OAuth verification.
             Privacy + Terms must be reachable from the home page via a visible link. */}
-        <footer className="relative z-10 border-t border-[#1A1A1A] mt-8 py-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#666]">
+        <footer className="relative z-10 border-t border-gray-200 dark:border-[#1A1A1A] mt-8 py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-[#666]">
             <p>© {new Date().getFullYear()} PublishKit · Made in India 🇮🇳</p>
             <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-              <a href="/about" className="hover:text-white transition-colors">
+              <a href="/about" className="hover:text-gray-900 dark:hover:text-white transition-colors">
                 About
               </a>
-              <a href="/privacy" className="hover:text-white transition-colors">
+              <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">
                 Privacy Policy
               </a>
-              <a href="/terms" className="hover:text-white transition-colors">
+              <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">
                 Terms of Service
               </a>
-              <a href="/pricing" className="hover:text-white transition-colors">
+              <a href="/pricing" className="hover:text-gray-900 dark:hover:text-white transition-colors">
                 Pricing
               </a>
               <a
                 href="mailto:ravishankaraiofficial@gmail.com"
-                className="hover:text-white transition-colors"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Contact
               </a>

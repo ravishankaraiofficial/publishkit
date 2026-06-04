@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useUpload } from '../../hooks/useUpload';
-import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles, FileText, Share2 } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
+import { Home, Clock, Settings, LogOut, LogIn, Zap, MessageSquare, Sparkles, FileText, Share2, Sun, Moon } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../lib/utils';
 import { useT } from '../../i18n';
@@ -21,6 +22,7 @@ const navItems = [
 export function Navbar() {
   const { user, logout, profile } = useAuth();
   const { reset } = useUpload();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -43,8 +45,8 @@ export function Navbar() {
     "px-3 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95",
     "hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10",
     location.pathname === to
-      ? "text-white"
-      : "text-[#888888] hover:text-white"
+      ? "text-gray-900 dark:text-white bg-gray-100 dark:bg-transparent"
+      : "text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white"
   );
 
   return (
@@ -85,8 +87,16 @@ export function Navbar() {
             )}
 
             <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-[#888888] dark:hover:text-white dark:hover:bg-white/[0.04] transition-all"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            <button
               onClick={handleAuthAction}
-              className="px-3 py-1.5 rounded-lg text-[#888888] hover:text-white hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10 transition-all duration-200 ease-out flex items-center gap-1.5 active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-gray-500 dark:text-[#888888] hover:text-white hover:bg-white/[0.04] hover:backdrop-blur-sm hover:ring-1 hover:ring-white/10 transition-all duration-200 ease-out flex items-center gap-1.5 active:scale-95"
             >
               {isGuest ? (
                 <>
@@ -108,10 +118,18 @@ export function Navbar() {
           <Zap className="w-4 h-4 text-[#E05A1E]" />
           <span className="text-[#E05A1E] font-bold text-lg tracking-tight">PublishKit</span>
         </Link>
-        <button
-          onClick={handleAuthAction}
-          className="flex items-center gap-1.5 text-xs text-[#888888] hover:text-white transition-all px-3 py-1.5 rounded-full border border-[#2A2A2A] active:scale-95"
-        >
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-full border border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white transition-all active:scale-95"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+          <button
+            onClick={handleAuthAction}
+            className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white transition-all px-3 py-1.5 rounded-full border border-gray-200 dark:border-[#2A2A2A] active:scale-95"
+          >
           {isGuest ? (
             <>
               <LogIn className="w-3.5 h-3.5" /> {t('nav.signIn')}
@@ -122,10 +140,11 @@ export function Navbar() {
             </>
           )}
         </button>
+        </div>
       </header>
 
       {/* ── Mobile bottom nav bar ── */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-md border-t border-[#2A2A2A]">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#0D0D0D]/95 backdrop-blur-md border-t border-gray-200 dark:border-[#2A2A2A]">
         <div className="flex items-stretch py-1.5 px-0.5">
           {navItems.map(({ to, icon: Icon, key }) => {
             const active = location.pathname === to;
@@ -138,7 +157,7 @@ export function Navbar() {
                   "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 rounded-xl transition-all active:scale-90",
                   active
                     ? "text-[#E05A1E]"
-                    : "text-[#555555] hover:text-[#888888]"
+                    : "text-gray-500 dark:text-[#555555] hover:text-gray-900 dark:hover:text-gray-500 dark:text-[#888888]"
                 )}
               >
                 <Icon className={cn("w-5 h-5", active && "drop-shadow-[0_0_6px_rgba(224,90,30,0.8)]")} />

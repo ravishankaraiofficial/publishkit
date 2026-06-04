@@ -69,9 +69,9 @@ export function Picker<T extends string>({
         onClick={() => setOpen((o) => !o)}
         className={cn(
           triggerBase,
-          'bg-[#1A1A1A]/50 border border-[#2A2A2A] text-sm font-medium text-white cursor-pointer',
+          'bg-white dark:bg-[#1A1A1A]/50 border border-gray-200 dark:border-[#2A2A2A] text-sm font-medium text-gray-900 dark:text-white cursor-pointer',
           'transition-all duration-200 ease-out',
-          'hover:bg-white/[0.04] hover:backdrop-blur-sm hover:border-[#E05A1E]/40 hover:ring-1 hover:ring-white/10',
+          'hover:bg-gray-50 dark:hover:bg-white/[0.04] hover:backdrop-blur-sm hover:border-[#E05A1E]/40 hover:ring-1 hover:ring-gray-200 dark:hover:ring-white/10',
           'focus:outline-none focus:border-[#E05A1E]/60',
           open && 'border-[#E05A1E]/60',
           disabled && 'opacity-60 cursor-not-allowed pointer-events-none',
@@ -88,7 +88,7 @@ export function Picker<T extends string>({
         </span>
         <ChevronDown
           className={cn(
-            'w-4 h-4 text-[#888888] transition-transform duration-200 flex-shrink-0',
+            'w-4 h-4 text-gray-500 dark:text-[#888888] transition-transform duration-200 flex-shrink-0',
             open && 'rotate-180 text-[#E05A1E]',
           )}
         />
@@ -110,11 +110,11 @@ export function Picker<T extends string>({
               // Mobile: bottom-sheet anchored above the bottom-nav (~64px tall)
               // with a generous max-height, strong glass effect for separation.
               'fixed left-4 right-4 bottom-24 max-h-[55vh] overflow-y-auto',
-              'bg-[#0E0E0E]/90 backdrop-blur-2xl border border-white/10 rounded-2xl',
+              'bg-white/95 dark:bg-[#0E0E0E]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-2xl',
               'shadow-2xl shadow-black/80 p-2',
               // Desktop / tablet: revert to inline popover under the trigger.
               'sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:mt-2 sm:w-full sm:max-h-[60vh] sm:p-1.5',
-              'sm:bg-[#121212]/95 sm:backdrop-blur-xl sm:border-[#2A2A2A]',
+              'sm:bg-white/95 sm:dark:bg-[#121212]/95 sm:backdrop-blur-xl sm:border-gray-200 dark:sm:border-gray-200 dark:border-[#2A2A2A]',
               variant === 'pill' && 'sm:left-1/2 sm:-translate-x-1/2 sm:w-[280px]',
               'animate-fade-in',
             )}
@@ -141,7 +141,7 @@ export function Picker<T extends string>({
                   className={cn(
                     'flex items-center justify-between gap-3',
                     'px-4 py-3 sm:py-2.5 min-h-[48px] sm:min-h-[44px] rounded-xl cursor-pointer',
-                    'text-base sm:text-sm text-[#CFCFCF]',
+                    'text-base sm:text-sm text-gray-700 dark:text-[#CFCFCF]',
                     'transition-all duration-200 ease-out',
                     'hover:bg-[#E05A1E] hover:text-white hover:font-semibold hover:scale-[1.02]',
                     'hover:backdrop-blur-md hover:ring-1 hover:ring-white/20',

@@ -8,7 +8,7 @@ import { ArrowLeft } from 'lucide-react';
  */
 export function About() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#F5F5F5]">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D0D] text-gray-900 dark:text-[#F5F5F5]">
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Back link */}
         <Link

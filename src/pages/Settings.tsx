@@ -121,7 +121,7 @@ function CollapsibleSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-t border-[#2A2A2A] pt-5">
+    <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-5">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -130,12 +130,12 @@ function CollapsibleSection({
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-white">{title}</h3>
           {subtitle && (
-            <p className="mt-1 text-xs text-[#888888] leading-relaxed">{subtitle}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-[#888888] leading-relaxed">{subtitle}</p>
           )}
         </div>
         <ChevronDown
           className={cn(
-            'w-5 h-5 flex-shrink-0 mt-1 text-[#888888] transition-transform',
+            'w-5 h-5 flex-shrink-0 mt-1 text-gray-500 dark:text-[#888888] transition-transform',
             open && 'rotate-180'
           )}
         />
@@ -284,18 +284,18 @@ export function Settings() {
     error?: string;
   }) => (
     <div className="w-full">
-      <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">
+      <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-1.5">
         {props.label}
         {props.required && <span className="text-[#E05A1E] ml-1">*</span>}
       </label>
       {props.hint && (
-        <p className="text-xs text-[#555555] mb-2 leading-relaxed">{props.hint}</p>
+        <p className="text-xs text-gray-400 dark:text-[#555555] mb-2 leading-relaxed">{props.hint}</p>
       )}
       <textarea
         {...props.register}
         rows={props.rows ?? 3}
         placeholder={props.placeholder}
-        className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D] px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
+        className="flex w-full rounded-lg border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D] px-3 py-2 text-sm text-white placeholder:text-gray-400 dark:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
       />
       {props.error && <p className="mt-1.5 text-sm text-[#EF4444]">{props.error}</p>}
     </div>
@@ -310,8 +310,8 @@ export function Settings() {
     options: { value: string; label: string }[];
   }) => (
     <div>
-      <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">{props.label}</label>
-      {props.hint && <p className="text-xs text-[#555555] mb-2">{props.hint}</p>}
+      <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-1.5">{props.label}</label>
+      {props.hint && <p className="text-xs text-gray-400 dark:text-[#555555] mb-2">{props.hint}</p>}
       <div className="flex flex-wrap gap-2">
         {props.options.map((opt) => (
           <button
@@ -322,7 +322,7 @@ export function Settings() {
               'px-4 py-2 rounded-full text-sm font-medium border transition-all active:scale-95',
               props.value === opt.value
                 ? 'bg-[#E05A1E] border-[#E05A1E] text-white shadow-[0_0_14px_rgba(224,90,30,0.3)]'
-                : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/50 hover:text-white'
+                : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/50 hover:text-white'
             )}
           >
             {opt.label}
@@ -343,7 +343,7 @@ export function Settings() {
               <span className="text-[#E05A1E] ml-2 text-xl font-semibold">({watchedName})</span>
             )}
           </h1>
-          <p className="mt-2 text-sm text-[#888888] leading-relaxed max-w-xl">
+          <p className="mt-2 text-sm text-gray-500 dark:text-[#888888] leading-relaxed max-w-xl">
             {watchedName
               ? t('settings.subtitle', { name: watchedName })
               : t('settings.subtitleNoName')}
@@ -365,7 +365,7 @@ export function Settings() {
                 <h3 className="text-base sm:text-lg font-semibold text-white">
                   {t('settings.section1.title')}
                 </h3>
-                <p className="mt-1 text-xs text-[#888888] leading-relaxed">
+                <p className="mt-1 text-xs text-gray-500 dark:text-[#888888] leading-relaxed">
                   {t('settings.section1.subtitle')}
                 </p>
               </div>
@@ -407,10 +407,10 @@ export function Settings() {
                 control={control}
                 render={({ field }) => (
                   <div>
-                    <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-1.5">
                       {t('settings.language.label')} *
                     </label>
-                    <p className="text-xs text-[#555555] mb-2">
+                    <p className="text-xs text-gray-400 dark:text-[#555555] mb-2">
                       {t('settings.language.hint')}
                     </p>
                     <select
@@ -418,7 +418,7 @@ export function Settings() {
                       onChange={(e) => field.onChange(e.target.value)}
                       className={cn(
                         'w-full py-3 px-4 rounded-xl text-sm font-medium border transition-all',
-                        'bg-[#0D0D0D] border-[#2A2A2A] text-white',
+                        'bg-white dark:bg-[#0D0D0D] border-gray-200 dark:border-[#2A2A2A] text-white',
                         'focus:outline-none focus:border-[#E05A1E]/60 cursor-pointer'
                       )}
                     >
@@ -454,11 +454,11 @@ export function Settings() {
               {errors.tone && <p className="mt-1.5 text-sm text-[#EF4444]">{errors.tone.message}</p>}
 
               {/* ═══ Section 2 ═══ Audience ═══ */}
-              <div className="border-t border-[#2A2A2A] pt-5">
+              <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-5">
                 <h3 className="text-base sm:text-lg font-semibold text-white">
                   {t('settings.section2.title')}
                 </h3>
-                <p className="mt-1 text-xs text-[#888888] leading-relaxed">
+                <p className="mt-1 text-xs text-gray-500 dark:text-[#888888] leading-relaxed">
                   {t('settings.section2.subtitle')}
                 </p>
               </div>
@@ -511,11 +511,11 @@ export function Settings() {
               />
 
               {/* ═══ Section 3 ═══ Visual identity ═══ */}
-              <div className="border-t border-[#2A2A2A] pt-5">
+              <div className="border-t border-gray-200 dark:border-[#2A2A2A] pt-5">
                 <h3 className="text-base sm:text-lg font-semibold text-white">
                   {t('settings.section3.title')}
                 </h3>
-                <p className="mt-1 text-xs text-[#888888] leading-relaxed">
+                <p className="mt-1 text-xs text-gray-500 dark:text-[#888888] leading-relaxed">
                   {t('settings.section3.subtitle')}
                 </p>
               </div>
@@ -531,7 +531,7 @@ export function Settings() {
               />
 
               <div>
-                <p className="text-xs text-[#555555] mb-3">
+                <p className="text-xs text-gray-400 dark:text-[#555555] mb-3">
                   {t('settings.brandColors.hint', { color1: 'orange', hex1: '#FF5733' })}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -693,7 +693,7 @@ export function Settings() {
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
                             ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
-                            : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/40'
+                            : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
                         <input
@@ -715,7 +715,7 @@ export function Settings() {
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
                             ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
-                            : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/40'
+                            : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
                         <input
@@ -737,7 +737,7 @@ export function Settings() {
                           'flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all',
                           field.value
                             ? 'bg-[#E05A1E]/10 border-[#E05A1E]/60 text-white'
-                            : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/40'
+                            : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/40'
                         )}
                       >
                         <input

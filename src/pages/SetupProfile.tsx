@@ -84,7 +84,7 @@ export function SetupProfile() {
       <div className="max-w-2xl mx-auto py-8">
         <div className="mb-6 px-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Setup Your Creator Profile</h1>
-          <p className="mt-2 text-sm text-[#888888] leading-relaxed">
+          <p className="mt-2 text-sm text-gray-500 dark:text-[#888888] leading-relaxed">
             Fill this in so PublishKit can personalise your AI-generated results to match your brand and audience.
           </p>
         </div>
@@ -115,12 +115,12 @@ export function SetupProfile() {
               />
 
               <div className="w-full">
-                <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">Your On-Camera Appearance</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-1.5">Your On-Camera Appearance</label>
                 <textarea
                   {...register('appearance')}
                   rows={3}
                   placeholder="e.g. Indian male in his 20s, usually wearing a black hoodie"
-                  className="flex w-full rounded-lg border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-3 py-2 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
+                  className="flex w-full rounded-lg border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D]/50 backdrop-blur-sm px-3 py-2 text-sm text-white placeholder:text-gray-400 dark:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors resize-none"
                 />
                 {errors.appearance && <p className="mt-1.5 text-sm text-[#EF4444]">{errors.appearance.message}</p>}
               </div>
@@ -157,7 +157,7 @@ export function SetupProfile() {
                 control={control}
                 render={({ field }) => (
                   <div>
-                    <label className="block text-sm font-medium text-[#CFCFCF] mb-2">Default Language</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-2">Default Language</label>
                     <div className="flex gap-3">
                       {(['English', 'Hindi'] as const).map((lang) => (
                         <button
@@ -168,7 +168,7 @@ export function SetupProfile() {
                             'flex-1 py-3 rounded-xl text-sm font-semibold border transition-all',
                             field.value === lang
                               ? 'bg-[#E05A1E] border-[#E05A1E] text-white shadow-[0_0_16px_rgba(224,90,30,0.35)]'
-                              : 'bg-transparent border-[#2A2A2A] text-[#888888] hover:border-[#E05A1E]/50 hover:text-white'
+                              : 'bg-transparent border-gray-200 dark:border-[#2A2A2A] text-gray-500 dark:text-[#888888] hover:border-[#E05A1E]/50 hover:text-white'
                           )}
                         >
                           {lang}

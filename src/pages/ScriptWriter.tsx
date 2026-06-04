@@ -213,7 +213,7 @@ ${output.cta}
   const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
     if (isFree) {
       return (
-        <span className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</span>
+        <span className="text-xs text-gray-500 dark:text-[#888888] italic">{t('multipost.copyNotAvailable')}</span>
       );
     }
     return (
@@ -246,10 +246,10 @@ ${output.cta}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
               {t('script.usageCounter', { used: usage, limit: monthlyLimit })}
-              <span className="text-[#888888] ml-2">({planLabel})</span>
+              <span className="text-gray-500 dark:text-[#888888] ml-2">({planLabel})</span>
             </p>
             {isFree && (
-              <p className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
+              <p className="text-xs text-gray-500 dark:text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
             )}
           </div>
         </div>
@@ -406,7 +406,7 @@ ${output.cta}
 
             {/* Copy Full Script */}
             {isFree ? (
-              <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-[#888888] text-sm italic">
+              <div className="w-full py-3 rounded-lg text-center bg-neutral-900 border border-gray-800 text-gray-500 dark:text-[#888888] text-sm italic">
                 Copy not available on Free Plan â€” upgrade to Pro Plan or Max Plan
               </div>
             ) : (

@@ -265,7 +265,7 @@ const MultiPost: React.FC = () => {
   const renderCopyAction = (text: string, sizeClass: string = 'px-4 py-2') => {
     if (isFree) {
       return (
-        <span className="text-xs text-[#888888] italic">Copy not available on Free Plan</span>
+        <span className="text-xs text-gray-500 dark:text-[#888888] italic">Copy not available on Free Plan</span>
       );
     }
     return (
@@ -298,10 +298,10 @@ const MultiPost: React.FC = () => {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm text-gray-300">
               {t('multipost.usageCounter', { used: usage, limit: monthlyLimit })}
-              <span className="text-[#888888] ml-2">({planLabel})</span>
+              <span className="text-gray-500 dark:text-[#888888] ml-2">({planLabel})</span>
             </p>
             {isFree && (
-              <p className="text-xs text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
+              <p className="text-xs text-gray-500 dark:text-[#888888] italic">{t('multipost.copyNotAvailable')}</p>
             )}
           </div>
         </div>

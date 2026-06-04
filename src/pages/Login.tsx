@@ -51,7 +51,7 @@ export function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0D0D0D] text-[#F5F5F5] flex flex-col items-center justify-center p-6 overflow-hidden">
+    <div className="relative min-h-screen bg-white dark:bg-[#0D0D0D] text-gray-900 dark:text-[#F5F5F5] flex flex-col items-center justify-center p-6 overflow-hidden">
       <Helmet>
         <title>{t('seo.login.title')}</title>
         <meta name="description" content={t('seo.login.description')} />
@@ -98,30 +98,30 @@ export function Login() {
                 type="button"
                 onClick={handleLogin}
                 disabled={isLoading}
-                className="w-full h-full flex flex-col items-center sm:items-start gap-2 bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#E05A1E]/60 rounded-2xl p-5 text-left transition-colors disabled:opacity-60"
+                className="w-full h-full flex flex-col items-center sm:items-start gap-2 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 rounded-2xl p-5 text-left transition-colors disabled:opacity-60"
               >
                 <span className="text-3xl">{item.icon}</span>
-                <span className="text-sm text-[#CFCFCF] leading-relaxed">{item.text}</span>
+                <span className="text-sm text-gray-700 dark:text-[#CFCFCF] leading-relaxed">{item.text}</span>
               </button>
             </li>
           ))}
         </ul>
 
         {/* Divider */}
-        <div className="mt-14 w-full max-w-sm h-px bg-[#2A2A2A]" />
+        <div className="mt-14 w-full max-w-sm h-px bg-gray-200 dark:bg-[#2A2A2A]" />
 
         {/* CTA — below all the content */}
         {/* Free trial exhausted message */}
         {localStorage.getItem('freeTrialUsed') === 'true' && (
-          <div className="mt-10 mb-4 w-full max-w-sm rounded-xl bg-[#1A1A1A] border border-[#E05A1E]/40 px-5 py-4 text-center">
+          <div className="mt-10 mb-4 w-full max-w-sm rounded-xl bg-gray-50 dark:bg-[#1A1A1A] border border-[#E05A1E]/40 px-5 py-4 text-center">
             <p className="text-white font-semibold text-sm mb-1">Your free session has been used</p>
-            <p className="text-[#888888] text-xs leading-relaxed">
+            <p className="text-gray-500 dark:text-[#888888] text-xs leading-relaxed">
               Sign in with Google to continue using PublishKit — it's free.
             </p>
           </div>
         )}
         {localStorage.getItem('freeTrialUsed') !== 'true' && (
-          <p className="mt-10 text-sm text-[#888888] mb-4">Sign in to get started — it's free</p>
+          <p className="mt-10 text-sm text-gray-500 dark:text-[#888888] mb-4">Sign in to get started — it's free</p>
         )}
         <button
           onClick={handleLogin}
@@ -147,7 +147,7 @@ export function Login() {
           )}
         </button>
 
-        <p className="mt-5 text-xs text-[#555555]">
+        <p className="mt-5 text-xs text-gray-400 dark:text-[#555555]">
           Personal use only · Your data stays private
         </p>
 

@@ -38,13 +38,13 @@ export function ColorPicker({
 
   return (
     <div className="w-full" ref={wrapperRef}>
-      <label className="block text-sm font-medium text-[#CFCFCF] mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-[#CFCFCF] mb-1.5">{label}</label>
       <div className="flex items-center gap-2">
         {/* Color swatch — click to open the picker */}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="w-10 h-10 rounded-lg border-2 border-[#2A2A2A] cursor-pointer flex-shrink-0 transition-all hover:border-[#E05A1E]/60"
+          className="w-10 h-10 rounded-lg border-2 border-gray-200 dark:border-[#2A2A2A] cursor-pointer flex-shrink-0 transition-all hover:border-[#E05A1E]/60"
           style={{ background: validHex ? hex : '#2A2A2A' }}
           title="Click to open color picker"
           aria-label="Open color picker"
@@ -54,13 +54,13 @@ export function ColorPicker({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 h-10 rounded-lg border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-3 text-sm text-white placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors"
+          className="flex-1 h-10 rounded-lg border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D]/50 backdrop-blur-sm px-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#555555] focus:outline-none focus:ring-2 focus:ring-[#E05A1E]/70 transition-colors"
         />
       </div>
 
       {/* Full-featured color picker popover */}
       {open && (
-        <div className="mt-2 p-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl shadow-2xl z-50">
+        <div className="mt-2 p-3 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl shadow-2xl z-50">
           <HexColorPicker
             color={pickerHex}
             onChange={(newHex) => onChange(newHex.toUpperCase())}
@@ -68,20 +68,20 @@ export function ColorPicker({
           />
           <div className="flex items-center gap-2 mt-3">
             <div
-              className="w-8 h-8 rounded-md border border-[#2A2A2A] flex-shrink-0"
+              className="w-8 h-8 rounded-md border border-gray-200 dark:border-[#2A2A2A] flex-shrink-0"
               style={{ background: pickerHex }}
             />
             <input
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="flex-1 h-8 rounded-md border border-[#2A2A2A] bg-[#0D0D0D]/50 backdrop-blur-sm px-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#E05A1E]/70"
+              className="flex-1 h-8 rounded-md border border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0D0D0D]/50 backdrop-blur-sm px-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#E05A1E]/70"
               placeholder="#E05A1E"
             />
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-xs text-[#888888] hover:text-white px-2 py-1 rounded border border-[#2A2A2A] hover:border-[#E05A1E]/60 transition-all"
+              className="text-xs text-gray-500 dark:text-[#888888] hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded border border-gray-200 dark:border-[#2A2A2A] hover:border-[#E05A1E]/60 transition-all"
             >
               Done
             </button>
@@ -91,7 +91,7 @@ export function ColorPicker({
 
       {error && <p className="mt-1.5 text-sm text-[#EF4444]">{error}</p>}
       {value && !validHex && (
-        <p className="mt-1 text-xs text-[#888888]">Type a color name or a hex like #E05A1E</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-[#888888]">Type a color name or a hex like #E05A1E</p>
       )}
     </div>
   );

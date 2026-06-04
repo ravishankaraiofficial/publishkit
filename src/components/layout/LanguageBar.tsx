@@ -14,7 +14,7 @@ export const LanguageBar: React.FC = () => {
   const { lang, setLang, t } = useI18n();
 
   return (
-    <div className="w-full bg-neutral-950/70 border-b border-gray-800 backdrop-blur-sm">
+    <div className="w-full bg-gray-50/70 dark:bg-neutral-950/70 border-b border-gray-200 dark:border-gray-800 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
         <span className="text-xs uppercase tracking-wide text-gray-500 flex-shrink-0">
           {t('languageBar.prompt')}
@@ -34,7 +34,7 @@ export const LanguageBar: React.FC = () => {
                     'px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200',
                     active
                       ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow scale-105'
-                      : 'bg-neutral-800 text-gray-300 hover:text-white hover:bg-[#E05A1E] hover:font-bold hover:scale-110 hover:shadow-[0_0_15px_rgba(224,90,30,0.4)] hover:backdrop-blur-md',
+                      : 'bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-[#E05A1E] dark:hover:bg-[#E05A1E] hover:font-bold hover:scale-110 hover:shadow-[0_0_15px_rgba(224,90,30,0.4)] hover:backdrop-blur-md',
                     translated ? '' : 'opacity-60',
                   ].join(' ')}
                 >
