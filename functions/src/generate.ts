@@ -226,7 +226,7 @@ export async function generateScriptFromContent(
   const modelName = pickModel(plan, 'script');
   const model = genAI.getGenerativeModel({
     model: modelName,
-    generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+    generationConfig: { temperature: 0.7 },
   });
 
   const prompt = buildScriptPrompt(contentContext, profile, tone, duration, outputLanguage);
