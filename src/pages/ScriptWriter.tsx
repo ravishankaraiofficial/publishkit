@@ -13,7 +13,7 @@ import { DropZone } from '../components/upload/DropZone';
 import { useUpload } from '../hooks/useUpload';
 import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
-import { useT } from '../i18n';
+import { useT, useI18n } from '../i18n';
 import { Shield } from 'lucide-react';
 import { ProcessingCard } from '../components/upload/ProcessingCard';
 
@@ -44,10 +44,11 @@ const ScriptWriter: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const t = useT();
+  const { lang: uiLang } = useI18n();
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState<'Casual' | 'Educational' | 'Storytelling'>('Casual');
   const [duration, setDuration] = useState<'5' | '10' | '15'>('10');
-  const [language, setLanguage] = useState<OutputLanguage>(profile?.language || 'English');
+  const [language, setLanguage] = useState<OutputLanguage>(uiLang);
   const [output, setOutput] = useState<ScriptOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -71,6 +72,10 @@ const ScriptWriter: React.FC = () => {
     setScriptTone(tone);
     setScriptDuration(duration);
   }, [tone, duration, setUploadMode, setScriptTone, setScriptDuration]);
+
+  React.useEffect(() => {
+    setLanguage(uiLang);
+  }, [uiLang]);
 
   // Sync file upload result to local output state
   React.useEffect(() => {

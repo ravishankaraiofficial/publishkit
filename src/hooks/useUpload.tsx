@@ -9,6 +9,7 @@ import { useToast } from '../components/ui/Toast';
 import { processAudioCall } from '../lib/api';
 import { type Result } from '../types';
 import type { OutputLanguage } from '../lib/languages';
+import { useI18n } from '../i18n';
 import fpPromise from '@fingerprintjs/fingerprintjs';
 
 interface MultiPostPlatforms {
@@ -104,12 +105,13 @@ const UploadContext = createContext<UploadContextType | null>(null);
 export function UploadProvider({ children }: { children: ReactNode }) {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const { lang: uiLang } = useI18n();
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [statusIndex, setStatusIndex] = useState(0);
   const [statusCycle, setStatusCycle] = useState<string[]>(getStatusCycle('audio/mpeg'));
-  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("English");
+  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(uiLang);
   const [uploadMode, setUploadMode] = useState<'metadata' | 'script'>('metadata');
   const [scriptTone, setScriptTone] = useState<string>('Casual');
   const [scriptDuration, setScriptDuration] = useState<string>('10');
@@ -133,6 +135,10 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const statusTimerRef = useRef<number | null>(null);
   const prevUidRef = useRef<string | null>(null);
   const recoveryAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    setOutputLanguage(uiLang);
+  }, [uiLang]);
 
   // When the user changes (e.g., anonymous → Google after sign-in), reset all
   // upload state so the main page shows a fresh upload zone, not the old result.

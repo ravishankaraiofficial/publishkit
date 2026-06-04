@@ -13,7 +13,7 @@ import { Picker } from '../components/ui/Picker';
 import { LanguagePicker } from '../components/ui/LanguagePicker';
 import { toastNativeName } from '../lib/languages';
 import type { OutputLanguage } from '../lib/languages';
-import { useT } from '../i18n';
+import { useT, useI18n } from '../i18n';
 import { getRemainingMultiPostQuota } from '../lib/quota';
 
 interface MultiPostOutput {
@@ -31,11 +31,12 @@ const MultiPost: React.FC = () => {
   const navigate = useNavigate();
   const t = useT();
   const { toast } = useToast();
+  const { lang: uiLang } = useI18n();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [pastResults, setPastResults] = useState<Array<{ id: string; title: string }>>([]);
   const [selectedResult, setSelectedResult] = useState('');
-  const [language, setLanguage] = useState<OutputLanguage>(profile?.language || 'English');
+  const [language, setLanguage] = useState<OutputLanguage>(uiLang);
   const [platforms, setPlatforms] = useState({
     x: true,
     instagram: true,
@@ -86,6 +87,10 @@ const MultiPost: React.FC = () => {
 
     fetchPastResults();
   }, [user]);
+
+  useEffect(() => {
+    setLanguage(uiLang);
+  }, [uiLang]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
