@@ -13,6 +13,7 @@ export type OutputLanguage =
   | 'Bengali'
   | 'Malayalam'
   | 'Kannada'
+  | 'Assamese'
   | 'Bhojpuri'
   | 'Urdu';
 
@@ -35,6 +36,7 @@ export const OUTPUT_LANGUAGES: OutputLanguageOption[] = [
   { value: 'Bengali',   label: 'Bengali',   native: 'বাংলা' },
   { value: 'Malayalam', label: 'Malayalam', native: 'മലയാളം' },
   { value: 'Kannada',   label: 'Kannada',   native: 'ಕನ್ನಡ' },
+  { value: 'Assamese',  label: 'Assamese',  native: 'অসমীয়া' },
   { value: 'Bhojpuri',  label: 'Bhojpuri',  native: 'भोजपुरी' },
   { value: 'Urdu',      label: 'Urdu',      native: 'اردو' },
 ];

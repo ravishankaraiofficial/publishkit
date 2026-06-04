@@ -13,6 +13,7 @@ export const VALID_LANGUAGES: ReadonlySet<string> = new Set([
   'Bengali',
   'Malayalam',
   'Kannada',
+  'Assamese',
   'Bhojpuri',
   'Urdu',
 ]);
@@ -31,6 +32,7 @@ const HINTS: Record<string, string> = {
   Bengali:   ' (use Bengali script — বাংলা)',
   Malayalam: ' (use Malayalam script — മലയാളം)',
   Kannada:   ' (use Kannada script — ಕನ್ನಡ)',
+  Assamese:  ' (use Assamese script — অসমীয়া)',
   Bhojpuri:  ' (use Devanagari script — भोजपुरी; aim for Bhojpuri vocabulary, Hindi-flavoured fallback acceptable)',
   Urdu:      ' (use Nastaliq/Arabic script — اردو)',
 };
@@ -53,6 +55,7 @@ const INTRODUCTION_WORD: Record<string, string> = {
   Bengali:   'ভূমিকা',
   Malayalam: 'ആമുഖം',
   Kannada:   'ಪರಿಚಯ',
+  Assamese:  'পৰিচয়',
   Bhojpuri:  'परिचय',
   Urdu:      'تعارف',
 };
@@ -86,6 +89,7 @@ const LANG_CONFIG: Record<string, LangConfig> = {
   Bengali:   { name: 'Bengali',   script: 'Bengali', scriptNote: 'বাংলা' },
   Malayalam: { name: 'Malayalam', script: 'Malayalam', scriptNote: 'മലയാളം' },
   Kannada:   { name: 'Kannada',   script: 'Kannada', scriptNote: 'ಕನ್ನಡ' },
+  Assamese:  { name: 'Assamese',  script: 'Assamese', scriptNote: 'অসমীয়া' },
   Bhojpuri:  { name: 'Bhojpuri',  script: 'Devanagari', scriptNote: 'भोजपुरी; Hindi-flavoured fallback acceptable' },
   Urdu:      { name: 'Urdu',      script: 'Nastaliq/Arabic', scriptNote: 'اردو' },
 };
