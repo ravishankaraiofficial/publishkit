@@ -46,8 +46,8 @@ const ScriptWriter: React.FC = () => {
   const t = useT();
   const { lang: uiLang } = useI18n();
   const [topic, setTopic] = useState('');
-  const [tone, setTone] = useState<'Casual' | 'Educational' | 'Storytelling'>('Casual');
-  const [duration, setDuration] = useState<'30s' | '1m' | '5' | '10' | '15'>('10');
+  const [tone, setTone] = useState<string>('Casual');
+  const [duration, setDuration] = useState<string>('30s');
   const [language, setLanguage] = useState<OutputLanguage>(uiLang);
   const [output, setOutput] = useState<ScriptOutput | null>(null);
   const [loading, setLoading] = useState(false);
@@ -284,11 +284,11 @@ const ScriptWriter: React.FC = () => {
             )}
 
             <div className="mt-6 flex flex-col items-center gap-2 text-sm text-gray-500">
-              <p>{t('script.dropzoneSupported')}</p>
               <div className="flex items-center gap-1.5 text-emerald-500/80 bg-emerald-500/10 px-3 py-1 rounded-full">
                 <Shield className="w-4 h-4" />
                 <span>{t('script.dropzonePrivacy')}</span>
               </div>
+              <p>{t('script.dropzoneSupported')}</p>
             </div>
           </div>
 
@@ -372,15 +372,6 @@ const ScriptWriter: React.FC = () => {
                 {renderCopyAction(output.script)}
               </div>
               <p className="text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{output.script}</p>
-            </div>
-
-            {/* Analysis */}
-            <div className="bg-gray-50 dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Analysis & Details</h3>
-                {renderCopyAction(output.analysis)}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-sm">{output.analysis}</p>
             </div>
 
             {/* Copy Full Script */}

@@ -299,14 +299,18 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             }
           }
 
-          if (data.status === 'complete' && user?.isAnonymous) {
+          if (data.status === 'failed') {
+            toast(data.errorMessage || 'Processing failed.', 'error');
+            if (user) {
+              localStorage.removeItem(`activeResultId_${user.uid}`);
+            }
+            setResultId(null);
+            setResult(null);
+          } else if (data.status === 'complete' && user?.isAnonymous) {
             // Mark free trial as consumed so next visit gates to login.
             localStorage.setItem('freeTrialUsed', 'true');
             // Backup the result in case they sign in to copy it
             localStorage.setItem('guestResultBackup', JSON.stringify(data));
-          }
-          if (data.status === 'failed') {
-            toast(data.errorMessage || 'Processing failed.', 'error');
           }
 
           // Auto-trigger MultiPost when the result lands, if the user opted in

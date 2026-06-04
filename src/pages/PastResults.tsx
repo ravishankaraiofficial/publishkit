@@ -329,11 +329,7 @@ export function PastResults() {
                 const isSelected = result.id ? selectedIds.has(result.id) : false;
 
                 const date = result.createdAt
-                  ? new Date((result.createdAt as any).seconds * 1000).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })
+                  ? new Date((result.createdAt as any).seconds * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                   : '';
                 const time = result.createdAt
                   ? new Date((result.createdAt as any).seconds * 1000).toLocaleTimeString('en-IN', {

@@ -33,7 +33,7 @@ export const generateScript = functions
       // Validate inputs
       const topic = typeof data.topic === 'string' ? data.topic.trim() : '';
       const tone = ['Casual', 'Educational', 'Storytelling'].includes(data.tone) ? data.tone : 'Casual';
-      const duration = ['5', '10', '15'].includes(data.duration) ? data.duration : '10';
+      const duration = ['30s', '1m', '5', '10', '15'].includes(data.duration) ? data.duration : '30s';
       const language = coerceLanguage(data.language);
 
       if (!topic || topic.length === 0 || topic.length > 500) {
@@ -77,25 +77,10 @@ export const generateScript = functions
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
 
-      // Parse JSON from response (handle markdown code blocks)
-      let jsonText = responseText;
-      const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[1];
-      } else {
-        // Try to extract JSON object directly
-        const objectMatch = responseText.match(/\{[\s\S]*\}/);
-        if (objectMatch) {
-          jsonText = objectMatch[0];
-        }
-      }
-
-      const scriptData: ScriptOutput = JSON.parse(jsonText);
-
-      // Validate output structure
-      if (!scriptData.script || !scriptData.analysis) {
-        throw new Error('Invalid script structure from Gemini');
-      }
+      const scriptData: ScriptOutput = {
+        script: responseText.trim(),
+        analysis: "" // Analysis was removed based on previous requirements
+      };
 
       return scriptData;
     } catch (error: any) {

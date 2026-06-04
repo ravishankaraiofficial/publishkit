@@ -207,7 +207,7 @@ export const processAudioWorker = functions
       if (generationMode === 'script') {
         const { generateScriptFromContent } = require('./generate');
         const scriptTone = data.scriptTone || 'Casual';
-        const scriptDuration = data.scriptDuration || '10';
+        const scriptDuration = data.scriptDuration || '30s';
         let contentContext = '';
 
         if (isDocument) {
