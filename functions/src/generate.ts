@@ -226,7 +226,7 @@ export async function generateScriptFromContent(
   const modelName = pickModel(plan, 'script');
   const model = genAI.getGenerativeModel({
     model: modelName,
-    generationConfig: { temperature: 0.7 },
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.7 },
   });
 
   const prompt = buildScriptPrompt(contentContext, profile, tone, duration, outputLanguage);
@@ -258,10 +258,12 @@ export async function generateScriptFromContent(
   try {
     scriptData = JSON.parse(jsonText);
   } catch (e) {
+    console.error('Failed to parse script JSON output. Raw response:', responseText);
     throw new Error('Failed to parse script JSON output.');
   }
 
   if (!scriptData.script || !scriptData.analysis) {
+    console.error('Invalid script structure. Raw response:', responseText);
     throw new Error('Invalid script structure from Gemini');
   }
 
