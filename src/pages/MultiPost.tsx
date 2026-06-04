@@ -294,7 +294,7 @@ const MultiPost: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">{t('nav.multipost')}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t('nav.multipost')}</h1>
           <p className="text-gray-400">{t('multipost.subtitle')}</p>
         </div>
 

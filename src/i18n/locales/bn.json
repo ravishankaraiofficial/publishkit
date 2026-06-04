@@ -267,5 +267,7 @@
   "upload.dropzoneSubtitle": "অডিও · PDF · ছবি · সর্বোচ্চ 200MB",
   "script.copyFullScript": "সম্পূর্ণ স্ক্রিপ্ট কপি করুন",
   "script.resultComing": "The result is coming...",
-  "script.resultGenerated": "✅ The output has been generated below!"
+  "script.resultGenerated": "✅ The output has been generated below!",
+  "script.duration30s": "30 Seconds",
+  "script.duration1m": "1 Minute"
 }

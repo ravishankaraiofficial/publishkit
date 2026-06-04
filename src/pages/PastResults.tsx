@@ -169,7 +169,7 @@ export function PastResults() {
     <PageContainer>
       <div className="max-w-4xl mx-auto">
         {/* ── Heading ── */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-wide mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white uppercase tracking-wide mb-2">
           {t('history.title')}
         </h1>
 

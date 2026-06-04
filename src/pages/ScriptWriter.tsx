@@ -18,10 +18,8 @@ import { Shield } from 'lucide-react';
 import { ProcessingCard } from '../components/upload/ProcessingCard';
 
 interface ScriptOutput {
-  hook: string;
-  intro: string;
-  sections: Array<{ title: string; content: string }>;
-  cta: string;
+  script: string;
+  analysis: string;
 }
 
 const TONE_OPTIONS = [
@@ -31,6 +29,8 @@ const TONE_OPTIONS = [
 ];
 
 const DURATION_OPTIONS = [
+  { value: '30s', label: '30 Seconds' },
+  { value: '1m', label: '1 Minute' },
   { value: '5', label: '5 Minutes' },
   { value: '10', label: '10 Minutes' },
   { value: '15', label: '15 Minutes' },
@@ -47,7 +47,7 @@ const ScriptWriter: React.FC = () => {
   const { lang: uiLang } = useI18n();
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState<'Casual' | 'Educational' | 'Storytelling'>('Casual');
-  const [duration, setDuration] = useState<'5' | '10' | '15'>('10');
+  const [duration, setDuration] = useState<'30s' | '1m' | '5' | '10' | '15'>('10');
   const [language, setLanguage] = useState<OutputLanguage>(uiLang);
   const [output, setOutput] = useState<ScriptOutput | null>(null);
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ const ScriptWriter: React.FC = () => {
 
   // Sync file upload result to local output state
   React.useEffect(() => {
-    if (result && result.status === 'complete' && result.hook) {
+    if (result && result.status === 'complete' && result.script) {
       setOutput(result as any);
     }
   }, [result]);
@@ -98,7 +98,9 @@ const ScriptWriter: React.FC = () => {
 
   const translatedDurationOptions = DURATION_OPTIONS.map(opt => ({
     ...opt,
-    label: t('script.durationMinutes', { count: parseInt(opt.value) })
+    label: opt.value === '30s' ? t('script.duration30s', { defaultValue: '30 Seconds' }) : 
+           opt.value === '1m' ? t('script.duration1m', { defaultValue: '1 Minute' }) :
+           t('script.durationMinutes', { count: parseInt(opt.value) })
   }));
 
   const plan = profile?.plan ?? 'free';
@@ -125,15 +127,7 @@ const ScriptWriter: React.FC = () => {
 
   const copyFullScript = () => {
     if (!output) return;
-    const fullScript = `
-${output.hook}
-
-${output.intro}
-
-${output.sections.map((s) => `${s.title}\n${s.content}`).join('\n\n')}
-
-${output.cta}
-`.trim();
+    const fullScript = `${output.script}\n\n--- Analysis ---\n${output.analysis}`.trim();
     handleCopy(fullScript);
   };
 
@@ -242,7 +236,7 @@ ${output.cta}
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">{t('script.title')}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t('script.title')}</h1>
           <p className="text-gray-400">{t('script.subtitle')}</p>
         </div>
 
@@ -278,14 +272,6 @@ ${output.cta}
               />
             )}
             
-            <div className="mt-4 flex flex-col items-center gap-2 text-sm text-gray-500">
-              <p>{t('script.dropzoneSupported')}</p>
-              <div className="flex items-center gap-1.5 text-emerald-500/80 bg-emerald-500/10 px-3 py-1 rounded-full">
-                <Shield className="w-4 h-4" />
-                <span>{t('script.dropzonePrivacy')}</span>
-              </div>
-            </div>
-
             {(isUploading || loading) && (
               <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center text-center font-medium animate-pulse">
                 {t('script.resultComing')}
@@ -296,6 +282,14 @@ ${output.cta}
                 {t('script.resultGenerated')}
               </div>
             )}
+
+            <div className="mt-6 flex flex-col items-center gap-2 text-sm text-gray-500">
+              <p>{t('script.dropzoneSupported')}</p>
+              <div className="flex items-center gap-1.5 text-emerald-500/80 bg-emerald-500/10 px-3 py-1 rounded-full">
+                <Shield className="w-4 h-4" />
+                <span>{t('script.dropzonePrivacy')}</span>
+              </div>
+            </div>
           </div>
 
           <div className="relative flex items-center py-5">
@@ -371,42 +365,22 @@ ${output.cta}
         {/* Output Section */}
         {output && (
           <div className="space-y-6">
-            {/* Hook */}
-            <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
+            {/* The Script */}
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">{t('script.hookTitle')}</h3>
-                {renderCopyAction(output.hook)}
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">The Script</h3>
+                {renderCopyAction(output.script)}
               </div>
-              <p className="text-gray-100 leading-relaxed">{output.hook}</p>
+              <p className="text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{output.script}</p>
             </div>
 
-            {/* Intro */}
-            <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
+            {/* Analysis */}
+            <div className="bg-gray-50 dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">{t('script.introTitle')}</h3>
-                {renderCopyAction(output.intro)}
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Analysis & Details</h3>
+                {renderCopyAction(output.analysis)}
               </div>
-              <p className="text-gray-100 leading-relaxed">{output.intro}</p>
-            </div>
-
-            {/* Sections */}
-            {output.sections.map((section, idx) => (
-              <div key={idx} className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">{section.title}</h3>
-                  {renderCopyAction(section.content)}
-                </div>
-                <p className="text-gray-100 leading-relaxed whitespace-pre-wrap">{section.content}</p>
-              </div>
-            ))}
-
-            {/* CTA */}
-            <div className="bg-neutral-900 rounded-2xl border border-gray-800 p-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">{t('script.ctaTitle')}</h3>
-                {renderCopyAction(output.cta)}
-              </div>
-              <p className="text-gray-100 leading-relaxed">{output.cta}</p>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-sm">{output.analysis}</p>
             </div>
 
             {/* Copy Full Script */}

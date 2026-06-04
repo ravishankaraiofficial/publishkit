@@ -83,7 +83,7 @@ export function SetupProfile() {
     <PageContainer>
       <div className="max-w-2xl mx-auto py-8">
         <div className="mb-6 px-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Setup Your Creator Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Setup Your Creator Profile</h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-[#888888] leading-relaxed">
             Fill this in so PublishKit can personalise your AI-generated results to match your brand and audience.
           </p>

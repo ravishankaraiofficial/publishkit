@@ -9,10 +9,8 @@ import { enforceFreeTierGuard } from './lib/freeTierGuard';
 import { buildScriptPrompt } from './lib/scriptPrompt';
 
 interface ScriptOutput {
-  hook: string;
-  intro: string;
-  sections: Array<{ title: string; content: string }>;
-  cta: string;
+  script: string;
+  analysis: string;
 }
 
 export const generateScript = functions
@@ -95,12 +93,7 @@ export const generateScript = functions
       const scriptData: ScriptOutput = JSON.parse(jsonText);
 
       // Validate output structure
-      if (
-        !scriptData.hook ||
-        !scriptData.intro ||
-        !Array.isArray(scriptData.sections) ||
-        !scriptData.cta
-      ) {
+      if (!scriptData.script || !scriptData.analysis) {
         throw new Error('Invalid script structure from Gemini');
       }
 

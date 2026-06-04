@@ -117,8 +117,6 @@ export interface Result {
   generationMode?: 'metadata' | 'script';
   scriptTone?: string;
   scriptDuration?: string;
-  hook?: string;
-  intro?: string;
-  sections?: Array<{ title: string; content: string }>;
-  cta?: string;
+  script?: string;
+  analysis?: string;
 }

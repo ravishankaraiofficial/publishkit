@@ -337,7 +337,7 @@ export function Settings() {
       <div className="max-w-2xl mx-auto">
         {/* Page heading */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             {t('settings.title')}
             {watchedName && (
               <span className="text-[#E05A1E] ml-2 text-xl font-semibold">({watchedName})</span>

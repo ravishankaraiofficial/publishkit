@@ -278,5 +278,7 @@
   "upload.dropzoneSubtitle": "অডিঅ' · PDF · ছবি · সৰ্বোচ্চ 200MB",
   "script.copyFullScript": "সম্পূৰ্ণ স্ক্ৰিপ্ট কপি কৰক",
   "script.resultComing": "ফলাফল আহি আছে...",
-  "script.resultGenerated": "✅ আউটপুট তলত জেনেৰেট কৰা হৈছে!"
+  "script.resultGenerated": "✅ আউটপুট তলত জেনেৰেট কৰা হৈছে!",
+  "script.duration30s": "30 Seconds",
+  "script.duration1m": "1 Minute"
 }

@@ -96,26 +96,16 @@ export function Picker<T extends string>({
 
       {open && (
         <>
-          {/* mobile-only dimmed backdrop tap-to-close. Stronger dim than before
-              so the bottom-sheet stands out against the page. */}
-          <div
-            className="sm:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in"
-            onClick={() => setOpen(false)}
-            aria-hidden
-          />
+
           <ul
             role="listbox"
             className={cn(
               'z-50 min-w-[220px]',
-              // Mobile: bottom-sheet anchored above the bottom-nav (~64px tall)
-              // with a generous max-height, strong glass effect for separation.
-              'fixed left-4 right-4 bottom-24 max-h-[55vh] overflow-y-auto',
-              'bg-white/95 dark:bg-[#0E0E0E]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-2xl',
-              'shadow-2xl shadow-black/80 p-2',
-              // Desktop / tablet: revert to inline popover under the trigger.
-              'sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:mt-2 sm:w-full sm:max-h-[60vh] sm:p-1.5',
-              'sm:bg-white/95 sm:dark:bg-[#121212]/95 sm:backdrop-blur-xl sm:border-gray-200 dark:sm:border-gray-200 dark:border-[#2A2A2A]',
-              variant === 'pill' && 'sm:left-1/2 sm:-translate-x-1/2 sm:w-[280px]',
+              // Always use inline popover under the trigger.
+              'absolute left-auto right-auto bottom-auto mt-2 w-full max-h-[60vh] overflow-y-auto',
+              'bg-white/95 dark:bg-[#121212]/95 backdrop-blur-xl border border-gray-200 dark:border-[#2A2A2A] rounded-2xl',
+              'shadow-2xl shadow-black/80 p-1.5',
+              variant === 'pill' && 'left-1/2 -translate-x-1/2 w-[280px]',
               'animate-fade-in',
             )}
           >
@@ -140,8 +130,8 @@ export function Picker<T extends string>({
                   }}
                   className={cn(
                     'flex items-center justify-between gap-3',
-                    'px-4 py-3 sm:py-2.5 min-h-[48px] sm:min-h-[44px] rounded-xl cursor-pointer',
-                    'text-base sm:text-sm text-gray-700 dark:text-[#CFCFCF]',
+                    'px-4 py-2.5 min-h-[44px] rounded-xl cursor-pointer',
+                    'text-sm text-gray-700 dark:text-[#CFCFCF]',
                     'transition-all duration-200 ease-out',
                     'hover:bg-[#E05A1E] hover:text-white hover:font-semibold hover:scale-[1.02]',
                     'hover:backdrop-blur-md hover:ring-1 hover:ring-white/20',

@@ -267,5 +267,7 @@
   "upload.dropzoneSubtitle": "ਆਡੀਓ · PDF · ਚਿੱਤਰ · ਵੱਧ ਤੋਂ ਵੱਧ 200MB",
   "script.copyFullScript": "ਪੂਰੀ ਸਕ੍ਰਿਪਟ ਕਾਪੀ ਕਰੋ",
   "script.resultComing": "The result is coming...",
-  "script.resultGenerated": "✅ The output has been generated below!"
+  "script.resultGenerated": "✅ The output has been generated below!",
+  "script.duration30s": "30 Seconds",
+  "script.duration1m": "1 Minute"
 }

@@ -174,7 +174,7 @@ export function Feedback() {
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t('feedback.title')}</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">{t('feedback.title')}</h1>
             <p className="text-gray-500 dark:text-[#888888] text-sm">{t('feedback.subtitle')}</p>
           </div>
           <button

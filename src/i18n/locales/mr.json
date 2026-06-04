@@ -267,5 +267,7 @@
   "upload.dropzoneSubtitle": "ऑडिओ · PDF · इमेज · कमाल 200MB",
   "script.copyFullScript": "पूर्ण स्क्रिप्ट कॉपी करा",
   "script.resultComing": "The result is coming...",
-  "script.resultGenerated": "✅ The output has been generated below!"
+  "script.resultGenerated": "✅ The output has been generated below!",
+  "script.duration30s": "30 Seconds",
+  "script.duration1m": "1 Minute"
 }

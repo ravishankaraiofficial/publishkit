@@ -267,5 +267,7 @@
   "upload.dropzoneSubtitle": "ഓഡിയോ · PDF · ചിത്രം · പരമാവധി 200MB",
   "script.copyFullScript": "മുഴുവൻ സ്ക്രിപ്റ്റും പകർത്തുക",
   "script.resultComing": "The result is coming...",
-  "script.resultGenerated": "✅ The output has been generated below!"
+  "script.resultGenerated": "✅ The output has been generated below!",
+  "script.duration30s": "30 Seconds",
+  "script.duration1m": "1 Minute"
 }
