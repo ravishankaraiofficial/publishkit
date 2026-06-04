@@ -228,7 +228,7 @@ const Pricing: React.FC = () => {
           <div className="bg-white dark:bg-neutral-900 border border-orange-600/30 rounded-2xl p-8 mb-12 shadow-sm">
             <div className="max-w-2xl mx-auto">
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-                {t('pricing.currentUsage')} — {profile?.usageCycleStart ? new Date(profile.usageCycleStart).toLocaleDateString() + ' to ' + new Date(new Date(profile.usageCycleStart).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Current Cycle'}
+                {t('pricing.currentUsage')} — {profile?.usageCycleStart ? new Date(profile.usageCycleStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ' to ' + new Date(new Date(profile.usageCycleStart).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Current Cycle'}
               </p>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-2xl font-semibold text-gray-900 dark:text-white">
