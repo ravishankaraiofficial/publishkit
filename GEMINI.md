@@ -9,7 +9,7 @@
 - **GitHub:** https://github.com/ravishankaraiofficial/publishkit
 - **Firebase Project:** `gen-lang-client-0079285803`
 - **Root Directory:** `D:\Project\Project 01\Google Antigravity Files`
-- **Latest Commit on `main`:** `3b134e3` — fix: JSON parsing bug in script generation and infinite toast loop on upload failure
+- **Latest Commit on `main`:** `5753d88` — docs: Update security documentation and changelog for Pass 6 audit
 - **Last Updated:** 2026-06-12
 
 ---
