@@ -1,6 +1,6 @@
 # PublishKit Security Model
 
-> Last updated: 2026-05-21 — covers production state through Pass 5 (GStack Audit).
+> Last updated: 2026-06-12 — covers production state through Pass 6 (Dependency Security Audit).
 
 This document is the single source of truth for what PublishKit defends against, how, and what operational actions remain on the user's plate (dashboard toggles that can't be expressed in code).
 
@@ -28,9 +28,9 @@ What we're explicitly defending against, ranked by financial impact:
 
 ---
 
-## Vibe Coding 7-point Checklist — Pass 5 results
+## Vibe Coding 7-point Checklist — Pass 6 results
 
-Run on 2026-05-21 against the production codebase.
+Run on 2026-06-12 against the production codebase.
 
 | # | Check | State |
 |---|---|---|
@@ -40,7 +40,7 @@ Run on 2026-05-21 against the production codebase.
 | 4 | Auth architecture (no custom session / password hashing) | **PASS** — Firebase Auth only. |
 | 5 | API versioning | **PASS** — Convention adopted (`functionNameV2`). |
 | 6 | File upload security (MIME, size, path traversal) | **PASS** — Storage rules + frontend sanitization + **Pass 5 backend path ownership check**. |
-| 7 | Dependency check | **PASS** — `npm audit fix` in root on 2026-05-21 resolved moderate vulnerability. |
+| 7 | Dependency check | **PASS** — `npm audit fix` in root and `functions/` on 2026-06-12 resolved 11 vulnerabilities. |
 
 ---
 
@@ -225,7 +225,8 @@ These items can't be expressed in repo code. They must be verified periodically 
 | 2026-05-18 | Hardening Pass 2 | `fb8a8ff` | Razorpay timing-safe HMAC, plan-allowlist, UID-regex, duplicate-subscription block, stale-cancel filter |
 | 2026-05-18 | Hardening Pass 3 | `50e275c` | Burst rate limit, webhook event-ID idempotency, prompt-injection caps |
 | 2026-05-18 | Hardening Pass 4 | | Frontend filename sanitization, `brace-expansion` fix |
-| 2026-05-21 | Hardening Pass 5 | (this change) | **CRITICAL: Payment bypass fixed** (fetch verifiedPlan from Razorpay API). **CRITICAL: IDOR fixed** (enforce path ownership in `processAudio`). **MODERATE: Webhook race fixed** (transactional dedup). **MODERATE: protobufjs fix** (npm audit). |
+| 2026-05-21 | Hardening Pass 5 | `7f88443` | **CRITICAL: Payment bypass fixed** (fetch verifiedPlan from Razorpay API). **CRITICAL: IDOR fixed** (enforce path ownership in `processAudio`). **MODERATE: Webhook race fixed** (transactional dedup). **MODERATE: protobufjs fix** (npm audit). |
+| 2026-06-12 | Hardening Pass 6 | | **CRITICAL: Dependency Security Audit**. Patched 3 high-severity frontend and 8 moderate/high severity backend CVEs via `npm audit fix`. Confirmed structural immunity against CBSE-style architectural hacks (IDOR, exposed master keys, client-side OTP validation). |
 
 ---
 

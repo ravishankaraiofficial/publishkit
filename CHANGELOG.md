@@ -1,5 +1,11 @@
 # PublishKit Changelog
 
+## [2026-06-12] Security Hardening Pass 6 — Dependency Security Audit
+
+- **What changed:** Conducted a comprehensive dependency security audit across frontend and backend. Evaluated architectural vulnerabilities (inspired by the CBSE OSM portal hack) such as exposed master passwords, client-side OTP validation, IDOR, and insecure password resets, confirming PublishKit's structural immunity.
+- **Implementation:** Ran `npm audit fix` in both root and `functions/` directories.
+- **Results:** Resolved 3 high-severity vulnerabilities in the frontend (`@grpc/grpc-js`, `react-router`) and 8 moderate/high severity vulnerabilities in the backend (`qs`, `@grpc/grpc-js`). Intentionally deferred updating one backend sub-dependency (`uuid`) because patching it requires a breaking major-version upgrade to `firebase-admin` (v14) which presents an unacceptable risk of breaking core logic.
+
 ## [2026-06-04] Bug Fixes: JSON Parsing and Infinite Toast Loop
 
 - **Script Writer JSON Parse Fix:** Modified `scriptPrompt.ts` to instruct the AI to return raw plain text instead of JSON format, preventing markdown code blocks from appearing in the script output. Removed JSON parsing logic in `handleScript.ts` backend function so the script is delivered cleanly to the frontend.
