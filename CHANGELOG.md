@@ -1,5 +1,11 @@
 # PublishKit Changelog
 
+## [2026-06-04] Bug Fixes: JSON Parsing and Infinite Toast Loop
+
+- **Script Writer JSON Parse Fix:** Modified `scriptPrompt.ts` to instruct the AI to return raw plain text instead of JSON format, preventing markdown code blocks from appearing in the script output. Removed JSON parsing logic in `handleScript.ts` backend function so the script is delivered cleanly to the frontend.
+- **Upload Infinite Toast Loop Fix:** Fixed an issue where a failed upload would trigger an infinite "uploading..." toast loop on the frontend.
+- **Billing Awareness:** Diagnosed and assisted user with an API 429 Error (prepayment credits depleted), which seamlessly resumed upon billing top-up.
+
 ## [2026-05-29] Creator Profile Injection for Metadata and MultiPost
 
 - **What changed:** Titles, descriptions, timestamps, and MultiPost generations now strictly follow the creator's profile settings.

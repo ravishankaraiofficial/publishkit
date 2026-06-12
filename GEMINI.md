@@ -9,8 +9,8 @@
 - **GitHub:** https://github.com/ravishankaraiofficial/publishkit
 - **Firebase Project:** `gen-lang-client-0079285803`
 - **Root Directory:** `D:\Project\Project 01\Google Antigravity Files`
-- **Latest Commit on `main`:** `00bd31c` — fix(i18n): inject native scripts in language directives to enforce AI output language
-- **Last Updated:** 2026-05-26
+- **Latest Commit on `main`:** `3b134e3` — fix: JSON parsing bug in script generation and infinite toast loop on upload failure
+- **Last Updated:** 2026-06-12
 
 ---
 
